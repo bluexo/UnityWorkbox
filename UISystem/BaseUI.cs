@@ -1,5 +1,6 @@
 ﻿using System;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.EventSystems;
 
 #if WINDOWS_UWP
@@ -15,8 +16,14 @@ namespace Arthas.Client.UI
     public abstract class BaseUI : UIBehaviour
     {
         public event EventHandler<UIEventArgs> UIShowEvent;
-
         public event EventHandler<UIEventArgs> UIHideEvent;
+
+        #region beforeShow or afterHide event when ui active or deactive!
+        [Header("Do something before UI show")]
+        public UnityEvent BeforeShow;
+        [Header("Do something after UI hide")]
+        public UnityEvent AfterHide;
+        #endregion
 
         public UIEventArgs args = new UIEventArgs();
         public RectTransform RectTransform { get { return transform as RectTransform; } }
@@ -27,10 +34,12 @@ namespace Arthas.Client.UI
                 UIHideEvent(this, args);
             }
             gameObject.SetActive(false);
+            AfterHide.Invoke();
         }
 
         public virtual void Show()
         {
+            BeforeShow.Invoke();
             if (UIShowEvent != null) {
                 UIShowEvent(this, args);
             }
@@ -42,7 +51,7 @@ namespace Arthas.Client.UI
         public virtual bool IsAlwaysShow { get { return true; } }
     }
 
-    public class WindowUI<T> : BaseUI where T : BaseUI
+    public abstract class WindowUI<T> : BaseUI where T : BaseUI
     {
         public static T Instance {
             get {

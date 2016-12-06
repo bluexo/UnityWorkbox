@@ -9,10 +9,6 @@
 
     using UnityEditor;
 
-#endif
-
-# if UNITY_EDITOR
-
     [CustomEditor(typeof(MainCanvasUI))]
     public class MainCanvasUIEditor : Editor
     {
@@ -61,43 +57,17 @@
     [RequireComponent(typeof(Canvas))]
     [RequireComponent(typeof(CanvasScaler))]
     [RequireComponent(typeof(GraphicRaycaster))]
-    public class MainCanvasUI : BaseUI
+    public class MainCanvasUI : SingletonBehaviour<MainCanvasUI>
     {
-        public static MainCanvasUI Instance {
-            get {
-                if (!instance) {
-                    instance = FindObjectOfType<MainCanvasUI>();
-                }
-                return instance ;
-            }
-        }
-
-        private static MainCanvasUI instance;
-
-        private static Camera canvasCamera;
-
-        public static Camera CanvasCamera {
-            get {
-                if (!canvasCamera) {
-                    var canvas = FindObjectOfType<Canvas>();
-                    if (canvas)
-                        canvasCamera = canvas.worldCamera;
-                    else
-                        Debug.LogFormat(RichText.Red("Cannot find Canvas!"));
-                }
-                return canvasCamera;
-            }
-        }
-
         [SerializeField]
         private BaseUI startUI;
 
-        protected override void Awake()
+        protected void Awake()
         {
             DontDestroyOnLoad(gameObject);
         }
 
-        protected override void Start()
+        protected void Start()
         {
             if (!startUI) {
                 Debug.LogError(@"UISystem initialize fail , Cannot found start ui which has a <color=cyan>[UIStart]</color> Attribute and inherit <color=cyan>:WindowUI<T></color>");
