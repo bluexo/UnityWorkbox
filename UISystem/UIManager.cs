@@ -10,24 +10,10 @@ namespace Arthas.Client.UI
         private List<BaseUI> showedWindows = new List<BaseUI>();
 
         /// <summary>
-        /// 主画布
-        /// </summary>
-        public static MainCanvasUI MainCanvasUI {
-            get {
-                if (!mainCanvas) {
-                    mainCanvas = UnityEngine.Object.FindObjectOfType<MainCanvasUI>();
-                }
-                return mainCanvas;
-            }
-        }
-
-        private static MainCanvasUI mainCanvas;
-
-        /// <summary>
         /// 上一个显示的窗口
         /// </summary>
         public static BaseUI CurrentWindow { get; private set; }
-        public static BaseUI PrevWindows { get; private set; }
+        public static BaseUI PrevWindow { get; private set; }
 
         /// <summary>
         /// 添加UI
@@ -52,9 +38,8 @@ namespace Arthas.Client.UI
         /// 当UI显示
         /// </summary>
         /// <param name="name"></param>
-        private void OnShow(object sender, UIEventArgs args)
+        private void OnShow(BaseUI ui)
         {
-            var ui = sender as BaseUI;
             if (windows.ContainsKey(ui.name)) {
                 var window = windows[ui.name];
                 if (window.IsExclusive) {
@@ -76,12 +61,12 @@ namespace Arthas.Client.UI
         /// 当UI隐藏
         /// </summary>
         /// <param name="name"></param>
-        private void OnHide(object sender, UIEventArgs args)
+        private void OnHide(BaseUI ui)
         {
-            var ui = sender as BaseUI;
             if (windows.ContainsKey(ui.name)) {
                 var window = windows[ui.name];
                 showedWindows.Remove(window);
+                PrevWindow = window;
             }
         }
     }

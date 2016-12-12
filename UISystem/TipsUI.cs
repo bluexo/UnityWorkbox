@@ -7,7 +7,6 @@ using System.Collections;
 namespace Arthas.Client.UI
 {
     [UIOrder(OrderIndex = byte.MaxValue)]
-    [UIHeader(AlwaysShow = true)]
     public class TipsUI : WindowUI<TipsUI>
     {
         public static readonly Color okColor = Color.green;

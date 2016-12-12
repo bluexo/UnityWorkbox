@@ -6,18 +6,7 @@ namespace Arthas.Client.UI
     /// 顶层窗口特性
     /// </summary>
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = false)]
-    public class UIHeaderAttribute : Attribute
-    {
-        /// <summary>
-        /// 是否为独占窗口,是则隐藏其他窗口
-        /// </summary>
-        public bool Exclusive = true;
-
-        /// <summary>
-        /// 是否忽略 隐藏或者显示事件
-        /// </summary>
-        public bool AlwaysShow = false;
-    }
+    public class UIHeaderAttribute : Attribute {     }
 
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = true)]
     public class UIOrderAttribute : Attribute
