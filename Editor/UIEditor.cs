@@ -21,7 +21,7 @@ namespace Arthas.Client.UI
             Selection.activeObject = canvas;
         }
 
-        [MenuItem("UI/Only Show Selection UI")]
+        [MenuItem("GameObject/Only Show Selection UI", false, -1)]
         public static void HideOther()
         {
             if (!Selection.activeGameObject || !Selection.activeGameObject.GetComponentInParent<UICanvas>())
