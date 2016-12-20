@@ -1,6 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using System.Collections.Generic;
+#if WINDOWS_UWP
+using System.Reflection;
+#endif
 
 namespace Arthas.Client.UI
 {
@@ -13,6 +14,7 @@ namespace Arthas.Client.UI
         /// 上一个显示的窗口
         /// </summary>
         public static BaseUI CurrentWindow { get; private set; }
+
         public static BaseUI PrevWindow { get; private set; }
 
         /// <summary>
@@ -42,18 +44,21 @@ namespace Arthas.Client.UI
         {
             if (windows.ContainsKey(ui.name)) {
                 var window = windows[ui.name];
-                if (window.IsExclusive) {
+#if WINDOWS_UWP
+                bool isExclusive = window.GetType().GetTypeInfo().IsDefined(typeof(UIHeaderAttribute));
+#else
+                var isExclusive = window.GetType().IsDefined(typeof(UIHeaderAttribute), false);
+#endif
+                if (isExclusive) {
+                    if (showedWindows.Count <= 0)
+                        showedWindows = new List<BaseUI>(UICanvas.Instance.GetComponentsInChildren<BaseUI>());
                     var arr = showedWindows.ToArray();
-                    foreach (var item in arr) {
-                        if (!item.IsAlwaysShow)
-                            item.Hide();
-                        else
-                            item.transform.SetAsLastSibling();
-                    }
-                    showedWindows.Clear();
+                    foreach (var item in arr) item.Hide();
                 }
+                PrevWindow = CurrentWindow;
                 showedWindows.Add(window);
                 CurrentWindow = window;
+                CurrentWindow.transform.SetAsLastSibling();
             }
         }
 
@@ -66,7 +71,6 @@ namespace Arthas.Client.UI
             if (windows.ContainsKey(ui.name)) {
                 var window = windows[ui.name];
                 showedWindows.Remove(window);
-                PrevWindow = window;
             }
         }
     }

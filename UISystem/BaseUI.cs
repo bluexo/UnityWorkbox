@@ -21,10 +21,12 @@ namespace Arthas.Client.UI
 
         [Header("Trigger when show[显示时触发的事件]")]
         public UnityEvent BeforeShow;
+
         public UnityEvent AfterShow;
 
         [Header("Trigger when hide[隐藏时触发的事件]")]
         public UnityEvent BeforeHide;
+
         public UnityEvent AfterHide;
 
         #endregion beforeShow or afterHide event when ui active or deactive!
@@ -52,15 +54,12 @@ namespace Arthas.Client.UI
             if (AfterShow != null)
                 AfterShow.Invoke();
         }
-
-        public virtual bool IsExclusive { get { return true; } }
-
-        public virtual bool IsAlwaysShow { get { return false; } }
     }
 
     public abstract class WindowUI<T> : BaseUI where T : BaseUI
     {
-        public static T Instance {
+        public static T Instance
+        {
             get {
                 if (!instance) {
                     var uiName = typeof(T).Name;
@@ -71,8 +70,7 @@ namespace Arthas.Client.UI
                             instance = ui;
                         else
                             instance = go.AddComponent<T>();
-                    }
-                    else Debug.LogFormat(RichText.Red("Can not found ui gameobject : {0} in MainCanvas!", uiName));
+                    } else Debug.LogFormat(RichText.Red("Can not found ui gameobject : {0} in MainCanvas!", uiName));
                 }
                 return instance;
             }
@@ -82,19 +80,16 @@ namespace Arthas.Client.UI
 
         public override void Show()
         {
-            if (!UIManager.ContainsUI(name))
+            if (!UIManager.ContainsUI(name)) {
                 UIManager.AddUI(name, this);
+            }
             base.Show();
         }
 
-        public override bool IsExclusive {
-            get {
-#if WINDOWS_UWP
-                return typeof(T).GetTypeInfo().IsDefined<UIHeaderAttribute>();
-
-#else
-                return typeof(T).IsDefined(typeof(UIHeaderAttribute), false);
-#endif
+        protected virtual void Back()
+        {
+            if (UIManager.PrevWindow) {
+                UIManager.PrevWindow.Show();
             }
         }
     }
