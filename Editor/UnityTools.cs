@@ -1,7 +1,6 @@
 ﻿using System.IO;
 using UnityEditor;
 using UnityEngine;
-using UnityEditor.SceneManagement;
 
 public static class UnityEditorTools
 {

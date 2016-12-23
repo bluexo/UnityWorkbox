@@ -27,7 +27,8 @@ namespace Arthas.Common
                 folds[i] = EditorGUILayout.Foldout(folds[i], string.Format("Item [{0}]", i));
                 if (folds[i]) {
                     var item = property.GetArrayElementAtIndex(i);
-                    item.FindPropertyRelative("id").intValue = i;
+                    var id = item.FindPropertyRelative("id");
+                    id.intValue = EditorGUILayout.IntSlider("Id", id.intValue, 1, 1000);
                     var name = item.FindPropertyRelative("name");
                     name.stringValue = EditorGUILayout.TextField("Name", name.stringValue);
                     var desc = item.FindPropertyRelative("description");
@@ -66,7 +67,7 @@ namespace Arthas.Common
     [System.Serializable]
     public class Item
     {
-        public string id;
+        public int id;
         public string name;
         public string description;
         public int price;
