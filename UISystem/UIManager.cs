@@ -47,7 +47,7 @@ namespace Arthas.Client.UI
 #if WINDOWS_UWP
                 bool isExclusive = window.GetType().GetTypeInfo().IsDefined(typeof(UIHeaderAttribute));
 #else
-                var isExclusive = window.GetType().IsDefined(typeof(UIHeaderAttribute), false);
+                var isExclusive = window.GetType().IsDefined(typeof(UIExclusiveAttribute), false);
 #endif
                 if (isExclusive) {
                     if (showedWindows.Count <= 0)
