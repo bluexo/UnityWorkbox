@@ -63,14 +63,14 @@ namespace Arthas.Client.UI
             get {
                 if (!instance) {
                     var uiName = typeof(T).Name;
-                    var go = UICanvas.Instance.transform.FindChild(uiName).gameObject;
-                    if (go) {
-                        var ui = go.GetComponent<T>();
+                    var child = UICanvas.Instance.transform.FindChild(uiName);
+                    if (child) {
+                        var ui = child.GetComponent<T>();
                         if (ui)
                             instance = ui;
                         else
-                            instance = go.AddComponent<T>();
-                    } else Debug.LogFormat(RichText.Red("Can not found ui gameobject : {0} in MainCanvas!", uiName));
+                            instance = child.gameObject.AddComponent<T>();
+                    } else Debug.LogErrorFormat("Can not found ui gameobject : {0} in UICanvas!", uiName);
                 }
                 return instance;
             }

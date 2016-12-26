@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 
 /// <summary>
-///Singleton
+/// Singleton
 /// </summary>
 /// <typeparam name="T"></typeparam>
 public class SingletonBehaviour<T> : MonoBehaviour where T : MonoBehaviour
