@@ -1,15 +1,11 @@
 ﻿using UnityEngine;
-using System.Collections;
 
-public class ArchiveManager : MonoBehaviour {
-
-	// Use this for initialization
-	void Start () {
-	
-	}
-	
-	// Update is called once per frame
-	void Update () {
-	
-	}
+/// <summary>
+/// 檔案管理
+/// </summary>
+public static class ArchiveManager 
+{
+    static ArchiveManager()
+    {
+    }
 }
