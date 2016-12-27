@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 #if WINDOWS_UWP
 using System.Reflection;
 #endif

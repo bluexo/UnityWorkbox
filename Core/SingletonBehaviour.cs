@@ -1,36 +1,37 @@
-﻿using UnityEngine;
-
-/// <summary>
-/// Singleton
-/// </summary>
-/// <typeparam name="T"></typeparam>
-public class SingletonBehaviour<T> : MonoBehaviour where T : MonoBehaviour
+﻿namespace UnityEngine
 {
-    public static T Instance
+    /// <summary>
+    /// Singleton
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    public abstract class SingletonBehaviour<T> : MonoBehaviour where T : MonoBehaviour
     {
-        get {
-            if (!instance) {
-                instance = FindObjectOfType<T>();
+        public static T Instance
+        {
+            get {
                 if (!instance) {
-                    var go = new GameObject(typeof(T).ToString());
-                    instance = go.AddComponent<T>();
-                    DontDestroyOnLoad(instance.gameObject);
+                    instance = FindObjectOfType<T>();
+                    if (!instance) {
+                        var go = new GameObject(typeof(T).ToString());
+                        instance = go.AddComponent<T>();
+                        DontDestroyOnLoad(instance.gameObject);
+                    }
                 }
+                return instance;
             }
-            return instance;
         }
-    }
 
-    private static T instance;
+        private static T instance;
 
-    protected virtual void Awake()
-    {
-        if (!instance) {
-            instance = this as T;
-            DontDestroyOnLoad(gameObject);
-        } else {
-            if (!instance.Equals(this))
-                Destroy(gameObject);
+        protected virtual void Awake()
+        {
+            if (!instance) {
+                instance = this as T;
+                DontDestroyOnLoad(gameObject);
+            } else {
+                if (instance && !instance.Equals(this))
+                    Destroy(this);
+            }
         }
     }
 }

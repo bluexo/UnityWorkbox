@@ -26,19 +26,29 @@ namespace Arthas.Common
                 if (folds[i]) {
                     var item = property.GetArrayElementAtIndex(i);
                     DrawItemProperty(item);
+                    EditorGUILayout.Space();
                 }
                 serializedObject.ApplyModifiedProperties();
             }
             EditorGUILayout.EndVertical();
-            var btnRect = EditorGUILayout.GetControlRect(GUILayout.Height(30));
-            if (GUI.Button(new Rect(btnRect.x, btnRect.y, btnRect.width / 2, btnRect.height), "+")) {
+
+            EditorGUILayout.BeginHorizontal();
+            if (GUILayout.Button("+")) {
                 ArrayUtility.Insert(ref folds, property.arraySize, false);
                 property.arraySize++;
             }
-            if (GUI.Button(new Rect(btnRect.x + btnRect.width / 2, btnRect.y, btnRect.width / 2, btnRect.height), "-")) {
+            if (GUILayout.Button("-")) {
                 property.arraySize--;
                 ArrayUtility.RemoveAt(ref folds, property.arraySize);
             }
+            if (GUILayout.Button(">")) {
+                for (var i = 0; i < folds.Length; i++) { folds[i] = false; }
+            }
+            if (GUILayout.Button("∨")) {
+                for (var i = 0; i < folds.Length; i++) { folds[i] = true; }
+            }
+            EditorGUILayout.EndHorizontal();
+
         }
 
         public abstract void DrawItemProperty(SerializedProperty property);
@@ -47,6 +57,8 @@ namespace Arthas.Common
 
     public class ConfigurableItems<T> : ScriptableObject
     {
-        public T[] items;
+        [SerializeField]
+        private T[] items;
+        public T[] Items { get { return items; } }
     }
 }
