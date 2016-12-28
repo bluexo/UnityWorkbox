@@ -17,6 +17,8 @@ namespace Arthas.Client.UI
         [SerializeField]
         private BaseUI startUI;
 
+        public int ChildCount { get; private set; }
+
         protected void Start()
         {
             if (!startUI) {
@@ -27,12 +29,15 @@ namespace Arthas.Client.UI
                 Debug.DebugBreak();
                 return;
             }
-            foreach (Transform child in transform) {
+            startUI.Show();
+            ChildCount = transform.childCount;
+            for (var i = 0; i < ChildCount; i++) {
+                var child = transform.GetChild(i);
                 var comp = child.GetComponent<BaseUI>();
-                if (comp && comp.Equals(startUI))
-                    comp.Show();
-                else
+                if (!comp) {
                     child.gameObject.SetActive(false);
+                }
+
             }
         }
     }

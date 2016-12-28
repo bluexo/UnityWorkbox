@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.EventSystems;
@@ -19,15 +20,20 @@ namespace Arthas.Client.UI
 
         #region beforeShow or afterHide event when ui active or deactive!
 
-        [Header("Trigger when show[显示时触发的事件]")]
+        [Header("Trigger when show")]
         public UnityEvent BeforeShow;
 
         public UnityEvent AfterShow;
 
-        [Header("Trigger when hide[隐藏时触发的事件]")]
+        [Header("Trigger when hide")]
         public UnityEvent BeforeHide;
 
         public UnityEvent AfterHide;
+
+        [SerializeField,Header("Share screen with brothers")]
+        protected List<BaseUI> brotherWindows = new List<BaseUI>();
+
+        public IList<BaseUI> BrotherWindows { get { return brotherWindows; } }
 
         #endregion beforeShow or afterHide event when ui active or deactive!
 
@@ -75,21 +81,18 @@ namespace Arthas.Client.UI
                 return instance;
             }
         }
-
         private static T instance;
 
         public override void Show()
         {
-            if (!UIManager.ContainsUI(name)) {
-                UIManager.AddUI(name, this);
-            }
+            UIManager.AddUI(this);
             base.Show();
         }
 
-        protected virtual void Back()
+        public virtual void Back()
         {
-            if (UIManager.PrevWindow) {
-                UIManager.PrevWindow.Show();
+            if (UIManager.PrevWindow.UI) {
+                UIManager.PrevWindow.UI.Show();
             }
         }
     }

@@ -1,12 +1,12 @@
-﻿using UnityEngine;
-using UnityEngine.UI;
-using DG.Tweening;
-using System.Collections.Generic;
+﻿using DG.Tweening;
 using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.UI;
 
 namespace Arthas.Client.UI
 {
-    [UIOrder(OrderIndex = byte.MaxValue)]
+    [UIHeader, UIOrder(OrderIndex = 1)]
     public class TipsUI : WindowUI<TipsUI>
     {
         public static readonly Color okColor = Color.green;
@@ -17,6 +17,8 @@ namespace Arthas.Client.UI
         private WaitForSeconds interval = new WaitForSeconds(.6f);
         private WaitForSeconds waitForHide = new WaitForSeconds(3f);
         private Coroutine coroutine;
+
+        [SerializeField]
         private Text text;
 
         protected override void Awake()
@@ -26,7 +28,7 @@ namespace Arthas.Client.UI
 
         public static void Info(string content)
         {
-            Instance. Pop(infoColor, content);
+            Instance.Pop(infoColor, content);
         }
 
         public static void Alert(string content)
@@ -68,13 +70,10 @@ namespace Arthas.Client.UI
             yield return waitForHide;
             Slide(false);
             yield return interval;
-            if (queue.Count <= 0)
-            {
+            if (queue.Count <= 0) {
                 StopCoroutine(coroutine);
                 coroutine = null;
-            }
-            else
-            {
+            } else {
                 StartCoroutine(Pop());
             }
         }

@@ -1,65 +1,136 @@
 ﻿using System;
 using System.Collections.Generic;
+
 #if WINDOWS_UWP
 using System.Reflection;
 #endif
 
 namespace Arthas.Client.UI
 {
-    public class UIManager : Singleton<UIManager>
+    public struct WindowInfo : IComparable<WindowInfo>
     {
-        private Dictionary<string, BaseUI> windows = new Dictionary<string, BaseUI>();
-        private List<BaseUI> showedWindows = new List<BaseUI>();
+        private const int headerOrderBegin = 1000;
+
+        public byte Order { get; set; }
+        public bool IsHeader { get; set; }
+        public bool IsExclusive { get; set; }
+        public BaseUI UI { get; set; }
+
+        public void SetOrder(int headerCount, int amountCount, int index)
+        {
+            var i = IsHeader ? (amountCount - index - 1) : (amountCount - headerCount - index - 1);
+            UI.transform.SetSiblingIndex(i);
+            UI.gameObject.SetActive(true);
+        }
+
+        public bool ContainBrother(BaseUI ui)
+        {
+            return UI && UI.BrotherWindows.Contains(ui);
+        }
+
+        public int CompareTo(WindowInfo other)
+        {
+            return other.Order.CompareTo(Order);
+        }
+    }
+
+    public static class UIManager
+    {
+        private static readonly Dictionary<BaseUI, WindowInfo> windows = new Dictionary<BaseUI, WindowInfo>();
+        private static readonly List<WindowInfo> showedWindows = new List<WindowInfo>();
+        private static readonly List<WindowInfo> showedHeaderWindows = new List<WindowInfo>();
+
+        static UIManager()
+        {
+            var uis = UICanvas.Instance.GetComponentsInChildren<BaseUI>();
+            for (var i = 0; i < uis.Length; i++) {
+                AddUI(uis[i]);
+                if (uis[i].isActiveAndEnabled) {
+                    var window = GetWindowInfo(uis[i]);
+                    if (window.IsHeader)
+                        showedHeaderWindows.Add(window);
+                    else
+                        showedWindows.Add(window);
+                }
+            }
+        }
 
         /// <summary>
         /// 上一个显示的窗口
         /// </summary>
-        public static BaseUI CurrentWindow { get; private set; }
+        public static WindowInfo CurrentWindow { get; private set; }
 
-        public static BaseUI PrevWindow { get; private set; }
+        public static WindowInfo PrevWindow { get; private set; }
 
         /// <summary>
         /// 添加UI
         /// </summary>
         /// <param name="name"></param>
         /// <param name="ui"></param>
-        public static void AddUI(string name, BaseUI ui)
+        public static void AddUI(BaseUI ui)
         {
-            if (!Instance.windows.ContainsKey(name)) {
-                Instance.windows.Add(name, ui);
-                ui.UIShowEvent += Instance.OnShow;
-                ui.UIHideEvent += Instance.OnHide;
+            if (!windows.ContainsKey(ui)) {
+                var window = GetWindowInfo(ui);
+                windows.Add(ui, window);
+                ui.UIShowEvent += OnShow;
+                ui.UIHideEvent += OnHide;
             }
         }
 
-        internal static bool ContainsUI(string name)
+        private static WindowInfo GetWindowInfo(BaseUI ui)
         {
-            return Instance.windows.ContainsKey(name);
+            var uiType = ui.GetType();
+#if WINDOWS_UWP
+                var isHeader = uiType.GetTypeInfo().IsDefined(typeof(UIHeaderAttribute));
+                var exclusive = uiType.GetTypeInfo().IsDefined(typeof(UIExclusiveAttribute), false);
+                var order = uiType.GetTypeInfo().GetCustomAttributes(typeof(UIOrderAttribute), false);
+#else
+            var header = uiType.IsDefined(typeof(UIHeaderAttribute), false);
+            var exclusive = uiType.IsDefined(typeof(UIExclusiveAttribute), false);
+            var order = uiType.GetCustomAttributes(typeof(UIOrderAttribute), false);
+#endif
+            var window = new WindowInfo()
+            {
+                IsHeader = header,
+                IsExclusive = exclusive,
+                Order = order.Length > 0 ? ((UIOrderAttribute)order[0]).OrderIndex : (byte)0,
+                UI = ui
+            };
+            return window;
         }
 
         /// <summary>
         /// 当UI显示
         /// </summary>
         /// <param name="name"></param>
-        private void OnShow(BaseUI ui)
+        private static void OnShow(BaseUI ui)
         {
-            if (windows.ContainsKey(ui.name)) {
-                var window = windows[ui.name];
-#if WINDOWS_UWP
-                bool isExclusive = window.GetType().GetTypeInfo().IsDefined(typeof(UIHeaderAttribute));
-#else
-                var isExclusive = window.GetType().IsDefined(typeof(UIExclusiveAttribute), false);
-#endif
-                if (isExclusive) {
-                    if (showedWindows.Count <= 0)
-                        showedWindows = new List<BaseUI>(UICanvas.Instance.GetComponentsInChildren<BaseUI>());
-                    var arr = showedWindows.ToArray();
-                    foreach (var item in arr) item.Hide();
+            if (windows.ContainsKey(ui)) {
+                var window = windows[ui];
+                var windowList = window.IsHeader ? showedHeaderWindows : showedWindows;
+                if (window.IsExclusive) {
+                    var array = windowList.ToArray();
+                    foreach (var item in array) {
+                        if (window.ContainBrother(item.UI) || item.UI.Equals(ui)) continue;
+                        item.UI.Hide();
+                    }
                 }
                 PrevWindow = CurrentWindow;
-                showedWindows.Add(window);
+                if (!windowList.Contains(window))
+                    windowList.Add(window);
                 CurrentWindow = window;
-                CurrentWindow.transform.SetAsLastSibling();
+                var sortWindows = new List<WindowInfo>(new WindowInfo[] { CurrentWindow });
+                var brothers = CurrentWindow.UI.BrotherWindows;
+                for (var i = 0; i < brothers.Count; i++) {
+                    if (windows.ContainsKey(brothers[i])) {
+                        var brotherWindow = windows[brothers[i]];
+                        sortWindows.Add(brotherWindow);
+                    }
+                }
+                sortWindows.Sort();
+                for (var i = 0; i < sortWindows.Count; i++) {
+                    sortWindows[i].SetOrder(showedHeaderWindows.Count, UICanvas.Instance.transform.childCount, i);
+                }
             }
         }
 
@@ -67,11 +138,14 @@ namespace Arthas.Client.UI
         /// 当UI隐藏
         /// </summary>
         /// <param name="name"></param>
-        private void OnHide(BaseUI ui)
+        private static void OnHide(BaseUI ui)
         {
-            if (windows.ContainsKey(ui.name)) {
-                var window = windows[ui.name];
-                showedWindows.Remove(window);
+            if (windows.ContainsKey(ui)) {
+                var window = windows[ui];
+                if (window.IsHeader)
+                    showedWindows.Remove(window);
+                else
+                    showedHeaderWindows.Remove(window);
             }
         }
     }

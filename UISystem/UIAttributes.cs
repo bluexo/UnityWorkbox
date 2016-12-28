@@ -6,29 +6,26 @@ namespace Arthas.Client.UI
     /// 独占窗口
     /// </summary>
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = false)]
-    public class UIExclusiveAttribute : Attribute {}
+    public class UIExclusiveAttribute : Attribute { }
 
     /// <summary>
-    /// 顶层窗口
+    /// 通用顶层UI
     /// </summary>
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = false)]
-    public class UIHeaderAttribute : Attribute {}
-
-    /// <summary>
-    /// 排序
-    /// </summary>
-    [AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = true)]
     public class UIOrderAttribute : Attribute
     {
-        /// <summary>
-        /// UI顺序的索引
-        /// </summary>
-        public byte OrderIndex = 0;
+        public byte OrderIndex { get; set; }
     }
+
+    /// <summary>
+    /// 通用顶层UI
+    /// </summary>
+    [AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = false)]
+    public class UIHeaderAttribute : Attribute { }
 
     /// <summary>
     /// 开始窗口
     /// </summary>
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = false)]
-    public class UIStartAttribute : Attribute {}
+    public class UIStartAttribute : Attribute { }
 }
