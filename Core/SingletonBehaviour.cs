@@ -30,7 +30,7 @@
                 DontDestroyOnLoad(gameObject);
             } else {
                 if (instance && !instance.Equals(this))
-                    Destroy(this);
+                    Destroy(gameObject);
             }
         }
     }

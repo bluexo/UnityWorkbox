@@ -9,8 +9,6 @@ namespace Arthas.Client.UI
 {
     public struct WindowInfo : IComparable<WindowInfo>
     {
-        private const int headerOrderBegin = 1000;
-
         public byte Order { get; set; }
         public bool IsHeader { get; set; }
         public bool IsExclusive { get; set; }
@@ -18,7 +16,7 @@ namespace Arthas.Client.UI
 
         public void SetOrder(int headerCount, int amountCount, int index)
         {
-            var i = IsHeader ? (amountCount - index - 1) : (amountCount - headerCount - index - 1);
+            var i = (IsHeader ? amountCount : amountCount - headerCount) - index - 1;
             UI.transform.SetSiblingIndex(i);
             UI.gameObject.SetActive(true);
         }

@@ -3,13 +3,15 @@
 namespace Arthas.Common
 {
 #if UNITY_EDITOR
+
     using UnityEditor;
+
     public abstract class ConfigurableItemsEditor : Editor
     {
         private SerializedProperty property;
 
         private bool[] folds;
-       
+
         private void OnEnable()
         {
             property = serializedObject.FindProperty("items");
@@ -25,7 +27,7 @@ namespace Arthas.Common
                 folds[i] = EditorGUILayout.Foldout(folds[i], string.Format("Item [{0}]", i));
                 if (folds[i]) {
                     var item = property.GetArrayElementAtIndex(i);
-                    DrawItemProperty(item);
+                    DrawItemProperty(item, i);
                     EditorGUILayout.Space();
                 }
                 serializedObject.ApplyModifiedProperties();
@@ -48,17 +50,18 @@ namespace Arthas.Common
                 for (var i = 0; i < folds.Length; i++) { folds[i] = true; }
             }
             EditorGUILayout.EndHorizontal();
-
         }
 
-        public abstract void DrawItemProperty(SerializedProperty property);
+        public abstract void DrawItemProperty(SerializedProperty property, int index);
     }
+
 #endif
 
     public class ConfigurableItems<T> : ScriptableObject
     {
         [SerializeField]
         private T[] items;
+
         public T[] Items { get { return items; } }
     }
 }
