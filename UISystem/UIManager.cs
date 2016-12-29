@@ -46,11 +46,9 @@ namespace Arthas.Client.UI
             for (var i = 0; i < uis.Length; i++) {
                 AddUI(uis[i]);
                 if (uis[i].isActiveAndEnabled) {
-                    var window = GetWindowInfo(uis[i]);
-                    if (window.IsHeader)
-                        showedHeaderWindows.Add(window);
-                    else
-                        showedWindows.Add(window);
+                    var window = CreateWindowInfo(uis[i]);
+                    var showed = window.IsHeader ? showedHeaderWindows : showedWindows;
+                    showed.Add(window);
                 }
             }
         }
@@ -70,14 +68,14 @@ namespace Arthas.Client.UI
         public static void AddUI(BaseUI ui)
         {
             if (!windows.ContainsKey(ui)) {
-                var window = GetWindowInfo(ui);
+                var window = CreateWindowInfo(ui);
                 windows.Add(ui, window);
                 ui.UIShowEvent += OnShow;
                 ui.UIHideEvent += OnHide;
             }
         }
 
-        private static WindowInfo GetWindowInfo(BaseUI ui)
+        private static WindowInfo CreateWindowInfo(BaseUI ui)
         {
             var uiType = ui.GetType();
 #if WINDOWS_UWP
