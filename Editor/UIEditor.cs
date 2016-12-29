@@ -71,7 +71,7 @@ namespace Arthas.Client.UI
                 outfile.WriteLine("");
                 outfile.WriteLine(start ? "[UIStart]" : "");
                 outfile.WriteLine("[UIExclusive]");
-                outfile.WriteLine("[UIOrder(OrderIndex = 1)]");
+                outfile.WriteLine("[UIOrder(SortOrder = 1)]");
                 outfile.WriteLine(string.Format("public class {0} : WindowUI<{0}>", name));
                 outfile.WriteLine("{");
                 outfile.WriteLine("     protected override void Start()");

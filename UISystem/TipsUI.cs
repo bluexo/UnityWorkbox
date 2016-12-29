@@ -6,7 +6,8 @@ using UnityEngine.UI;
 
 namespace Arthas.Client.UI
 {
-    [UIHeader, UIOrder(OrderIndex = 1)]
+    [UIHeader]
+    [UIOrder(SortOrder = 2)]
     public class TipsUI : WindowUI<TipsUI>
     {
         public static readonly Color okColor = Color.green;

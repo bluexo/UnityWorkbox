@@ -42,7 +42,7 @@ namespace Arthas.Client.UI
 
         static UIManager()
         {
-            var uis = UICanvas.Instance.GetComponentsInChildren<BaseUI>();
+            var uis = UICanvas.Instance.GetComponentsInChildren<BaseUI>(true);
             for (var i = 0; i < uis.Length; i++) {
                 AddUI(uis[i]);
                 if (uis[i].isActiveAndEnabled) {
@@ -93,7 +93,7 @@ namespace Arthas.Client.UI
             {
                 IsHeader = header,
                 IsExclusive = exclusive,
-                Order = order.Length > 0 ? ((UIOrderAttribute)order[0]).OrderIndex : (byte)0,
+                Order = order.Length > 0 ? ((UIOrderAttribute)order[0]).SortOrder : (byte)0,
                 UI = ui
             };
             return window;
@@ -116,8 +116,6 @@ namespace Arthas.Client.UI
                     }
                 }
                 PrevWindow = CurrentWindow;
-                if (!windowList.Contains(window))
-                    windowList.Add(window);
                 CurrentWindow = window;
                 var sortWindows = new List<WindowInfo>(new WindowInfo[] { CurrentWindow });
                 var brothers = CurrentWindow.UI.BrotherWindows;
@@ -129,7 +127,10 @@ namespace Arthas.Client.UI
                 }
                 sortWindows.Sort();
                 for (var i = 0; i < sortWindows.Count; i++) {
-                    sortWindows[i].SetOrder(showedHeaderWindows.Count, UICanvas.Instance.transform.childCount, i);
+                    var sortWindow = sortWindows[i];
+                    if (!windowList.Contains(sortWindow))
+                        windowList.Add(sortWindow);
+                    sortWindow.SetOrder(showedHeaderWindows.Count, UICanvas.Instance.transform.childCount, i);
                 }
             }
         }
