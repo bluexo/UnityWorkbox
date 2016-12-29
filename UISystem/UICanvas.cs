@@ -17,8 +17,6 @@ namespace Arthas.Client.UI
         [SerializeField]
         private BaseUI startUI;
 
-        public int ChildCount { get; private set; }
-
         protected void Start()
         {
             if (!startUI) {
@@ -30,8 +28,7 @@ namespace Arthas.Client.UI
                 return;
             }
             startUI.Show();
-            ChildCount = transform.childCount;
-            for (var i = 0; i < ChildCount; i++) {
+            for (var i = 0; i < transform.childCount; i++) {
                 var child = transform.GetChild(i);
                 var comp = child.GetComponent<BaseUI>();
                 if (!comp) {
