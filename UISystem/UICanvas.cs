@@ -34,7 +34,6 @@ namespace Arthas.Client.UI
                 if (!comp) {
                     child.gameObject.SetActive(false);
                 }
-
             }
         }
     }

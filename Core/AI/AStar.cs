@@ -165,13 +165,13 @@ public class AStar : MonoBehaviour
     private void OnDrawGizmos()
     {
         foreach (var pair in points) {
-            RichText.DrawCross(pair.Key + new Vector2(.5f, .5f), pair.Value);
+            DebugEx.DrawCross(pair.Key + new Vector2(.5f, .5f), pair.Value);
             Gizmos.DrawWireCube(pair.Key + new Vector2(.5f, .5f), new Vector2(.5f, .5f));
         }
         foreach (var node in closeList) {
             Gizmos.DrawWireCube(node.Position + new Vector2(.5f, .5f), new Vector2(.25f, .25f));
         }
 
-        RichText.DrawPath(path.ToArray(), Color.yellow);
+        DebugEx.DrawPath(path.ToArray(), Color.yellow);
     }
 }
