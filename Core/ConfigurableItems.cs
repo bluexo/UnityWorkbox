@@ -29,24 +29,27 @@ namespace Arthas.Common
                     var item = property.GetArrayElementAtIndex(i);
                     DrawItemProperty(item, i);
                     EditorGUILayout.Space();
+                    EditorGUILayout.BeginHorizontal();
+                    if (GUILayout.Button("+")) {
+                        ArrayUtility.Insert(ref folds, i, false);
+                        property.InsertArrayElementAtIndex(i);
+                    }
+                    if (GUILayout.Button("-")) {
+                        property.DeleteArrayElementAtIndex(i);
+                        ArrayUtility.RemoveAt(ref folds, i);
+                    }
+                    EditorGUILayout.EndHorizontal();
+                    EditorGUILayout.Space();
                 }
                 serializedObject.ApplyModifiedProperties();
             }
             EditorGUILayout.EndVertical();
 
             EditorGUILayout.BeginHorizontal();
-            if (GUILayout.Button("+")) {
-                ArrayUtility.Insert(ref folds, property.arraySize, false);
-                property.arraySize++;
-            }
-            if (GUILayout.Button("-")) {
-                property.arraySize--;
-                ArrayUtility.RemoveAt(ref folds, property.arraySize);
-            }
-            if (GUILayout.Button(">")) {
+            if (GUILayout.Button(">", GUILayout.Height(45f))) {
                 for (var i = 0; i < folds.Length; i++) { folds[i] = false; }
             }
-            if (GUILayout.Button("∨")) {
+            if (GUILayout.Button("∨", GUILayout.Height(45f))) {
                 for (var i = 0; i < folds.Length; i++) { folds[i] = true; }
             }
             EditorGUILayout.EndHorizontal();
