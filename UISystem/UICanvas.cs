@@ -14,8 +14,16 @@ namespace Arthas.Client.UI
     [RequireComponent(typeof(GraphicRaycaster))]
     public class UICanvas : SingletonBehaviour<UICanvas>
     {
+        public static Canvas Canvas { get; private set; }
+
         [SerializeField]
         private BaseUI startUI;
+
+        protected override void Awake()
+        {
+            base.Awake();
+            Canvas = GetComponent<Canvas>();
+        }
 
         protected void Start()
         {
