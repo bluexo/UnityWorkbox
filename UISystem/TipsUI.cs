@@ -83,7 +83,7 @@ namespace Arthas.Client.UI
         {
             var height = RectTransform.sizeDelta.y;
             var end = show ? -height / 2 + 3f : height / 2;
-            RectTransform.DOAnchorMoveY(end, .5f).SetEase(Ease.InQuart);
+            RectTransform.DOAnchorPosY(end, .5f).SetEase(Ease.InQuart);
         }
     }
 }

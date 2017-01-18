@@ -82,4 +82,10 @@ public static class UnityEditorTools
         Debug.Log("Creating Classfile: " + copyPath);
         AssetDatabase.Refresh(ImportAssetOptions.Default);
     }
+
+    [MenuItem("Tools/DeleteAllKeys")]
+    public static void DeleteAllPlayerPref()
+    {
+        PlayerPrefs.DeleteAll();
+    }
 }
