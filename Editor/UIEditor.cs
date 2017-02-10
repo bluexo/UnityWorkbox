@@ -9,10 +9,10 @@ namespace Arthas.Client.UI
         [MenuItem("UI/Create UICanvas")]
         public static void AddUICanvas()
         {
-            var canvas = FindObjectOfType<UICanvas>();
+            var canvas = FindObjectOfType<UIManager>();
             if (!canvas) {
                 var go = new GameObject("UICanvas");
-                canvas = go.AddComponent<UICanvas>();
+                canvas = go.AddComponent<UIManager>();
                 go.SetActive(true);
             }
             else {
@@ -24,9 +24,9 @@ namespace Arthas.Client.UI
         [MenuItem("GameObject/Only Show Selection UI", false, -1)]
         public static void HideOther()
         {
-            if (!Selection.activeGameObject || !Selection.activeGameObject.GetComponentInParent<UICanvas>())
+            if (!Selection.activeGameObject || !Selection.activeGameObject.GetComponentInParent<UIManager>())
                 return;
-            var canvas = FindObjectOfType<UICanvas>();
+            var canvas = FindObjectOfType<UIManager>();
             foreach (Transform trans in canvas.transform) {
                 if (trans.gameObject == Selection.activeGameObject)
                     trans.gameObject.SetActive(true);
@@ -48,7 +48,7 @@ namespace Arthas.Client.UI
 
             if (!start) {
                 var selected = Selection.activeObject as GameObject;
-                if (!selected || selected.transform.parent != UICanvas.Instance.transform) {
+                if (!selected || selected.transform.parent != UIManager.Instance.transform) {
                     Debug.Log("<color=yellow>Selected object is null or not a UICanvas child !</color>");
                     return;
                 }

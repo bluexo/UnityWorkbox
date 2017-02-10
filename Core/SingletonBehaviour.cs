@@ -14,7 +14,6 @@
                     if (!instance) {
                         var go = new GameObject(typeof(T).ToString());
                         instance = go.AddComponent<T>();
-                        DontDestroyOnLoad(instance.gameObject);
                     }
                 }
                 return instance;
@@ -25,9 +24,9 @@
 
         protected virtual void Awake()
         {
+            DontDestroyOnLoad(gameObject);
             if (!instance) {
                 instance = this as T;
-                DontDestroyOnLoad(gameObject);
             } else {
                 if (instance && !instance.Equals(this))
                     Destroy(gameObject);

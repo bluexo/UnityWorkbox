@@ -5,12 +5,12 @@ using UnityEngine;
 
 namespace Arthas.Client.UI
 {
-    [CustomEditor(typeof(UICanvas))]
-    public class UICanvasEditor : Editor
+    [CustomEditor(typeof(UIManager))]
+    public class UIManagerEditor : Editor
     {
         private void OnEnable()
         {
-            var canvasObject = (target as UICanvas).gameObject;
+            var canvasObject = (target as UIManager).gameObject;
             var ui = serializedObject.FindProperty("startUI");
             if (!ui.objectReferenceValue) {
                 var type = GetChildStartUI();

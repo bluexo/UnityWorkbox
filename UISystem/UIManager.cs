@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using UnityEngine;
 
 #if WINDOWS_UWP
 using System.Reflection;
@@ -32,21 +33,48 @@ namespace Arthas.Client.UI
         }
     }
 
-    public static class UIManager
+    public class UIManager : SingletonBehaviour<UIManager>
     {
         private static readonly Dictionary<BaseUI, WindowInfo> windows = new Dictionary<BaseUI, WindowInfo>();
         private static readonly List<WindowInfo> showedWindows = new List<WindowInfo>();
         private static readonly List<WindowInfo> showedHeaderWindows = new List<WindowInfo>();
 
-        static UIManager()
+        public static Canvas Canvas { get; private set; }
+
+        [SerializeField]
+        private BaseUI startUI;
+
+        protected override void Awake()
         {
-            var uis = UICanvas.Instance.GetComponentsInChildren<BaseUI>(true);
+            base.Awake();
+            Canvas = GetComponent<Canvas>();
+            var uis = GetComponentsInChildren<BaseUI>(true);
             for (var i = 0; i < uis.Length; i++) {
                 AddUI(uis[i]);
                 if (uis[i].isActiveAndEnabled) {
                     var window = CreateWindowInfo(uis[i]);
                     var showed = window.IsHeader ? showedHeaderWindows : showedWindows;
                     showed.Add(window);
+                }
+            }
+        }
+
+        protected void Start()
+        {
+            if (!startUI) {
+#if UNITY_EDITOR
+                UnityEditor.Selection.activeGameObject = gameObject;
+#endif
+                Debug.LogError(@"UISystem initialize fail , Cannot found start ui which has a <color=cyan>[UIStart]</color> Attribute and inherit <color=cyan>:WindowUI<T></color>");
+                Debug.DebugBreak();
+                return;
+            }
+            startUI.Show();
+            for (var i = 0; i < transform.childCount; i++) {
+                var child = transform.GetChild(i);
+                var comp = child.GetComponent<BaseUI>();
+                if (!comp) {
+                    child.gameObject.SetActive(false);
                 }
             }
         }
@@ -126,7 +154,7 @@ namespace Arthas.Client.UI
                     var sortWindow = sortWindows[i];
                     if (!windowList.Contains(sortWindow))
                         windowList.Add(sortWindow);
-                    sortWindow.SetOrder(showedHeaderWindows.Count, UICanvas.Instance.transform.childCount, i);
+                    sortWindow.SetOrder(showedHeaderWindows.Count, Instance.transform.childCount, i);
                 }
             }
         }

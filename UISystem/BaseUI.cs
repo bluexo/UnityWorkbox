@@ -69,7 +69,7 @@ namespace Arthas.Client.UI
             get {
                 if (!instance) {
                     var uiName = typeof(T).Name;
-                    var child = UICanvas.Instance.transform.FindChild(uiName);
+                    var child = UIManager.Instance.transform.FindChild(uiName);
                     if (child) {
                         var ui = child.GetComponent<T>();
                         if (ui)
