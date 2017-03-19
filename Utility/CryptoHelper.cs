@@ -6,5 +6,7 @@ using System.Security.Cryptography;
 /// </summary>
 public static class CryptoHelper
 {
-    
+    public static string Encrypt(string src) { return src; }
+
+    public static string Decrypt(string src) { return src; }
 }

@@ -83,7 +83,8 @@ public static class UnityEditorTools
         AssetDatabase.Refresh(ImportAssetOptions.Default);
     }
 
-    [MenuItem("Tools/DeleteAllKeys")]
+
+    [MenuItem("Tools/PlayerPref/Delete All")]
     public static void DeleteAllPlayerPref()
     {
         PlayerPrefs.DeleteAll();
