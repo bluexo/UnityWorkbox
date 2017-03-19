@@ -30,7 +30,7 @@ namespace Arthas.Client.UI
 
         public UnityEvent AfterHide;
 
-        [SerializeField,Header("Share screen with brothers")]
+        [SerializeField, Header("Share screen with brothers")]
         protected List<BaseUI> brotherWindows = new List<BaseUI>();
 
         public IList<BaseUI> BrotherWindows { get { return brotherWindows; } }
@@ -67,10 +67,12 @@ namespace Arthas.Client.UI
         public static T Instance
         {
             get {
-                if (!instance) {
+                if (!instance)
+                {
                     var uiName = typeof(T).Name;
                     var child = UIManager.Instance.transform.FindChild(uiName);
-                    if (child) {
+                    if (child)
+                    {
                         var ui = child.GetComponent<T>();
                         if (ui)
                             instance = ui;
@@ -91,7 +93,8 @@ namespace Arthas.Client.UI
 
         public virtual void Back()
         {
-            if (UIManager.PrevWindow.UI) {
+            if (UIManager.PrevWindow.UI)
+            {
                 UIManager.PrevWindow.UI.Show();
             }
         }
