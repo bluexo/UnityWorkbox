@@ -1,5 +1,4 @@
-﻿using DG.Tweening;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -83,7 +82,7 @@ namespace Arthas.Client.UI
         {
             var height = RectTransform.sizeDelta.y;
             var end = show ? -height / 2 + 3f : height / 2;
-            RectTransform.DOAnchorPosY(end, .5f).SetEase(Ease.InQuart);
+            RectTransform.position = new Vector3(RectTransform.position.x, end, RectTransform.position.z);
         }
     }
 }
