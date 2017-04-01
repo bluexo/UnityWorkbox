@@ -3,21 +3,24 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 
-[RequireComponent(typeof(Toggle))]
-public class ToggleTrigger : MonoBehaviour
+namespace Arthas.Client.UI
 {
-    public event Action<Toggle> ToggleTriggerEvent;
-    private Toggle toggler;
-
-    void Start()
+    [RequireComponent(typeof(Toggle))]
+    public class ToggleTrigger : MonoBehaviour
     {
-        toggler = GetComponent<Toggle>();
-        toggler.onValueChanged.AddListener(OnValueChanged);
-    }
+        public event Action<Toggle> ToggleTriggerEvent;
+        private Toggle toggler;
 
-    private void OnValueChanged(bool on)
-    {
-        if (ToggleTriggerEvent != null)
-            ToggleTriggerEvent(toggler);
+        void Start()
+        {
+            toggler = GetComponent<Toggle>();
+            toggler.onValueChanged.AddListener(OnValueChanged);
+        }
+
+        private void OnValueChanged(bool on)
+        {
+            if (ToggleTriggerEvent != null)
+                ToggleTriggerEvent(toggler);
+        }
     }
 }
