@@ -1,10 +1,13 @@
-﻿using System.Collections.Generic;
-using UnityEngine;
+﻿/*******************************************************
+ * Class  : ConsoleLogger 
+ * Date   : 2014/1/31
+ * Author : Alvin
+ * ******************************************************/
 
-/// <summary>
-/// A console to display Unity's debug logs in-game.
-/// </summary>
-public class ConsoleGUILogger : MonoBehaviour
+using UnityEngine;
+using System.Collections.Generic;
+
+public class ConsoleLogger : MonoBehaviour
 {
     private struct Log
     {
@@ -13,9 +16,6 @@ public class ConsoleGUILogger : MonoBehaviour
         public LogType type;
     }
 
-    /// <summary>
-    /// The hotkey to show and hide the console window.
-    /// </summary>
     public KeyCode toggleKey = KeyCode.Tab;
 
     private List<Log> logs = new List<Log>();
@@ -23,7 +23,6 @@ public class ConsoleGUILogger : MonoBehaviour
     public bool show;
     private bool collapse;
 
-    // Visual elements:
 
     private static readonly Dictionary<LogType, Color> logTypeColors = new Dictionary<LogType, Color>()
     {
@@ -58,8 +57,18 @@ public class ConsoleGUILogger : MonoBehaviour
 #endif
     }
 
+    private float prevToggleTime = 0;
+
     private void Update()
     {
+        //在移动设备上通过五指同时触摸来激活
+#if !UNITY_STANDALONE && !UNITY_EDITOR
+        if (Input.touches.Length >= 5 
+            && (Time.time - prevToggleTime > .5f)) {
+                prevToggleTime = Time.time;
+                ToggleShowDebug();
+        }
+#endif
         if (Input.GetKeyDown(toggleKey)) {
             show = !show;
         }
@@ -72,28 +81,17 @@ public class ConsoleGUILogger : MonoBehaviour
 
     private void OnGUI()
     {
-#if !UNITY_STANDALONE && !UNITY_EDITOR
-        if (Input.touches.Length >= 5) {
-            ToggleShowDebug();
-        }
-#endif
         if (!show) return;
         windowRect = GUILayout.Window(123456, windowRect, ConsoleWindow, "Console");
     }
 
-    /// <summary>
-    /// A window that displayss the recorded logs.
-    /// </summary>
-    /// <param name="windowID">Window ID.</param>
     private void ConsoleWindow(int windowID)
     {
         scrollPosition = GUILayout.BeginScrollView(scrollPosition);
 
-        // Iterate through the recorded logs.
         for (int i = 0; i < logs.Count; i++) {
             var log = logs[i];
 
-            // Combine identical messages if collapse option is chosen.
             if (collapse) {
                 var messageSameAsPrevious = i > 0 && log.message == logs[i - 1].message;
 
@@ -120,16 +118,9 @@ public class ConsoleGUILogger : MonoBehaviour
 
         GUILayout.EndHorizontal();
 
-        // Allow the window to be dragged by its title bar.
         GUI.DragWindow(titleBarRect);
     }
 
-    /// <summary>
-    /// Records a log from the log callback.
-    /// </summary>
-    /// <param name="message">Message.</param>
-    /// <param name="stackTrace">Trace of where the message came from.</param>
-    /// <param name="type">Type of message (error, exception, warning, assert).</param>
     private void HandleLog(string message, string stackTrace, LogType type)
     {
         logs.Add(new Log()

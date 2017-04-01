@@ -8,8 +8,8 @@ using System.Text;
 /// </summary>
 public static class CryptoHelper
 {
-    private static TripleDES provider = TripleDES.Create();
-    private static ICryptoTransform encryptor, decryptor;
+    private readonly static TripleDES provider = TripleDES.Create();
+    private readonly static ICryptoTransform encryptor, decryptor;
     private const int BUFFER_SIZE = 1024;
 
     static CryptoHelper()
