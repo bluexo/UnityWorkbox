@@ -34,7 +34,7 @@ public class NetworkConfiguration : ScriptableObject
     {
         get
         {
-            var conf = Resources.Load<NetworkConfiguration>("Configs/NetworkConfiguration");
+            var conf = Resources.Load<NetworkConfiguration>("NetworkConfiguration");
             if (string.IsNullOrEmpty(conf.current.ip)) conf.current = conf.intranet;
             return conf.current;
         }
@@ -50,7 +50,7 @@ public class NetworkConfiguration : ScriptableObject
     private NetworkAddress internet;
 
 #if UNITY_EDITOR
-    public const string kPath = "Assets/Resources/Configs/NetworkConfiguration.asset";
+    public const string kPath = "Assets/Resources/NetworkConfiguration.asset";
     public const string kMenu = "Network/切换网络", kLocal = "/localhost", kIntranet = "/内网", kInternet = "/外网";
 
     [MenuItem(kMenu + kLocal)]

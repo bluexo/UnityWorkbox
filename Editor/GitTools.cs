@@ -9,7 +9,14 @@ public class GitTools : EditorWindow
     [MenuItem("Git/Bash")]
     public static void Git()
     {
-        Process.Start(gitPath);
+        try
+        {
+            Process.Start(gitPath);
+        }
+        catch
+        {
+            UnityEngine.Debug.LogError("Cannot found Git , please add \"git.exe\" directory to your environment variable path");
+        }
     }
 
     [MenuItem("Git/GitExtensions/Browse")]
@@ -38,10 +45,13 @@ public class GitTools : EditorWindow
 
     public static void GitCommand(string cmd)
     {
-        try {
+        try
+        {
             Process.Start("gitextensions.exe", cmd);
-        } catch {
-            UnityEngine.Debug.LogError("Cannot found GitExtensions!");
+        }
+        catch
+        {
+            UnityEngine.Debug.LogError("Cannot found Git , please add \"gitextensions.exe\" directory to your environment variable path");
         }
     }
 }
