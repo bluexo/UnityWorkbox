@@ -6,18 +6,18 @@ namespace Arthas.Client.UI
 {
     public class UIEditor : Editor
     {
-        [MenuItem("UI/Create UICanvas")]
+        [MenuItem("UI/Create UIManager")]
         public static void AddUICanvas()
         {
             var canvas = FindObjectOfType<UIManager>();
             if (!canvas)
             {
-                var go = new GameObject("UICanvas");
+                var go = new GameObject("UIManager");
                 canvas = go.AddComponent<UIManager>();
                 go.SetActive(true);
             } else
             {
-                Debug.Log("<color=yellow>You alreay have a UICanvas !</color>");
+                Debug.Log("<color=yellow>You alreay have a UIManager !</color>");
             }
             Selection.activeObject = canvas;
         }
