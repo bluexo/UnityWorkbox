@@ -20,7 +20,7 @@ public class ConsoleLogger : MonoBehaviour
 
     private List<Log> logs = new List<Log>();
     private Vector2 scrollPosition;
-    public bool show;
+    public bool showConsole, showFPS;
     private bool collapse;
 
 
@@ -59,6 +59,19 @@ public class ConsoleLogger : MonoBehaviour
 
     private float prevToggleTime = 0;
 
+    const float fpsMeasurePeriod = 0.5f;
+    private int m_FpsAccumulator = 0;
+    private float m_FpsNextPeriod = 0;
+    private int m_CurrentFps;
+    const string display = "{0} FPS";
+
+
+    private void Start()
+    {
+        DontDestroyOnLoad(gameObject);
+        m_FpsNextPeriod = Time.realtimeSinceStartup + fpsMeasurePeriod;
+    }
+
     private void Update()
     {
         //在移动设备上通过五指同时触摸来激活
@@ -69,33 +82,52 @@ public class ConsoleLogger : MonoBehaviour
                 ToggleShowDebug();
         }
 #endif
-        if (Input.GetKeyDown(toggleKey)) {
-            show = !show;
+        if (Input.GetKeyDown(toggleKey))
+        {
+            showConsole = !showConsole;
         }
     }
 
     public void ToggleShowDebug()
     {
-        show = !show;
+        showConsole = !showConsole;
     }
 
     private void OnGUI()
     {
-        if (!show) return;
-        windowRect = GUILayout.Window(123456, windowRect, ConsoleWindow, "Console");
+        // measure average frames per second
+        if (showFPS)
+        {
+            m_FpsAccumulator++;
+            if (Time.realtimeSinceStartup > m_FpsNextPeriod)
+            {
+                m_CurrentFps = (int)(m_FpsAccumulator / fpsMeasurePeriod);
+                m_FpsAccumulator = 0;
+                m_FpsNextPeriod += fpsMeasurePeriod;
+            }
+            GUI.Box(new Rect(10, 5, 60, 25), string.Format(display, m_CurrentFps));
+        }
+        if (showConsole)
+        {
+            windowRect = GUILayout.Window(123456, windowRect, ConsoleWindow, "Console");
+        }
+
     }
 
     private void ConsoleWindow(int windowID)
     {
         scrollPosition = GUILayout.BeginScrollView(scrollPosition);
 
-        for (int i = 0; i < logs.Count; i++) {
+        for (int i = 0; i < logs.Count; i++)
+        {
             var log = logs[i];
 
-            if (collapse) {
+            if (collapse)
+            {
                 var messageSameAsPrevious = i > 0 && log.message == logs[i - 1].message;
 
-                if (messageSameAsPrevious) {
+                if (messageSameAsPrevious)
+                {
                     continue;
                 }
             }
@@ -110,7 +142,8 @@ public class ConsoleLogger : MonoBehaviour
 
         GUILayout.BeginHorizontal();
 
-        if (GUILayout.Button(clearLabel)) {
+        if (GUILayout.Button(clearLabel))
+        {
             logs.Clear();
         }
 
