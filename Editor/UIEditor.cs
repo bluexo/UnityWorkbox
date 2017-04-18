@@ -37,7 +37,7 @@ namespace Arthas.Client.UI
             }
         }
 
-        [MenuItem("UI/Create Script with Selection UI")]
+        [MenuItem("UI/Create UI Script with selection")]
         public static void CreateUIScript()
         {
             CreateUIPanel();

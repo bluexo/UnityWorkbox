@@ -38,5 +38,11 @@ namespace System
                 return arr[arr.Count - 1];
             else return default(T);
         }
+
+        public static byte[] ReverseToBytes(this byte[] arr)
+        {
+            Array.Reverse(arr);
+            return arr;
+        }
     }
 }

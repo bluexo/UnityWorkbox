@@ -18,7 +18,8 @@ using System.IO;
 [CreateAssetMenu(fileName = "NetworkConfiguration", menuName = "CreateConfig/NetworkConfiguration")]
 public class NetworkConfiguration : ScriptableObject
 {
-    public const string kConfigPath = "Resources/Configs/";
+    public const string kConfigPath = "Configs/";
+
 
     /// <summary>
     /// 网络地址
@@ -28,7 +29,7 @@ public class NetworkConfiguration : ScriptableObject
     {
         public string ip;
         public short port;
-
+        public MessageFormat messageFormat;
         public static bool operator ==(NetworkAddress lhs, NetworkAddress rhs) { return lhs.ip == rhs.ip && lhs.port == rhs.port; }
         public static bool operator !=(NetworkAddress lhs, NetworkAddress rhs) { return lhs.ip != rhs.ip || lhs.port != rhs.port; }
     }
@@ -53,7 +54,7 @@ public class NetworkConfiguration : ScriptableObject
     private NetworkAddress internet;
 
 #if UNITY_EDITOR
-    public const string kPath = "Assets/" + kConfigPath + "NetworkConfiguration.asset";
+    public const string kPath = "Assets/Resources/" + kConfigPath + "NetworkConfiguration.asset";
     public const string kMenu = "Network/切换网络", kLocal = "/localhost", kIntranet = "/内网", kInternet = "/外网";
 
     [MenuItem(kMenu + kLocal)]
@@ -124,7 +125,7 @@ public class NetworkConfiguration : ScriptableObject
                 intranet = new NetworkAddress() { ip = "192.168.1.10", port = 10000 },
                 internet = new NetworkAddress() { ip = "0.0.0.0", port = 10000 }
             };
-            var path = Path.Combine(Application.dataPath, kConfigPath);
+            var path = Path.Combine(Application.dataPath, "Resouces/" + kConfigPath);
             if (!Directory.Exists(path)) Directory.CreateDirectory(path);
             AssetDatabase.CreateAsset(conf, kPath);
             EditorUtility.SetDirty(conf);

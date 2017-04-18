@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 #if WINDOWS_UWP
 using System.Reflection;
@@ -33,6 +34,9 @@ namespace Arthas.Client.UI
         }
     }
 
+    [RequireComponent(typeof(Canvas))]
+    [RequireComponent(typeof(CanvasScaler))]
+    [RequireComponent(typeof(GraphicRaycaster))]
     public class UIManager : SingletonBehaviour<UIManager>
     {
         private static readonly Dictionary<BaseUI, WindowInfo> windows = new Dictionary<BaseUI, WindowInfo>();

@@ -18,24 +18,19 @@ namespace Arthas.Client.UI
 
         public event Action<BaseUI> UIHideEvent;
 
-        #region beforeShow or afterHide event when ui active or deactive!
+        #region show or hide event when ui active or deactive!
+        [SerializeField, Header("Trigger when show")]
+        protected UnityEvent BeforeShow, AfterShow;
 
-        [Header("Trigger when show")]
-        public UnityEvent BeforeShow;
-
-        public UnityEvent AfterShow;
-
-        [Header("Trigger when hide")]
-        public UnityEvent BeforeHide;
-
-        public UnityEvent AfterHide;
+        [SerializeField, Header("Trigger when hide")]
+        public UnityEvent BeforeHide, AfterHide;
 
         [SerializeField, Header("Share screen with brothers")]
         protected List<BaseUI> brotherWindows = new List<BaseUI>();
 
         public IList<BaseUI> BrotherWindows { get { return brotherWindows; } }
 
-        #endregion beforeShow or afterHide event when ui active or deactive!
+        #endregion show or hide event when ui active or deactive!
 
         public RectTransform RectTransform { get { return transform as RectTransform; } }
 
@@ -64,9 +59,12 @@ namespace Arthas.Client.UI
 
     public abstract class WindowUI<T> : BaseUI where T : BaseUI
     {
+        public virtual int SortOrder { get; set; }
+
         public static T Instance
         {
-            get {
+            get
+            {
                 if (!instance)
                 {
                     var uiName = typeof(T).Name;
@@ -78,14 +76,16 @@ namespace Arthas.Client.UI
                             instance = ui;
                         else
                             instance = child.gameObject.AddComponent<T>();
-                    } else Debug.LogErrorFormat("Can not found ui gameobject : {0} in UICanvas!", uiName);
+                    }
+                    else Debug.LogErrorFormat("Can not found ui gameobject : {0} in UICanvas!", uiName);
                 }
                 return instance;
             }
         }
+   
         private static T instance;
 
-        public override void Show()
+        public virtual void Show()
         {
             UIManager.AddUI(this);
             base.Show();
