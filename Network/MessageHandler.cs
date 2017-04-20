@@ -44,11 +44,11 @@ namespace Arthas.Network
         /// <param name="msg"></param>
         public static void Invoke(IMessage msg)
         {
-            var cmdType = msg.Head.CommandId;
+            var cmdType = msg.Header.Command;
             if (messages.ContainsKey(cmdType))
                 messages[cmdType].Invoke(msg);
             else
-                Debug.LogFormat("Cannot invoke message,MsgID:{0},CmdType:{1}", msg.Head, cmdType);
+                Debug.LogFormat("Cannot invoke message,MsgID:{0},CmdType:{1}", msg.Header, cmdType);
         }
     }
 }

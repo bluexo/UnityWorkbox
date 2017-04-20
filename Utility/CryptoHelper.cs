@@ -8,6 +8,7 @@ using System.Text;
 /// </summary>
 public static class CryptoHelper
 {
+#if !WINDOWS_UWP
     private readonly static TripleDES provider = TripleDES.Create();
     private readonly static ICryptoTransform encryptor, decryptor;
     private const int BUFFER_SIZE = 1024;
@@ -49,4 +50,5 @@ public static class CryptoHelper
         orginStream.Flush();
         return Encoding.UTF8.GetString(orginStream.ToArray());
     }
+#endif
 }

@@ -39,7 +39,7 @@ namespace System
             else return default(T);
         }
 
-        public static byte[] ReverseToBytes(this byte[] arr)
+        public static byte[] Reverse(this byte[] arr)
         {
             Array.Reverse(arr);
             return arr;

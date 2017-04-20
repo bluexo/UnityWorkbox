@@ -6,9 +6,9 @@ namespace Arthas.Client.UI
 {
 
     [RequireComponent(typeof(Button))]
-    public class ClickTrigger : MonoBehaviour
+    public class ClickTrigger : MonoBehaviour , ISelectableUITrigger
     {
-        public event Action<Button> ClickedEvent;
+        public event Action<GameObject> TriggerEvent;
 
         private Button toggler;
 
@@ -20,8 +20,8 @@ namespace Arthas.Client.UI
 
         private void OnValueChanged()
         {
-            if (ClickedEvent != null)
-                ClickedEvent(toggler);
+            if (TriggerEvent != null)
+                TriggerEvent(toggler.gameObject);
         }
     }
 }

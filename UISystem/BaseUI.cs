@@ -59,7 +59,9 @@ namespace Arthas.Client.UI
 
     public abstract class WindowUI<T> : BaseUI where T : BaseUI
     {
-        public virtual int SortOrder { get; set; }
+        [SerializeField] private int sortOrder;
+
+        public virtual int SortOrder { get { return sortOrder; } }
 
         public static T Instance
         {

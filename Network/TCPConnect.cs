@@ -22,12 +22,11 @@ namespace Arthas.Network
     {
         public bool IsConnected { get; private set; }
         public string Address { get; private set; }
-        public event Action<IMessage> MessageRespondEvent;
+        public event Action<byte[]> MessageRespondEvent;
         public event Action DisconnectEvent;
-        const int READ_BUFFER_SIZE = 8192;
+        const int READ_BUFFER_SIZE = 4096;
         const int MSG_LEN_SIZE = 4;
         private byte[] readBuffer = new byte[READ_BUFFER_SIZE];
-        private readonly IMessageHead messageHead;
 
 
         /// <summary>
@@ -40,10 +39,8 @@ namespace Arthas.Network
 #else
         private TcpClient client;
 #endif
-        public TCPConnect(IMessageHead head = null)
+        public TCPConnect()
         {
-            if (head == null) messageHead = new DefaultMessageHead() { SerialNumber = 0 , Dest = 2 };
-            else messageHead = head;
             IsConnected = false;
         }
 
@@ -122,33 +119,9 @@ namespace Arthas.Network
         }
 
 #else
-        /// <summary>
-        /// 发送数据到服务器
-        /// </summary>
-        /// <param name="msgId"></param>
-        /// <param name="data"></param>
-        public void SendData(int userId, int msgId, string data)
-        {
-            if (client == null)
-                return;
-            var writer = new BinaryWriter(client.GetStream());
-            var userIdBuffer = BitConverter.GetBytes(userId);
-            var msgIdBuffer = BitConverter.GetBytes(msgId);
-            var dataBuffer = Encoding.UTF8.GetBytes(data);
-            var fullBuffer = new byte[userIdBuffer.Length + msgIdBuffer.Length + dataBuffer.Length];
-            Buffer.BlockCopy(userIdBuffer, 0, fullBuffer, 0, userIdBuffer.Length);
-            Buffer.BlockCopy(msgIdBuffer, 0, fullBuffer, userIdBuffer.Length, msgIdBuffer.Length);
-            Buffer.BlockCopy(dataBuffer, 0, fullBuffer, userIdBuffer.Length + msgIdBuffer.Length, dataBuffer.Length);
-            writer.Write(fullBuffer);
-            writer.Flush();
-        }
-
-        public void Send(short command, object body)
+        public void Send(byte[] buffer)
         {
             if (client == null) return;
-            messageHead.CommandId = command;
-            var msg = MessageFactory.CreateMessage(messageHead, body);
-            var buffer = msg.GetBuffer();
             var writer = new BinaryWriter(client.GetStream());
             writer.Write(buffer);
             writer.Flush();
@@ -194,9 +167,10 @@ namespace Arthas.Network
                     Close();
                     return;
                 }
-                var dataArray = new byte[lengthToRead];
-                Buffer.BlockCopy(readBuffer, MSG_LEN_SIZE, dataArray, 0, lengthToRead);
-                ProcessCommands(dataArray);
+                var arr = new byte[lengthToRead];
+                Buffer.BlockCopy(readBuffer, 0, arr, 0, lengthToRead);
+                if (MessageRespondEvent != null)
+                    MessageRespondEvent(arr);
                 stream.BeginRead(readBuffer, 0, READ_BUFFER_SIZE, Read, null);
             }
             catch (Exception ex)
@@ -206,15 +180,6 @@ namespace Arthas.Network
             }
         }
 #endif
-        private void ProcessCommands(byte[] dataArray)
-        {
-            var message = MessageFactory.CreateMessage(messageHead, dataArray);
-            if (MessageRespondEvent != null)
-                MessageRespondEvent(message);
-#if UNITY_EDITOR
-            Debug.LogFormat("MsgID:{0}", message.Head);
-#endif
-        }
 
         public void Close()
         {

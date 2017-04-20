@@ -15,7 +15,7 @@ using System.IO;
 /// <summary>
 /// 网络配置
 /// </summary>
-[CreateAssetMenu(fileName = "NetworkConfiguration", menuName = "CreateConfig/NetworkConfiguration")]
+[CreateAssetMenu(fileName = "NetworkConfiguration", menuName = "Configs/NetworkConfiguration")]
 public class NetworkConfiguration : ScriptableObject
 {
     public const string kConfigPath = "Configs/";
@@ -29,7 +29,6 @@ public class NetworkConfiguration : ScriptableObject
     {
         public string ip;
         public short port;
-        public MessageFormat messageFormat;
         public static bool operator ==(NetworkAddress lhs, NetworkAddress rhs) { return lhs.ip == rhs.ip && lhs.port == rhs.port; }
         public static bool operator !=(NetworkAddress lhs, NetworkAddress rhs) { return lhs.ip != rhs.ip || lhs.port != rhs.port; }
     }
