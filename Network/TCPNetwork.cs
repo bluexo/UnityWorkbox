@@ -75,9 +75,9 @@ namespace Arthas.Network
         {
 #if !UNITY_EDITOR && !UNITY_STANDALONE
             if (Application.internetReachability == NetworkReachability.NotReachable
-                && onError != null)
+                && error != null)
             {
-                onError.Invoke("Network not reachable , please check you network setting!");
+                error.Invoke("Network not reachable , please check you network setting!");
                 return;
             }
 #endif

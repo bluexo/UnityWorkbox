@@ -34,9 +34,15 @@ namespace System
 
         public static T Last<T>(this IList<T> arr)
         {
-            if (arr.Count > 0)
-                return arr[arr.Count - 1];
+            if (arr.Count > 0) return arr[arr.Count - 1];
             else return default(T);
+        }
+
+
+        public static void Replace<Tkey, TValue>(this Dictionary<Tkey, TValue> dict, Tkey k, TValue v)
+        {
+            if (dict.ContainsKey(k)) dict.Remove(k);
+            dict.Add(k, v);
         }
 
         public static byte[] Reverse(this byte[] arr)

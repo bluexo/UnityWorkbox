@@ -22,6 +22,7 @@ public class NetworkEditor : Editor
         EditorGUI.LabelField(rect, typeof(TCPNetwork).ToString(), EditorStyles.whiteLargeLabel);
         EditorGUI.DrawRect(rect, Color.yellow / 2);
 
+        /*
         cmdFold = EditorGUILayout.Foldout(cmdFold, typeof(CommandType).ToString());
         if (cmdFold)
         {
@@ -34,5 +35,6 @@ public class NetworkEditor : Editor
             }
             GUI.contentColor = Color.white;
         }
+        */
     }
 }
