@@ -6,6 +6,7 @@ using UnityEngine;
 
 namespace Arthas.Network
 {
+
     /// <summary>
     /// 默认的请求头部格式
     /// </summary>
@@ -16,7 +17,7 @@ namespace Arthas.Network
         public short Descriptor { get; set; }
         public short Command { get; set; }
 
-        public virtual IMessageHeader CreateFromBuffer(byte[] buffer)
+        public virtual void Overwrite(byte[] buffer)
         {
             throw new NotImplementedException();
         }
@@ -61,7 +62,7 @@ namespace Arthas.Network
 
         public int Status { get; set; }
 
-        public override IMessageHeader CreateFromBuffer(byte[] buffer)
+        public override void Overwrite(byte[] buffer)
         {
             using (var stream = new MemoryStream(buffer))
             using (var reader = new BinaryReader(stream))
@@ -82,7 +83,6 @@ namespace Arthas.Network
                     Time = BitConverter.ToDouble(reader.ReadBytes(sizeof(double)).Reverse(), 0);
                     Status = BitConverter.ToInt32(reader.ReadBytes(sizeof(int)).Reverse(), 0);
                 }
-                return this;
             }
         }
 
@@ -178,12 +178,21 @@ namespace Arthas.Network
             ResponseMessageHeader = new ResponseHeader() { IsLittleEndian = littleEndian };
         }
 
-        public IMessage CreateMessage<T>(T content, bool containHeader = false) where T : class
+        public IMessage FromObject(object obj)
         {
-            var buffer = content as byte[];
+            throw new NotImplementedException();
+        }
+
+        public IMessage FromString(string str)
+        {
+            throw new NotImplementedException();
+        }
+
+        public IMessage FromBuffer(byte[] buffer, bool containHeader = false) 
+        {
             if (containHeader)
             {
-                ResponseMessageHeader = ResponseMessageHeader.CreateFromBuffer(buffer);
+                ResponseMessageHeader.Overwrite(buffer);
                 return new DefaultMessage(ResponseMessageHeader, buffer, containHeader);
             }
             else
@@ -192,4 +201,5 @@ namespace Arthas.Network
             }
         }
     }
+
 }

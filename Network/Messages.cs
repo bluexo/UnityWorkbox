@@ -41,10 +41,10 @@ namespace Arthas.Network
         /// 获取Head
         /// </summary>
         /// <returns></returns>
-        IMessageHeader CreateFromBuffer(byte[] buffer);
+        void Overwrite(byte[] buffer);
 
         /// <summary>
-        /// 排除消息头
+        /// 从字节中移除消息头
         /// </summary>
         /// <returns></returns>
         void ExceptHeader(ref byte[] buffer);
@@ -85,16 +85,24 @@ namespace Arthas.Network
     /// </summary>
     public interface IMessageWrapper
     {
+        /// <summary>
+        /// 请求消息头
+        /// </summary>
         IMessageHeader RequestMessageHeader { get; }
 
+        /// <summary>
+        /// 响应消息头
+        /// </summary>
         IMessageHeader ResponseMessageHeader { get; }
+
+        IMessage FromObject(object obj);
 
         /// <summary>
         /// 创建消息
         /// </summary>
-        /// <param name="content"></param>
+        /// <param name="buffer"></param>
         /// <param name="containHeader"></param>
         /// <returns></returns>
-        IMessage CreateMessage<T>(T content, bool containHeader = false) where T : class;
+        IMessage FromBuffer(byte[] buffer, bool containHeader = false);
     }
 }

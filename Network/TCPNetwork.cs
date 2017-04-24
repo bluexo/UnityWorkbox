@@ -134,7 +134,7 @@ namespace Arthas.Network
                 var lenth = BitConverter.ToInt32(isLittleEndian ? lenthbytes : lenthbytes.Reverse(), 0);
                 var dest = new byte[lenth - sizeof(int)];
                 Buffer.BlockCopy(buffer, sizeof(int), dest, 0, lenth - sizeof(int));
-                msgQueue.Enqueue(MessageWrapper.CreateMessage(dest, true));
+                msgQueue.Enqueue(MessageWrapper.FromBuffer(dest, true));
             }
         }
 
@@ -172,14 +172,31 @@ namespace Arthas.Network
 
         public static void Send(short cmd, byte[] buf, Action<IMessage> callback)
         {
-            if (messageSerialNumber >= int.MaxValue) messageSerialNumber = 1;
-            MessageWrapper.RequestMessageHeader.SerialNumber = messageSerialNumber++;
+            MessageWrapper.RequestMessageHeader.SerialNumber = messageSerialNumber;
             MessageWrapper.RequestMessageHeader.Descriptor = 10;
             MessageWrapper.RequestMessageHeader.Command = cmd;
             responseActions.Add(MessageWrapper.RequestMessageHeader.Command, callback);
             try
             {
-                var message = MessageWrapper.CreateMessage(buf);
+                var message = MessageWrapper.FromBuffer(buf);
+                var buffer = message.GetBufferWithLength();
+                connector.Send(buffer);
+            }
+            catch (Exception ex)
+            {
+                Debug.LogError(ex.Message);
+            }
+        }
+
+        public static void Send(short cmd, object obj, Action<IMessage> callback)
+        {
+            MessageWrapper.RequestMessageHeader.SerialNumber = messageSerialNumber;
+            MessageWrapper.RequestMessageHeader.Descriptor = 10;
+            MessageWrapper.RequestMessageHeader.Command = cmd;
+            responseActions.Add(MessageWrapper.RequestMessageHeader.Command, callback);
+            try
+            {
+                var message = MessageWrapper.FromObject(obj);
                 var buffer = message.GetBufferWithLength();
                 connector.Send(buffer);
             }

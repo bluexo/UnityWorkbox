@@ -38,20 +38,22 @@ namespace Arthas.Network
             ResponseMessageHeader = new ResponseHeader();
         }
 
-        public IMessage CreateMessage<T>(T content, bool containHeader = false) where T : class
+        public IMessage FromString(string str)
         {
-            if (containHeader)
-            {
-                var buffer = content as byte[];
-                ResponseMessageHeader = ResponseMessageHeader.CreateFromBuffer(buffer);
-                ResponseMessageHeader.ExceptHeader(ref buffer);
-                return new JsonMessage(ResponseMessageHeader, Encoding.UTF8.GetString(buffer));
-            }
-            else
-            {
-                var str = content as string;
-                return new JsonMessage(RequestMessageHeader, str);
-            }
+            return new JsonMessage(RequestMessageHeader, str);
+        }
+
+        public IMessage FromObject(object obj)
+        {
+            var json = JsonUtility.ToJson(obj);
+            return new JsonMessage(RequestMessageHeader, json);
+        }
+
+        public IMessage FromBuffer(byte[] buffer, bool containHeader = false)
+        {
+            ResponseMessageHeader.Overwrite(buffer);
+            if (containHeader) ResponseMessageHeader.ExceptHeader(ref buffer);
+            return new JsonMessage(ResponseMessageHeader, Encoding.UTF8.GetString(buffer));
         }
     }
 }
