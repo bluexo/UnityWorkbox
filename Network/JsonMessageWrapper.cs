@@ -28,32 +28,32 @@ namespace Arthas.Network
 
     public class JsonMessageWrapper : IMessageWrapper
     {
-        public IMessageHeader RequestMessageHeader { get; private set; }
+        public IMessageHeader RequestHeader { get; private set; }
 
-        public IMessageHeader ResponseMessageHeader { get; private set; }
+        public IMessageHeader ResponseHeader { get; private set; }
 
         public JsonMessageWrapper()
         {
-            RequestMessageHeader = new RequestHeader();
-            ResponseMessageHeader = new ResponseHeader();
+            RequestHeader = new RequestHeader();
+            ResponseHeader = new ResponseHeader();
         }
 
         public IMessage FromString(string str)
         {
-            return new JsonMessage(RequestMessageHeader, str);
+            return new JsonMessage(RequestHeader, str);
         }
 
         public IMessage FromObject(object obj)
         {
             var json = JsonUtility.ToJson(obj);
-            return new JsonMessage(RequestMessageHeader, json);
+            return new JsonMessage(RequestHeader, json);
         }
 
         public IMessage FromBuffer(byte[] buffer, bool containHeader = false)
         {
-            ResponseMessageHeader.Overwrite(buffer);
-            if (containHeader) ResponseMessageHeader.ExceptHeader(ref buffer);
-            return new JsonMessage(ResponseMessageHeader, Encoding.UTF8.GetString(buffer));
+            ResponseHeader.Overwrite(buffer);
+            if (containHeader) ResponseHeader.ExceptHeader(ref buffer);
+            return new JsonMessage(ResponseHeader, Encoding.UTF8.GetString(buffer));
         }
     }
 }

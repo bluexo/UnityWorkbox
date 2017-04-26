@@ -28,7 +28,6 @@ namespace Arthas.Network
         const int MSG_LEN_SIZE = 4;
         private byte[] readBuffer = new byte[READ_BUFFER_SIZE];
 
-
         /// <summary>
         /// TCP客户端
         /// </summary>
@@ -163,14 +162,13 @@ namespace Arthas.Network
                 var lengthToRead = stream.EndRead(ar);
                 if (lengthToRead < 1 || lengthToRead > READ_BUFFER_SIZE)
                 {
-                    Debug.Log("Stream read error!");
+                    Debug.LogError("Stream read error , network will be closed!");
                     Close();
                     return;
                 }
                 var arr = new byte[lengthToRead];
                 Buffer.BlockCopy(readBuffer, 0, arr, 0, lengthToRead);
-                if (MessageRespondEvent != null)
-                    MessageRespondEvent(arr);
+                if (MessageRespondEvent != null) MessageRespondEvent(arr);
                 stream.BeginRead(readBuffer, 0, READ_BUFFER_SIZE, Read, null);
             }
             catch (Exception ex)

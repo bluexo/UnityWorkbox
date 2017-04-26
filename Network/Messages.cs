@@ -88,17 +88,29 @@ namespace Arthas.Network
         /// <summary>
         /// 请求消息头
         /// </summary>
-        IMessageHeader RequestMessageHeader { get; }
+        IMessageHeader RequestHeader { get; }
 
         /// <summary>
         /// 响应消息头
         /// </summary>
-        IMessageHeader ResponseMessageHeader { get; }
+        IMessageHeader ResponseHeader { get; }
 
+        /// <summary>
+        /// 从字符串创建消息
+        /// </summary>
+        /// <param name="str"></param>
+        /// <returns></returns>
+        IMessage FromString(string str);
+
+        /// <summary>
+        /// 从一个对象创建消息
+        /// </summary>
+        /// <param name="obj"></param>
+        /// <returns></returns>
         IMessage FromObject(object obj);
 
         /// <summary>
-        /// 创建消息
+        /// 创建消息从字节数组
         /// </summary>
         /// <param name="buffer"></param>
         /// <param name="containHeader"></param>

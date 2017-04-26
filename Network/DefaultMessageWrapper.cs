@@ -6,7 +6,6 @@ using UnityEngine;
 
 namespace Arthas.Network
 {
-
     /// <summary>
     /// 默认的请求头部格式
     /// </summary>
@@ -168,14 +167,14 @@ namespace Arthas.Network
     /// </summary>
     public class DefaultMessageWrapper : IMessageWrapper
     {
-        public IMessageHeader RequestMessageHeader { get; private set; }
+        public IMessageHeader RequestHeader { get; private set; }
 
-        public IMessageHeader ResponseMessageHeader { get; private set; }
+        public IMessageHeader ResponseHeader { get; private set; }
 
         public DefaultMessageWrapper(bool littleEndian = true)
         {
-            RequestMessageHeader = new RequestHeader() { IsLittleEndian = littleEndian };
-            ResponseMessageHeader = new ResponseHeader() { IsLittleEndian = littleEndian };
+            RequestHeader = new RequestHeader() { IsLittleEndian = littleEndian };
+            ResponseHeader = new ResponseHeader() { IsLittleEndian = littleEndian };
         }
 
         public IMessage FromObject(object obj)
@@ -192,14 +191,13 @@ namespace Arthas.Network
         {
             if (containHeader)
             {
-                ResponseMessageHeader.Overwrite(buffer);
-                return new DefaultMessage(ResponseMessageHeader, buffer, containHeader);
+                ResponseHeader.Overwrite(buffer);
+                return new DefaultMessage(ResponseHeader, buffer, containHeader);
             }
             else
             {
-                return new DefaultMessage(RequestMessageHeader, buffer, containHeader);
+                return new DefaultMessage(RequestHeader, buffer, containHeader);
             }
         }
     }
-
 }

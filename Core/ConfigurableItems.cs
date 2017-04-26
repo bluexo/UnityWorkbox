@@ -22,19 +22,24 @@ namespace Arthas.Common
 
         public override void OnInspectorGUI()
         {
+            base.OnInspectorGUI();
             var rect = EditorGUILayout.BeginVertical();
-            for (var i = 0; i < property.arraySize; i++) {
+            for (var i = 0; i < property.arraySize; i++)
+            {
                 folds[i] = EditorGUILayout.Foldout(folds[i], string.Format("Item [{0}]", i));
-                if (folds[i]) {
+                if (folds[i])
+                {
                     var item = property.GetArrayElementAtIndex(i);
                     DrawItemProperty(item, i);
                     EditorGUILayout.Space();
                     EditorGUILayout.BeginHorizontal();
-                    if (GUILayout.Button("+")) {
+                    if (GUILayout.Button("+"))
+                    {
                         ArrayUtility.Insert(ref folds, i, false);
                         property.InsertArrayElementAtIndex(i);
                     }
-                    if (GUILayout.Button("-")) {
+                    if (GUILayout.Button("-"))
+                    {
                         property.DeleteArrayElementAtIndex(i);
                         ArrayUtility.RemoveAt(ref folds, i);
                     }
@@ -46,10 +51,12 @@ namespace Arthas.Common
             EditorGUILayout.EndVertical();
 
             EditorGUILayout.BeginHorizontal();
-            if (GUILayout.Button(">", GUILayout.Height(45f))) {
+            if (GUILayout.Button(">", GUILayout.Height(45f)))
+            {
                 for (var i = 0; i < folds.Length; i++) { folds[i] = false; }
             }
-            if (GUILayout.Button("∨", GUILayout.Height(45f))) {
+            if (GUILayout.Button("∨", GUILayout.Height(45f)))
+            {
                 for (var i = 0; i < folds.Length; i++) { folds[i] = true; }
             }
             EditorGUILayout.EndHorizontal();
@@ -62,7 +69,7 @@ namespace Arthas.Common
 
     public class ConfigurableItems<T> : ScriptableObject
     {
-        [SerializeField]
+        [SerializeField, HideInInspector]
         private T[] items;
 
         public T[] Items { get { return items; } }

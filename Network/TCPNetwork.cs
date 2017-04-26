@@ -5,9 +5,6 @@ using System.Collections.Generic;
 
 namespace Arthas.Network
 {
-    public enum MessageFormat { Binary, Json, ProtoBuf }
-
-
     /// <summary>
     /// TCP网络
     /// </summary>
@@ -32,6 +29,12 @@ namespace Arthas.Network
 
         public static IMessageWrapper MessageWrapper { get; private set; }
 
+        public static bool IsLittleEndian
+        {
+            get { return Instance.isLittleEndian; }
+            set { Instance.isLittleEndian = value; }
+        }
+
         public static bool IsConnected { get { return connector.IsConnected; } }
 
         private readonly static TCPConnect connector = new TCPConnect();
@@ -43,8 +46,10 @@ namespace Arthas.Network
         private float currentTime, connectCheckDuration = .1f;
         private static object enterLock = new object();
 
-        [SerializeField] private float connectTimeout = 10f, heartbeatDuration = 8f;
-        [SerializeField] private bool isLittleEndian = true;
+        [SerializeField]
+        private float connectTimeout = 10f, heartbeatDuration = 8f;
+        [SerializeField]
+        private bool isLittleEndian = true;
         private static int messageSerialNumber = 1;
 
         protected override void Awake()
@@ -63,6 +68,9 @@ namespace Arthas.Network
             MessageWrapper = wrapper ?? new DefaultMessageWrapper(isLittleEndian);
             connector.Connect(ip, port);
             checkTimeout = StartCoroutine(CheckeTimeout());
+#if UNITY_EDITOR
+            Debug.LogFormat("Connect to server , <color=cyan>Addr:[{0}:{1}] ,wrapper:{2}.</color>", ip, port, MessageWrapper.GetType());
+#endif
         }
 
         /// <summary>
@@ -134,7 +142,15 @@ namespace Arthas.Network
                 var lenth = BitConverter.ToInt32(isLittleEndian ? lenthbytes : lenthbytes.Reverse(), 0);
                 var dest = new byte[lenth - sizeof(int)];
                 Buffer.BlockCopy(buffer, sizeof(int), dest, 0, lenth - sizeof(int));
-                msgQueue.Enqueue(MessageWrapper.FromBuffer(dest, true));
+                var msg = MessageWrapper.FromBuffer(dest, true);
+                msgQueue.Enqueue(msg);
+#if UNITY_EDITOR
+                Debug.LogFormat("<color=green>[TCPNetwork]</color> [Receive] << SN:{0} , Descriptor:{1} , CMD:{2} , BUF_SIZE:{3}",
+                    msg.Header.SerialNumber,
+                    msg.Header.Descriptor,
+                    msg.Header.Command,
+                    buffer.Length);
+#endif
             }
         }
 
@@ -172,15 +188,23 @@ namespace Arthas.Network
 
         public static void Send(short cmd, byte[] buf, Action<IMessage> callback)
         {
-            MessageWrapper.RequestMessageHeader.SerialNumber = messageSerialNumber;
-            MessageWrapper.RequestMessageHeader.Descriptor = 10;
-            MessageWrapper.RequestMessageHeader.Command = cmd;
-            responseActions.Add(MessageWrapper.RequestMessageHeader.Command, callback);
+            var header = MessageWrapper.RequestHeader;
+            header.SerialNumber = messageSerialNumber;
+            header.Descriptor = (short)(cmd == 10001 ? 10 : 33);
+            header.Command = cmd;
+            responseActions.Replace(MessageWrapper.RequestHeader.Command, callback);
             try
             {
                 var message = MessageWrapper.FromBuffer(buf);
                 var buffer = message.GetBufferWithLength();
                 connector.Send(buffer);
+#if UNITY_EDITOR
+                Debug.LogFormat("<color=cyan>[TCPNetwork]</color> [Send] >> SN:{0} , Descriptor:{1} , CMD:{2} , BUF_SIZE:{3}",
+                    header.SerialNumber,
+                    header.Descriptor,
+                    header.Command,
+                    buffer.Length);
+#endif
             }
             catch (Exception ex)
             {
@@ -190,15 +214,23 @@ namespace Arthas.Network
 
         public static void Send(short cmd, object obj, Action<IMessage> callback)
         {
-            MessageWrapper.RequestMessageHeader.SerialNumber = messageSerialNumber;
-            MessageWrapper.RequestMessageHeader.Descriptor = 10;
-            MessageWrapper.RequestMessageHeader.Command = cmd;
-            responseActions.Add(MessageWrapper.RequestMessageHeader.Command, callback);
+            var header = MessageWrapper.RequestHeader;
+            header.SerialNumber = messageSerialNumber;
+            header.Descriptor = (short)(cmd == 10001 ? 10 : 33);
+            header.Command = cmd;
+            responseActions.Add(MessageWrapper.RequestHeader.Command, callback);
             try
             {
                 var message = MessageWrapper.FromObject(obj);
                 var buffer = message.GetBufferWithLength();
                 connector.Send(buffer);
+#if UNITY_EDITOR
+                Debug.LogFormat("<color=cyan>[TCPNetwork]</color> [Send] >> SN:{0} , Descriptor:{1} , CMD:{2} , BUF_SIZE:{3}",
+                    header.SerialNumber,
+                    header.Descriptor,
+                    header.Command,
+                    buffer.Length);
+#endif
             }
             catch (Exception ex)
             {
@@ -218,6 +250,11 @@ namespace Arthas.Network
                 connector.MessageRespondEvent -= OnMessageRespond;
                 connector.DisconnectEvent -= OnDisconnected;
             }
+        }
+
+        public static void Close()
+        {
+            connector.Close();
         }
     }
 }

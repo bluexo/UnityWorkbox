@@ -20,16 +20,16 @@ namespace System
     public delegate TResult Func<T1, T2, T3, T4, T5, T6, T7, TResult>(T1 t1, T2 t2, T3 t3, T4 t4, T5 t5, T6 t6, T7 t7);
 
     public delegate TResult Func<T1, T2, T3, T4, T5, T6, T7, T8, TResult>(T1 t1, T2 t2, T3 t3, T4 t4, T5 t5, T6 t6, T7 t7, T8 t8);
+}
 
-
+namespace System.Collections
+{
     public static class CollectionExtentions
     {
         public static T First<T>(this IList<T> arr)
         {
-            if (arr.Count > 0)
-                return arr[0];
-            else
-                return default(T);
+            if (arr.Count > 0) return arr[0];
+            else return default(T);
         }
 
         public static T Last<T>(this IList<T> arr)
@@ -38,8 +38,7 @@ namespace System
             else return default(T);
         }
 
-
-        public static void Replace<Tkey, TValue>(this Dictionary<Tkey, TValue> dict, Tkey k, TValue v)
+        public static void Replace<Tkey, TValue>(this IDictionary<Tkey, TValue> dict, Tkey k, TValue v)
         {
             if (dict.ContainsKey(k)) dict.Remove(k);
             dict.Add(k, v);
@@ -49,6 +48,29 @@ namespace System
         {
             Array.Reverse(arr);
             return arr;
+        }
+
+        public static void Foreach<Tkey, TValue>(this IDictionary<Tkey, TValue> dict, Action<KeyValuePair<Tkey, TValue>> action)
+        {
+            foreach (var pair in dict)
+            {
+                if (action != null)
+                {
+                    action(pair);
+                }
+            }
+        }
+
+        public static void Foreach(this Array arr, Action<int> action)
+        {
+            int len = arr.Length;
+            while (len-- > 0)
+            {
+                if (action != null)
+                {
+                    action(len);
+                }
+            }
         }
     }
 }
