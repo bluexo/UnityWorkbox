@@ -1,4 +1,6 @@
-﻿using UnityEngine;
+﻿using System;
+using System.Xml;
+using UnityEngine;
 
 namespace Arthas.Common
 {
@@ -12,16 +14,20 @@ namespace Arthas.Common
 
         private bool[] folds;
 
-        private void OnEnable()
+        protected virtual void OnEnable()
         {
             property = serializedObject.FindProperty("items");
-            if (property.arraySize <= 0)
-                property.arraySize++;
+            if (property.arraySize <= 0) property.arraySize++;
             folds = new bool[property.arraySize];
+            serializedObject.ApplyModifiedProperties();
         }
 
         public override void OnInspectorGUI()
         {
+            EditorGUILayout.BeginHorizontal();
+
+            EditorGUILayout.EndHorizontal();
+
             base.OnInspectorGUI();
             var rect = EditorGUILayout.BeginVertical();
             for (var i = 0; i < property.arraySize; i++)
@@ -33,16 +39,19 @@ namespace Arthas.Common
                     DrawItemProperty(item, i);
                     EditorGUILayout.Space();
                     EditorGUILayout.BeginHorizontal();
+                    GUI.color = Color.green;
                     if (GUILayout.Button("+"))
                     {
                         ArrayUtility.Insert(ref folds, i, false);
                         property.InsertArrayElementAtIndex(i);
                     }
+                    GUI.color = Color.red;
                     if (GUILayout.Button("-"))
                     {
                         property.DeleteArrayElementAtIndex(i);
                         ArrayUtility.RemoveAt(ref folds, i);
                     }
+                    GUI.color = Color.white;
                     EditorGUILayout.EndHorizontal();
                     EditorGUILayout.Space();
                 }
@@ -51,14 +60,12 @@ namespace Arthas.Common
             EditorGUILayout.EndVertical();
 
             EditorGUILayout.BeginHorizontal();
-            if (GUILayout.Button(">", GUILayout.Height(45f)))
-            {
+            GUI.color = Color.yellow;
+            if (GUILayout.Button(">", GUILayout.Height(25f)))
                 for (var i = 0; i < folds.Length; i++) { folds[i] = false; }
-            }
-            if (GUILayout.Button("∨", GUILayout.Height(45f)))
-            {
+            if (GUILayout.Button("∨", GUILayout.Height(25f)))
                 for (var i = 0; i < folds.Length; i++) { folds[i] = true; }
-            }
+            GUI.color = Color.white;
             EditorGUILayout.EndHorizontal();
         }
 
@@ -70,7 +77,7 @@ namespace Arthas.Common
     public class ConfigurableItems<T> : ScriptableObject
     {
         [SerializeField, HideInInspector]
-        private T[] items;
+        protected T[] items;
 
         public T[] Items { get { return items; } }
     }

@@ -153,7 +153,6 @@ namespace Arthas.Network
             }
         }
 #else
-
         private void Read(IAsyncResult ar)
         {
             try

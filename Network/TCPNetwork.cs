@@ -188,10 +188,7 @@ namespace Arthas.Network
 
         public static void Send(short cmd, byte[] buf, Action<IMessage> callback)
         {
-            var header = MessageWrapper.RequestHeader;
-            header.SerialNumber = messageSerialNumber;
-            header.Descriptor = (short)(cmd == 10001 ? 10 : 33);
-            header.Command = cmd;
+            MessageWrapper.RequestHeader.Command = cmd;
             responseActions.Replace(MessageWrapper.RequestHeader.Command, callback);
             try
             {
@@ -200,9 +197,9 @@ namespace Arthas.Network
                 connector.Send(buffer);
 #if UNITY_EDITOR
                 Debug.LogFormat("<color=cyan>[TCPNetwork]</color> [Send] >> SN:{0} , Descriptor:{1} , CMD:{2} , BUF_SIZE:{3}",
-                    header.SerialNumber,
-                    header.Descriptor,
-                    header.Command,
+                    MessageWrapper.RequestHeader.SerialNumber,
+                    MessageWrapper.RequestHeader.Descriptor,
+                    MessageWrapper.RequestHeader.Command,
                     buffer.Length);
 #endif
             }
@@ -214,10 +211,7 @@ namespace Arthas.Network
 
         public static void Send(short cmd, object obj, Action<IMessage> callback)
         {
-            var header = MessageWrapper.RequestHeader;
-            header.SerialNumber = messageSerialNumber;
-            header.Descriptor = (short)(cmd == 10001 ? 10 : 33);
-            header.Command = cmd;
+            MessageWrapper.RequestHeader.Command = cmd;
             responseActions.Add(MessageWrapper.RequestHeader.Command, callback);
             try
             {
@@ -226,9 +220,33 @@ namespace Arthas.Network
                 connector.Send(buffer);
 #if UNITY_EDITOR
                 Debug.LogFormat("<color=cyan>[TCPNetwork]</color> [Send] >> SN:{0} , Descriptor:{1} , CMD:{2} , BUF_SIZE:{3}",
-                    header.SerialNumber,
-                    header.Descriptor,
-                    header.Command,
+                    MessageWrapper.RequestHeader.SerialNumber,
+                    MessageWrapper.RequestHeader.Descriptor,
+                    MessageWrapper.RequestHeader.Command,
+                    buffer.Length);
+#endif
+            }
+            catch (Exception ex)
+            {
+                Debug.LogError(ex.Message);
+            }
+        }
+
+        public static void Send(short cmd, byte[] buf, Action<IMessageHeader> headerAction, Action<IMessage> callback)
+        {
+            MessageWrapper.RequestHeader.Command = cmd;
+            if (headerAction != null) headerAction(MessageWrapper.RequestHeader);
+            responseActions.Replace(MessageWrapper.RequestHeader.Command, callback);
+            try
+            {
+                var message = MessageWrapper.FromBuffer(buf);
+                var buffer = message.GetBufferWithLength();
+                connector.Send(buffer);
+#if UNITY_EDITOR
+                Debug.LogFormat("<color=cyan>[TCPNetwork]</color> [Send] >> SN:{0} , Descriptor:{1} , CMD:{2} , BUF_SIZE:{3}",
+                    MessageWrapper.RequestHeader.SerialNumber,
+                    MessageWrapper.RequestHeader.Descriptor,
+                    MessageWrapper.RequestHeader.Command,
                     buffer.Length);
 #endif
             }
