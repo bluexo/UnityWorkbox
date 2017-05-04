@@ -11,7 +11,7 @@ namespace Arthas.Client.UI
 {
     public struct WindowInfo : IComparable<WindowInfo>
     {
-        public byte Order { get; set; }
+        public int Order { get; set; }
         public bool IsHeader { get; set; }
         public bool IsExclusive { get; set; }
         public BaseUI UI { get; set; }
@@ -121,7 +121,7 @@ namespace Arthas.Client.UI
             {
                 IsHeader = header,
                 IsExclusive = exclusive,
-                Order = order.Length > 0 ? ((UIOrderAttribute)order[0]).SortOrder : (byte)0,
+				Order = ui.SortOrder,
                 UI = ui
             };
             return window;

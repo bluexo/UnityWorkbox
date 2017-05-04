@@ -14,7 +14,11 @@ namespace Arthas.Client.UI
     [RequireComponent(typeof(CanvasRenderer))]
     public abstract class BaseUI : UIBehaviour
     {
-        public event Action<BaseUI> UIShowEvent;
+		[SerializeField] private int sortOrder;
+		
+		public virtual int SortOrder { get { return sortOrder; } }
+
+		public event Action<BaseUI> UIShowEvent;
 
         public event Action<BaseUI> UIHideEvent;
 
@@ -59,9 +63,6 @@ namespace Arthas.Client.UI
 
     public abstract class WindowUI<T> : BaseUI where T : BaseUI
     {
-        [SerializeField] private int sortOrder;
-
-        public virtual int SortOrder { get { return sortOrder; } }
 
         public static T Instance
         {

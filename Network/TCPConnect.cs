@@ -97,7 +97,7 @@ namespace Arthas.Network
         /// 
         /// </summary>
         /// <param name="data"></param>
-        public async void SendData(int userId, int msgId, string data)
+        public async void Send(int userId, int msgId, string data)
         {
             using (writer = new DataWriter(client.OutputStream))
             {
@@ -128,16 +128,14 @@ namespace Arthas.Network
 #endif
 
 #if WINDOWS_UWP
-        public async void ReadAsync()
+        private async void ReadAsync()
         {
             try
             {
                 reader = new DataReader(client.InputStream);
-                //读取字符串长度
                 await reader.LoadAsync(MSG_LEN_SIZE);
                 var lenBuffer = new byte[MSG_LEN_SIZE];
                 reader.ReadBytes(lenBuffer);
-                //读取字符串内容
                 var actualStringLength = await reader.LoadAsync(BitConverter.ToUInt32(lenBuffer, 0));
                 var dataArray = new byte[actualStringLength];
                 reader.ReadBytes(dataArray);
