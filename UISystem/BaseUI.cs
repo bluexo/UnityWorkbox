@@ -88,7 +88,7 @@ namespace Arthas.Client.UI
    
         private static T instance;
 
-        public virtual void Show()
+        public new virtual void Show()
         {
             UIManager.AddUI(this);
             base.Show();
