@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace Arthas.Client.UI
+namespace Arthas.UI
 {
     [UIHeader]
     [UIOrder(SortOrder = 2)]

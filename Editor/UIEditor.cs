@@ -2,7 +2,7 @@
 using UnityEditor;
 using UnityEngine;
 
-namespace Arthas.Client.UI
+namespace Arthas.UI
 {
     public class UIEditor : Editor
     {

@@ -2,7 +2,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace Arthas.Client.UI
+namespace Arthas.UI
 {
 
     [RequireComponent(typeof(Button))]

@@ -8,7 +8,7 @@ using UnityEngine.EventSystems;
 using System.Reflection;
 #endif
 
-namespace Arthas.Client.UI
+namespace Arthas.UI
 {
     [RequireComponent(typeof(RectTransform))]
     [RequireComponent(typeof(CanvasRenderer))]
@@ -75,10 +75,8 @@ namespace Arthas.Client.UI
                     if (child)
                     {
                         var ui = child.GetComponent<T>();
-                        if (ui)
-                            instance = ui;
-                        else
-                            instance = child.gameObject.AddComponent<T>();
+                        if (ui) instance = ui;
+                        else instance = child.gameObject.AddComponent<T>();
                     }
                     else Debug.LogErrorFormat("Can not found ui gameobject : {0} in UICanvas!", uiName);
                 }

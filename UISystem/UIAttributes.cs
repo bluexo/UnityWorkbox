@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Arthas.Client.UI
+namespace Arthas.UI
 {
     /// <summary>
     /// When Exclusive shown will be hide other windows (exclusive of UIHeader)

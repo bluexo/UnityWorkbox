@@ -3,7 +3,7 @@ using System.Reflection;
 using UnityEditor;
 using UnityEngine;
 
-namespace Arthas.Client.UI
+namespace Arthas.UI
 {
     [CustomEditor(typeof(UIManager))]
     public class UIManagerEditor : Editor

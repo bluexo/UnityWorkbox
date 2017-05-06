@@ -7,7 +7,7 @@ using UnityEngine.UI;
 using System.Reflection;
 #endif
 
-namespace Arthas.Client.UI
+namespace Arthas.UI
 {
     public struct WindowInfo : IComparable<WindowInfo>
     {
