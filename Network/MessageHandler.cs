@@ -4,9 +4,9 @@ using Arthas.Protocol;
 using UnityEngine;
 namespace Arthas.Network
 {
-    public class MessageHandler
+    public static class MessageHandler
     {
-        private static Dictionary<short, Action<IMessage>> messages = new Dictionary<short, Action<IMessage>>();
+        private static Dictionary<int, Action<IMessage>> messages = new Dictionary<int, Action<IMessage>>();
 
         static MessageHandler()
         {
@@ -20,8 +20,7 @@ namespace Arthas.Network
         /// <param name="invoker"></param>
         public static void RegisterMessage(short cmdType, Action<IMessage> invoker)
         {
-            if (!messages.ContainsKey(cmdType))
-            {
+            if (!messages.ContainsKey(cmdType)) {
                 messages.Add(cmdType, invoker);
             }
         }
@@ -32,8 +31,7 @@ namespace Arthas.Network
         /// <param name="command"></param>
         public static void UnregisterMessage(short command)
         {
-            if (messages.ContainsKey(command))
-            {
+            if (messages.ContainsKey(command)) {
                 messages.Remove(command);
             }
         }
@@ -44,11 +42,10 @@ namespace Arthas.Network
         /// <param name="msg"></param>
         public static void Invoke(IMessage msg)
         {
-            var cmdType = msg.Header.Command;
-            if (messages.ContainsKey(cmdType))
-                messages[cmdType].Invoke(msg);
+            if (messages.ContainsKey(msg.Header.Command))
+                messages[msg.Header.Command].Invoke(msg);
             else
-                Debug.LogFormat("Cannot invoke message,MsgID:{0},CmdType:{1}", msg.Header, cmdType);
+                Debug.LogFormat("Cannot invoke message,CmdType:{0}", msg.Header.Command);
         }
     }
 }

@@ -97,15 +97,13 @@ namespace Arthas.Network
         /// 
         /// </summary>
         /// <param name="data"></param>
-        public async void Send(int userId, int msgId, string data)
+        public async void Send(byte[] buffer)
         {
             using (writer = new DataWriter(client.OutputStream))
             {
                 try
                 {
-                    writer.WriteBytes(BitConverter.GetBytes(userId));
-                    writer.WriteBytes(BitConverter.GetBytes(msgId));
-                    writer.WriteBytes(Encoding.UTF8.GetBytes(data));
+                    writer.WriteBytes(buffer);
                     await writer.StoreAsync();
                     await writer.FlushAsync();
                     writer.DetachStream();
@@ -139,7 +137,7 @@ namespace Arthas.Network
                 var actualStringLength = await reader.LoadAsync(BitConverter.ToUInt32(lenBuffer, 0));
                 var dataArray = new byte[actualStringLength];
                 reader.ReadBytes(dataArray);
-                ProcessCommands(dataArray);
+                if (MessageRespondEvent != null) MessageRespondEvent(dataArray);
                 reader.DetachStream();
                 ReadAsync();
             }

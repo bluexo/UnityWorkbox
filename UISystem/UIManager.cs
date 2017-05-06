@@ -109,13 +109,13 @@ namespace Arthas.UI
         {
             var uiType = ui.GetType();
 #if WINDOWS_UWP
-                var isHeader = uiType.GetTypeInfo().IsDefined(typeof(UIHeaderAttribute));
+                var header = uiType.GetTypeInfo().IsDefined(typeof(UIHeaderAttribute));
                 var exclusive = uiType.GetTypeInfo().IsDefined(typeof(UIExclusiveAttribute), false);
-                var order = uiType.GetTypeInfo().GetCustomAttributes(typeof(UIOrderAttribute), false);
+                //var order = uiType.GetTypeInfo().GetCustomAttributes(typeof(UIOrderAttribute), false);
 #else
             var header = uiType.IsDefined(typeof(UIHeaderAttribute), false);
             var exclusive = uiType.IsDefined(typeof(UIExclusiveAttribute), false);
-            var order = uiType.GetCustomAttributes(typeof(UIOrderAttribute), false);
+            //var order = uiType.GetCustomAttributes(typeof(UIOrderAttribute), false);
 #endif
             var window = new WindowInfo()
             {

@@ -16,29 +16,15 @@ namespace Arthas.Network
         /// </summary>
         bool IsLittleEndian { get; }
 
-        /// <summary>
-        /// 序号
-        /// </summary>
-        int SerialNumber { get; set; }
-
-        /// <summary>
-        /// 命令Id
-        /// </summary>
         short Command { get; set; }
 
         /// <summary>
-        /// 描述符
+        /// 
         /// </summary>
-        short Descriptor { get; set; }
-
-        /// <summary>
-        /// 获取消息头的字节
-        /// </summary>
-        /// <returns></returns>
         byte[] GetBuffer();
 
         /// <summary>
-        /// 获取Head
+        /// 根据字节创建消息头
         /// </summary>
         /// <returns></returns>
         void Overwrite(byte[] buffer);
@@ -59,7 +45,7 @@ namespace Arthas.Network
         /// 消息头
         /// </summary>
         IMessageHeader Header { get; }
-
+        
         /// <summary>
         /// 获取消息体
         /// </summary>
@@ -88,12 +74,12 @@ namespace Arthas.Network
         /// <summary>
         /// 请求消息头
         /// </summary>
-        IMessageHeader RequestHeader { get; }
+        IMessageHeader RequestHeader { get; set; }
 
         /// <summary>
         /// 响应消息头
         /// </summary>
-        IMessageHeader ResponseHeader { get; }
+        IMessageHeader ResponseHeader { get; set; }
 
         /// <summary>
         /// 从字符串创建消息
@@ -110,7 +96,7 @@ namespace Arthas.Network
         IMessage FromObject(object obj);
 
         /// <summary>
-        /// 创建消息从字节数组
+        /// 从字节数组创建消息
         /// </summary>
         /// <param name="buffer"></param>
         /// <param name="containHeader"></param>

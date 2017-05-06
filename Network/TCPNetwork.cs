@@ -14,14 +14,17 @@ namespace Arthas.Network
         /// 推送事件
         /// </summary>
         public static event Action<IMessage> PushEvent;
+
         /// <summary>
         /// 网络连接事件
         /// </summary>
         public static event Action ConnectedEvent;
+
         /// <summary>
         /// 网络断开事件
         /// </summary>
         public static event Action DisconnectedEvent;
+
         /// <summary>
         /// 错误回调
         /// </summary>
@@ -96,21 +99,17 @@ namespace Arthas.Network
 
         private IEnumerator CheckeTimeout()
         {
-            while (true)
-            {
+            while (true) {
                 yield return timeoutWaiter;
-                if (connector.IsConnected)
-                {
+                if (connector.IsConnected) {
                     OnConnected();
                     StopCoroutine(checkTimeout);
                     yield break;
                 }
-                if ((currentTime += Time.deltaTime) > connectTimeout)
-                {
+                if ((currentTime += Time.deltaTime) > connectTimeout) {
                     currentTime = 0;
                     StopCoroutine(checkTimeout);
-                    if (ErrorCallback != null)
-                    {
+                    if (ErrorCallback != null) {
                         ErrorCallback("Cannot connect to server , please check your network!");
                     }
                 }
@@ -121,22 +120,19 @@ namespace Arthas.Network
         {
             if (ConnectedEvent != null)
                 ConnectedEvent();
-            //StartCoroutine(Heartbeat());
             HandleEvent(true);
             Debug.LogFormat("Connect server success, Addr : {0} .", connector.Address);
         }
 
         private void OnDisconnected()
         {
-            if (DisconnectedEvent != null)
-                DisconnectedEvent();
+            if (DisconnectedEvent != null) DisconnectedEvent();
             HandleEvent(false);
         }
 
         private void OnMessageRespond(byte[] buffer)
         {
-            lock (enterLock)
-            {
+            lock (enterLock) {
                 var lenthbytes = new byte[sizeof(int)];
                 Buffer.BlockCopy(buffer, 0, lenthbytes, 0, sizeof(int));
                 var lenth = BitConverter.ToInt32(isLittleEndian ? lenthbytes : lenthbytes.Reverse(), 0);
@@ -145,44 +141,26 @@ namespace Arthas.Network
                 var msg = MessageWrapper.FromBuffer(dest, true);
                 msgQueue.Enqueue(msg);
 #if UNITY_EDITOR
-                Debug.LogFormat("<color=green>[TCPNetwork]</color> [Receive] << SN:{0} , Descriptor:{1} , CMD:{2} , BUF_SIZE:{3}",
-                    msg.Header.SerialNumber,
-                    msg.Header.Descriptor,
-                    msg.Header.Command,
-                    buffer.Length);
+                Debug.LogFormat("<color=cyan>[TCPNetwork]</color> [Send] >> CMD:{0} , BUF_SIZE:{1}", MessageWrapper.RequestHeader.Command, buffer.Length);
 #endif
             }
         }
 
         private void Update()
         {
-            if (msgQueue.Count > 0)
-            {
+            if (msgQueue.Count > 0) {
                 var message = msgQueue.Dequeue();
                 if (responseActions.Count > 0
-                    && responseActions.ContainsKey(message.Header.Command))
-                {
+                    && responseActions.ContainsKey(message.Header.Command)) {
                     var action = responseActions[message.Header.Command];
-                    if (action != null)
-                    {
+                    if (action != null) {
                         action.Invoke(message);
                         responseActions.Remove(message.Header.Command);
                         return;
                     }
-                }
-                else if (PushEvent != null)
-                {
+                } else if (PushEvent != null) {
                     PushEvent(message);
                 }
-            }
-        }
-
-        public IEnumerator Heartbeat()
-        {
-            while (connector.IsConnected)
-            {
-                yield return heartbeatWaiter;
-                //connector.Send(1, -1, string.Empty);
             }
         }
 
@@ -190,21 +168,14 @@ namespace Arthas.Network
         {
             MessageWrapper.RequestHeader.Command = cmd;
             responseActions.Replace(MessageWrapper.RequestHeader.Command, callback);
-            try
-            {
+            try {
                 var message = MessageWrapper.FromBuffer(buf);
                 var buffer = message.GetBufferWithLength();
                 connector.Send(buffer);
 #if UNITY_EDITOR
-                Debug.LogFormat("<color=cyan>[TCPNetwork]</color> [Send] >> SN:{0} , Descriptor:{1} , CMD:{2} , BUF_SIZE:{3}",
-                    MessageWrapper.RequestHeader.SerialNumber,
-                    MessageWrapper.RequestHeader.Descriptor,
-                    MessageWrapper.RequestHeader.Command,
-                    buffer.Length);
+                Debug.LogFormat("<color=cyan>[TCPNetwork]</color> [Send] >> CMD:{0} , BUF_SIZE:{1}", MessageWrapper.RequestHeader.Command, buffer.Length);
 #endif
-            }
-            catch (Exception ex)
-            {
+            } catch (Exception ex) {
                 Debug.LogError(ex.Message);
             }
         }
@@ -213,58 +184,40 @@ namespace Arthas.Network
         {
             MessageWrapper.RequestHeader.Command = cmd;
             responseActions.Add(MessageWrapper.RequestHeader.Command, callback);
-            try
-            {
+            try {
                 var message = MessageWrapper.FromObject(obj);
                 var buffer = message.GetBufferWithLength();
                 connector.Send(buffer);
 #if UNITY_EDITOR
-                Debug.LogFormat("<color=cyan>[TCPNetwork]</color> [Send] >> SN:{0} , Descriptor:{1} , CMD:{2} , BUF_SIZE:{3}",
-                    MessageWrapper.RequestHeader.SerialNumber,
-                    MessageWrapper.RequestHeader.Descriptor,
-                    MessageWrapper.RequestHeader.Command,
-                    buffer.Length);
+                Debug.LogFormat("<color=cyan>[TCPNetwork]</color> [Send] >> CMD:{0} , BUF_SIZE:{1}", MessageWrapper.RequestHeader.Command, buffer.Length);
 #endif
-            }
-            catch (Exception ex)
-            {
+            } catch (Exception ex) {
                 Debug.LogError(ex.Message);
             }
         }
 
-        public static void Send(short cmd, byte[] buf, Action<IMessageHeader> headerAction, Action<IMessage> callback)
+        public static void Send(IMessageHeader requestHeader, byte[] buf, Action<IMessage> callback)
         {
-            MessageWrapper.RequestHeader.Command = cmd;
-            if (headerAction != null) headerAction(MessageWrapper.RequestHeader);
+            MessageWrapper.RequestHeader = requestHeader;
             responseActions.Replace(MessageWrapper.RequestHeader.Command, callback);
-            try
-            {
+            try {
                 var message = MessageWrapper.FromBuffer(buf);
                 var buffer = message.GetBufferWithLength();
                 connector.Send(buffer);
 #if UNITY_EDITOR
-                Debug.LogFormat("<color=cyan>[TCPNetwork]</color> [Send] >> SN:{0} , Descriptor:{1} , CMD:{2} , BUF_SIZE:{3}",
-                    MessageWrapper.RequestHeader.SerialNumber,
-                    MessageWrapper.RequestHeader.Descriptor,
-                    MessageWrapper.RequestHeader.Command,
-                    buffer.Length);
+                Debug.LogFormat("<color=cyan>[TCPNetwork]</color> [Send] >> CMD:{0} , BUF_SIZE:{1}", MessageWrapper.RequestHeader.Command, buffer.Length);
 #endif
-            }
-            catch (Exception ex)
-            {
+            } catch (Exception ex) {
                 Debug.LogError(ex.Message);
             }
         }
 
         private void HandleEvent(bool bind)
         {
-            if (bind)
-            {
+            if (bind) {
                 connector.MessageRespondEvent += OnMessageRespond;
                 connector.DisconnectEvent += OnDisconnected;
-            }
-            else
-            {
+            } else {
                 connector.MessageRespondEvent -= OnMessageRespond;
                 connector.DisconnectEvent -= OnDisconnected;
             }

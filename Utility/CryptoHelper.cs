@@ -1,5 +1,8 @@
 ﻿using System;
+#if !WINDOWS_UWP
 using System.IO;
+#endif
+
 using System.Security.Cryptography;
 using System.Text;
 
@@ -20,9 +23,11 @@ public static class CryptoHelper
         encryptor = provider.CreateEncryptor();
         decryptor = provider.CreateDecryptor();
     }
+#endif
 
     public static string Encrypt(string source, byte[] key = null, byte[] iv = null)
     {
+#if !WINDOWS_UWP
         if (key != null) provider.Key = key;
         if (iv != null) provider.IV = iv;
         var orginBuffer = Encoding.UTF8.GetBytes(source);
@@ -31,10 +36,14 @@ public static class CryptoHelper
         cryptoStream.Write(orginBuffer, 0, orginBuffer.Length);
         cryptoStream.FlushFinalBlock();
         return Convert.ToBase64String(stream.ToArray());
+#else
+        return source;
+#endif
     }
 
     public static string Decrypt(string source, byte[] key = null, byte[] iv = null)
     {
+#if !WINDOWS_UWP
         if (key != null) provider.Key = key;
         if (iv != null) provider.IV = iv;
         var encryptedStream = new MemoryStream(Convert.FromBase64String(source));
@@ -49,6 +58,8 @@ public static class CryptoHelper
         }
         orginStream.Flush();
         return Encoding.UTF8.GetString(orginStream.ToArray());
-    }
+#else
+        return source;
 #endif
+    }
 }
