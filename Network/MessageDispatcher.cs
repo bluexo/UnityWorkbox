@@ -6,7 +6,7 @@ namespace Arthas.Network
 {
     public static class MessageDispatcher
     {
-        private static Dictionary<int, Action<IMessage>> messages = new Dictionary<int, Action<IMessage>>();
+        private static Dictionary<int, Action<INetworkMessage>> messages = new Dictionary<int, Action<INetworkMessage>>();
 
         static MessageDispatcher()
         {
@@ -18,7 +18,7 @@ namespace Arthas.Network
         /// </summary>
         /// <param name="cmdType"></param>
         /// <param name="invoker"></param>
-        public static void RegisterMessage(short cmdType, Action<IMessage> invoker)
+        public static void RegisterMessage(short cmdType, Action<INetworkMessage> invoker)
         {
             if (!messages.ContainsKey(cmdType))
             {
@@ -42,7 +42,7 @@ namespace Arthas.Network
         /// 发起
         /// </summary>
         /// <param name="msg"></param>
-        public static void Invoke(IMessage msg)
+        public static void Invoke(INetworkMessage msg)
         {
             var cmd = (short)msg.Parameters[0];
             if (messages.ContainsKey(cmd))

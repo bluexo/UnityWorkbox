@@ -13,7 +13,7 @@ namespace Arthas.Network
         /// <summary>
         /// 推送事件
         /// </summary>
-        public static event Action<IMessage> PushEvent;
+        public static event Action<INetworkMessage> PushEvent;
 
         /// <summary>
         /// 网络连接事件
@@ -30,7 +30,7 @@ namespace Arthas.Network
         /// </summary>
         private static Action<string> ErrorCallback;
 
-        public static IMessageHandler MessageHandler { get; private set; }
+        public static INetworkMessageHandler MessageHandler { get; private set; }
 
         public static bool IsLittleEndian
         {
@@ -41,8 +41,8 @@ namespace Arthas.Network
         public static bool IsConnected { get { return connector.IsConnected; } }
 
         private readonly static TCPConnect connector = new TCPConnect();
-        private readonly static Queue<IMessage> msgQueue = new Queue<IMessage>();
-        private static Dictionary<object, Action<IMessage>> responseActions;
+        private readonly static Queue<INetworkMessage> msgQueue = new Queue<INetworkMessage>();
+        private readonly static Dictionary<object, Action<INetworkMessage>> responseActions = new Dictionary<object, Action<INetworkMessage>>();
 
         private WaitForSeconds heartbeatWaiter, timeoutWaiter;
         private Coroutine checkTimeout;
@@ -64,11 +64,10 @@ namespace Arthas.Network
         /// <summary>
         /// 连接到服务器
         /// </summary>
-        public void Connect(string ip, int port, IMessageHandler wrapper = null)
+        public void Connect(string ip, int port, INetworkMessageHandler handler = null)
         {
             if (connector.IsConnected) connector.Close();
-            MessageHandler = wrapper ?? new DefaultMessageHandler(isLittleEndian);
-            responseActions = new Dictionary<object, Action<IMessage>>(wrapper.CommandComparer);
+            MessageHandler = handler ?? new DefaultMessageHandler();
             connector.Connect(ip, port);
             checkTimeout = StartCoroutine(CheckeTimeout());
 #if UNITY_EDITOR
@@ -78,7 +77,7 @@ namespace Arthas.Network
 
         public static void Connect(Action callback = null,
            Action<string> error = null,
-           IMessageHandler handler = null)
+           INetworkMessageHandler handler = null)
         {
             Connect(NetworkConfiguration.Current.ip,
                 NetworkConfiguration.Current.port,
@@ -91,9 +90,11 @@ namespace Arthas.Network
         /// 根据网络配置连接到服务器
         /// </summary>
         /// <param name="configuration"></param>
-        public static void Connect(string ip, int port, Action callback = null,
+        public static void Connect(string ip, 
+            int port,
+            Action callback = null,
             Action<string> error = null,
-            IMessageHandler handler = null)
+            INetworkMessageHandler handler = null)
         {
 #if !UNITY_EDITOR && !UNITY_STANDALONE
             if (Application.internetReachability == NetworkReachability.NotReachable
@@ -180,7 +181,7 @@ namespace Arthas.Network
             }
         }
 
-        public static void Send(object cmd, byte[] buf, Action<IMessage> callback, params object[] parameters)
+        public static void Send(object cmd, byte[] buf, Action<INetworkMessage> callback, params object[] parameters)
         {
             try
             {

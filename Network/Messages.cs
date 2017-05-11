@@ -6,7 +6,7 @@ namespace Arthas.Network
     /// <summary>
     /// 消息接口
     /// </summary>
-    public interface IMessage
+    public interface INetworkMessage
     {
         /// <summary>
         /// 命令
@@ -35,28 +35,21 @@ namespace Arthas.Network
     /// <summary>
     /// 消息包装接口
     /// </summary>
-    public interface IMessageHandler
+    public interface INetworkMessageHandler
     {
-        /// <summary>
-        /// 消息命令比较器
-        /// 消息回调函数字典的Key为 <see cref="object"/> 类型
-        /// 如果没有定义比较器将不能正确Invoke回掉函数
-        /// </summary>
-        IEqualityComparer<object> CommandComparer { get; }
-
         /// <summary>
         /// 包装消息
         /// </summary>
         /// <param name="obj"></param>
         /// <param name="parameters"></param>
         /// <returns></returns>
-        IMessage PackMessage(object command, object obj, params object[] parameters);
+        INetworkMessage PackMessage(object command, object obj, params object[] parameters);
 
         /// <summary>
         /// 解析消息
         /// </summary>
         /// <param name="buffer"></param>
         /// <returns></returns>
-        IMessage ParseMessage(byte[] buffer);
+        INetworkMessage ParseMessage(byte[] buffer);
     }
 }

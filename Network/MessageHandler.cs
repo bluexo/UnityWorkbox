@@ -10,7 +10,7 @@ namespace Arthas.Network
     /// <summary>
     /// 默认消息
     /// </summary>
-    public class DefaultMessage : IMessage
+    public class DefaultMessage : INetworkMessage
     {
         protected byte[] buffer = { };
 
@@ -47,40 +47,11 @@ namespace Arthas.Network
     }
 
     /// <summary>
-    /// 整形命令比较器
-    /// </summary>
-    public class IntCommandComparer : IEqualityComparer<object>
-    {
-        public new bool Equals(object x, object y)
-        {
-            var xint = (int)x;
-            var yint = (int)y;
-            return xint == yint;
-        }
-
-        public int GetHashCode(object obj)
-        {
-            return obj.GetHashCode();
-        }
-    }
-
-    /// <summary>
     /// 默认的消息包装器
     /// </summary>
-    public class DefaultMessageHandler : IMessageHandler
+    public class DefaultMessageHandler : INetworkMessageHandler
     {
-
-        private bool isLittleEndian = false;
-
-        public IEqualityComparer<object> CommandComparer { get; private set; }
-
-        public DefaultMessageHandler(bool littleEndian)
-        {
-            isLittleEndian = littleEndian;
-            CommandComparer = new IntCommandComparer();
-        }
-
-        public IMessage PackMessage(object command, object obj, params object[] parameters)
+        public INetworkMessage PackMessage(object command, object obj, params object[] parameters)
         {
             if (obj is byte[])
             {
@@ -89,7 +60,7 @@ namespace Arthas.Network
                 var buffer = new byte[bodyBuffer.Length + cmdBytes.Length];
                 Buffer.BlockCopy(cmdBytes, 0, buffer, 0, cmdBytes.Length);
                 Buffer.BlockCopy(bodyBuffer, 0, buffer, cmdBytes.Length, bodyBuffer.Length);
-                return new DefaultMessage(command, buffer, isLittleEndian, parameters);
+                return new DefaultMessage(command, buffer, parameters);
             }
             else
             {
@@ -97,7 +68,7 @@ namespace Arthas.Network
             }
         }
 
-        public IMessage ParseMessage(byte[] buffer)
+        public INetworkMessage ParseMessage(byte[] buffer)
         {
             var len = BitConverter.ToInt16(buffer, 0);
             var command = BitConverter.ToInt16(buffer, sizeof(short));

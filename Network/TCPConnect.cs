@@ -28,7 +28,6 @@ namespace Arthas.Network
         const int MSG_LEN_SIZE = 4;
         private byte[] readBuffer = new byte[READ_BUFFER_SIZE];
 
-
         /// <summary>
         /// TCP客户端
         /// </summary>
