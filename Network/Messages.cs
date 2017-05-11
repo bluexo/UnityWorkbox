@@ -1,62 +1,28 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.IO;
-using UnityEngine;
 
 namespace Arthas.Network
 {
-    /// <summary>
-    /// 消息头接口
-    /// </summary>
-    public interface IMessageHeader
-    {
-        /// <summary>
-        /// 是否为小字节序
-        /// </summary>
-        bool IsLittleEndian { get; }
-
-        short Command { get; set; }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        byte[] GetBuffer();
-
-        /// <summary>
-        /// 根据字节创建消息头
-        /// </summary>
-        /// <returns></returns>
-        void Overwrite(byte[] buffer);
-
-        /// <summary>
-        /// 从字节中移除消息头
-        /// </summary>
-        /// <returns></returns>
-        void ExceptHeader(ref byte[] buffer);
-    }
-
     /// <summary>
     /// 消息接口
     /// </summary>
     public interface IMessage
     {
         /// <summary>
-        /// 消息头
+        /// 命令
         /// </summary>
-        IMessageHeader Header { get; }
-        
+        object Command { get; }
+
         /// <summary>
-        /// 获取消息体
+        /// 消息参数
         /// </summary>
-        /// <returns></returns>
-        byte[] GetBuffer(bool containsHead = false);
+        object[] Parameters { get; }
 
         /// <summary>
         /// 获取消息包含长度
         /// </summary>
         /// <returns></returns>
-        byte[] GetBufferWithLength();
+        byte[] GetBuffer(bool withLength = false , bool littleEndian = false);
 
         /// <summary>
         /// 获取对象
@@ -69,38 +35,28 @@ namespace Arthas.Network
     /// <summary>
     /// 消息包装接口
     /// </summary>
-    public interface IMessageWrapper
+    public interface IMessageHandler
     {
         /// <summary>
-        /// 请求消息头
+        /// 消息命令比较器
+        /// 消息回调函数字典的Key为 <see cref="object"/> 类型
+        /// 如果没有定义比较器将不能正确Invoke回掉函数
         /// </summary>
-        IMessageHeader RequestHeader { get; set; }
+        IEqualityComparer<object> CommandComparer { get; }
 
         /// <summary>
-        /// 响应消息头
-        /// </summary>
-        IMessageHeader ResponseHeader { get; set; }
-
-        /// <summary>
-        /// 从字符串创建消息
-        /// </summary>
-        /// <param name="str"></param>
-        /// <returns></returns>
-        IMessage FromString(string str);
-
-        /// <summary>
-        /// 从一个对象创建消息
+        /// 包装消息
         /// </summary>
         /// <param name="obj"></param>
+        /// <param name="parameters"></param>
         /// <returns></returns>
-        IMessage FromObject(object obj);
+        IMessage PackMessage(object command, object obj, params object[] parameters);
 
         /// <summary>
-        /// 从字节数组创建消息
+        /// 解析消息
         /// </summary>
         /// <param name="buffer"></param>
-        /// <param name="containHeader"></param>
         /// <returns></returns>
-        IMessage FromBuffer(byte[] buffer, bool containHeader = false);
+        IMessage ParseMessage(byte[] buffer);
     }
 }

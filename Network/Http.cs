@@ -2,7 +2,11 @@
 using System.Text;
 using System.Collections;
 using UnityEngine;
+#if UNITY_5_3
+using UnityEngine.Experimental.Networking;
+#elif UNITY_5_3_NEWER
 using UnityEngine.Networking;
+#endif
 
 namespace Arthas.Network
 {
@@ -142,7 +146,10 @@ namespace Arthas.Network
 
             if (webRequest.isError || webRequest.responseCode >= (int)ResponseCode.BadRequest)
             {
-                if (webRequest.responseCode == (int)ResponseCode.UnAuthorized) StartCoroutine(StartUI.Instance.Login());
+                if (webRequest.responseCode == (int)ResponseCode.UnAuthorized) //StartCoroutine(StartUI.Instance.Login());
+                {
+                    Debug.LogError("Request UnAuthorized!");
+                }
                 if (webRequest.responseCode == (int)ResponseCode.Error
                     && errorAction != null)
                 {

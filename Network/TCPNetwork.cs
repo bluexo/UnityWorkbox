@@ -30,7 +30,7 @@ namespace Arthas.Network
         /// </summary>
         private static Action<string> ErrorCallback;
 
-        public static IMessageWrapper MessageWrapper { get; private set; }
+        public static IMessageHandler MessageHandler { get; private set; }
 
         public static bool IsLittleEndian
         {
@@ -42,7 +42,7 @@ namespace Arthas.Network
 
         private readonly static TCPConnect connector = new TCPConnect();
         private readonly static Queue<IMessage> msgQueue = new Queue<IMessage>();
-        private readonly static Dictionary<int, Action<IMessage>> responseActions = new Dictionary<int, Action<IMessage>>();
+        private static Dictionary<object, Action<IMessage>> responseActions;
 
         private WaitForSeconds heartbeatWaiter, timeoutWaiter;
         private Coroutine checkTimeout;
@@ -50,39 +50,50 @@ namespace Arthas.Network
         private static object enterLock = new object();
 
         [SerializeField]
-        private float connectTimeout = 10f, heartbeatDuration = 8f;
+        private float connectTimeout = 10f, heartbeatInterval = 8f;
         [SerializeField]
         private bool isLittleEndian = true;
-        private static int messageSerialNumber = 1;
 
         protected override void Awake()
         {
             base.Awake();
             timeoutWaiter = new WaitForSeconds(connectCheckDuration);
-            heartbeatWaiter = new WaitForSeconds(heartbeatDuration);
+            heartbeatWaiter = new WaitForSeconds(heartbeatInterval);
         }
 
         /// <summary>
         /// 连接到服务器
         /// </summary>
-        public void Connect(string ip, int port, IMessageWrapper wrapper = null)
+        public void Connect(string ip, int port, IMessageHandler wrapper = null)
         {
             if (connector.IsConnected) connector.Close();
-            MessageWrapper = wrapper ?? new DefaultMessageWrapper(isLittleEndian);
+            MessageHandler = wrapper ?? new DefaultMessageHandler(isLittleEndian);
+            responseActions = new Dictionary<object, Action<IMessage>>(wrapper.CommandComparer);
             connector.Connect(ip, port);
             checkTimeout = StartCoroutine(CheckeTimeout());
 #if UNITY_EDITOR
-            Debug.LogFormat("Connect to server , <color=cyan>Addr:[{0}:{1}] ,wrapper:{2}.</color>", ip, port, MessageWrapper.GetType());
+            Debug.LogFormat("Connect to server , <color=cyan>Addr:[{0}:{1}] ,wrapper:{2}.</color>", ip, port, MessageHandler.GetType());
 #endif
+        }
+
+        public static void Connect(Action callback = null,
+           Action<string> error = null,
+           IMessageHandler handler = null)
+        {
+            Connect(NetworkConfiguration.Current.ip,
+                NetworkConfiguration.Current.port,
+                callback,
+                error,
+                handler);
         }
 
         /// <summary>
         /// 根据网络配置连接到服务器
         /// </summary>
         /// <param name="configuration"></param>
-        public static void Connect(Action callback = null,
+        public static void Connect(string ip, int port, Action callback = null,
             Action<string> error = null,
-            IMessageWrapper wrapper = null)
+            IMessageHandler handler = null)
         {
 #if !UNITY_EDITOR && !UNITY_STANDALONE
             if (Application.internetReachability == NetworkReachability.NotReachable
@@ -94,22 +105,26 @@ namespace Arthas.Network
 #endif
             ErrorCallback = error;
             ConnectedEvent = callback;
-            Instance.Connect(NetworkConfiguration.Current.ip, NetworkConfiguration.Current.port, wrapper);
+            Instance.Connect(ip, port, handler);
         }
 
         private IEnumerator CheckeTimeout()
         {
-            while (true) {
+            while (true)
+            {
                 yield return timeoutWaiter;
-                if (connector.IsConnected) {
+                if (connector.IsConnected)
+                {
                     OnConnected();
                     StopCoroutine(checkTimeout);
                     yield break;
                 }
-                if ((currentTime += Time.deltaTime) > connectTimeout) {
+                if ((currentTime += Time.deltaTime) > connectTimeout)
+                {
                     currentTime = 0;
                     StopCoroutine(checkTimeout);
-                    if (ErrorCallback != null) {
+                    if (ErrorCallback != null)
+                    {
                         ErrorCallback("Cannot connect to server , please check your network!");
                     }
                 }
@@ -132,92 +147,66 @@ namespace Arthas.Network
 
         private void OnMessageRespond(byte[] buffer)
         {
-            lock (enterLock) {
-                var lenthbytes = new byte[sizeof(int)];
-                Buffer.BlockCopy(buffer, 0, lenthbytes, 0, sizeof(int));
-                var lenth = BitConverter.ToInt32(isLittleEndian ? lenthbytes : lenthbytes.Reverse(), 0);
-                var dest = new byte[lenth - sizeof(int)];
-                Buffer.BlockCopy(buffer, sizeof(int), dest, 0, lenth - sizeof(int));
-                var msg = MessageWrapper.FromBuffer(dest, true);
+            lock (enterLock)
+            {
+                var msg = MessageHandler.ParseMessage(buffer);
                 msgQueue.Enqueue(msg);
 #if UNITY_EDITOR
-                Debug.LogFormat("<color=cyan>[TCPNetwork]</color> [Send] >> CMD:{0} , BUF_SIZE:{1}", MessageWrapper.RequestHeader.Command, buffer.Length);
+                Debug.LogFormat("<color=blue>[TCPNetwork]</color> [Receive] << CMD:{0},TIME:{1}", msg.Command, DateTime.Now);
 #endif
             }
         }
 
         private void Update()
         {
-            if (msgQueue.Count > 0) {
+            if (msgQueue.Count > 0)
+            {
                 var message = msgQueue.Dequeue();
                 if (responseActions.Count > 0
-                    && responseActions.ContainsKey(message.Header.Command)) {
-                    var action = responseActions[message.Header.Command];
-                    if (action != null) {
+                    && responseActions.ContainsKey(message.Command))
+                {
+                    var action = responseActions[message.Command];
+                    if (action != null)
+                    {
                         action.Invoke(message);
-                        responseActions.Remove(message.Header.Command);
+                        responseActions.Remove(message.Command);
                         return;
                     }
-                } else if (PushEvent != null) {
+                }
+                else if (PushEvent != null)
+                {
                     PushEvent(message);
                 }
             }
         }
 
-        public static void Send(short cmd, byte[] buf, Action<IMessage> callback)
+        public static void Send(object cmd, byte[] buf, Action<IMessage> callback, params object[] parameters)
         {
-            MessageWrapper.RequestHeader.Command = cmd;
-            responseActions.Replace(MessageWrapper.RequestHeader.Command, callback);
-            try {
-                var message = MessageWrapper.FromBuffer(buf);
-                var buffer = message.GetBufferWithLength();
+            try
+            {
+                responseActions.Replace(cmd, callback);
+                var message = MessageHandler.PackMessage(cmd, buf, callback, parameters);
+                var buffer = message.GetBuffer(true, IsLittleEndian);
                 connector.Send(buffer);
 #if UNITY_EDITOR
-                Debug.LogFormat("<color=cyan>[TCPNetwork]</color> [Send] >> CMD:{0} , BUF_SIZE:{1}", MessageWrapper.RequestHeader.Command, buffer.Length);
+                Debug.LogFormat("<color=cyan>[TCPNetwork]</color> [Send] >> CMD:{0},TIME:{1}", cmd, DateTime.Now);
 #endif
-            } catch (Exception ex) {
-                Debug.LogError(ex.Message);
             }
-        }
-
-        public static void Send(short cmd, object obj, Action<IMessage> callback)
-        {
-            MessageWrapper.RequestHeader.Command = cmd;
-            responseActions.Add(MessageWrapper.RequestHeader.Command, callback);
-            try {
-                var message = MessageWrapper.FromObject(obj);
-                var buffer = message.GetBufferWithLength();
-                connector.Send(buffer);
-#if UNITY_EDITOR
-                Debug.LogFormat("<color=cyan>[TCPNetwork]</color> [Send] >> CMD:{0} , BUF_SIZE:{1}", MessageWrapper.RequestHeader.Command, buffer.Length);
-#endif
-            } catch (Exception ex) {
-                Debug.LogError(ex.Message);
-            }
-        }
-
-        public static void Send(IMessageHeader requestHeader, byte[] buf, Action<IMessage> callback)
-        {
-            MessageWrapper.RequestHeader = requestHeader;
-            responseActions.Replace(MessageWrapper.RequestHeader.Command, callback);
-            try {
-                var message = MessageWrapper.FromBuffer(buf);
-                var buffer = message.GetBufferWithLength();
-                connector.Send(buffer);
-#if UNITY_EDITOR
-                Debug.LogFormat("<color=cyan>[TCPNetwork]</color> [Send] >> CMD:{0} , BUF_SIZE:{1}", MessageWrapper.RequestHeader.Command, buffer.Length);
-#endif
-            } catch (Exception ex) {
+            catch (Exception ex)
+            {
                 Debug.LogError(ex.Message);
             }
         }
 
         private void HandleEvent(bool bind)
         {
-            if (bind) {
+            if (bind)
+            {
                 connector.MessageRespondEvent += OnMessageRespond;
                 connector.DisconnectEvent += OnDisconnected;
-            } else {
+            }
+            else
+            {
                 connector.MessageRespondEvent -= OnMessageRespond;
                 connector.DisconnectEvent -= OnDisconnected;
             }

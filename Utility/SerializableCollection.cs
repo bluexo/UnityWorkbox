@@ -4,30 +4,43 @@ using System.Collections.Generic;
 namespace UnityEngine
 {
     [Serializable]
-    public class JsonArray<T>
+    public class JArray<T>
     {
         [SerializeField]
         private List<T> value;
         public List<T> Value { get { return value; } }
 
-        public JsonArray(List<T> list)
+        public JArray() {}
+
+        public JArray(List<T> list)
         {
             value = list;
         }
 
-        public JsonArray(T[] arr)
+        public JArray(T[] arr)
         {
             value = new List<T>(arr);
         }
 
-        public JsonArray(IEnumerable<T> arr)
+        public JArray(IEnumerable<T> arr)
         {
             value = new List<T>(arr);
+        }
+
+        public JArray<T> Overwrite(string json)
+        {
+            value = JsonUtility.FromJson<List<T>>(json);
+            return this;
+        }
+
+        public string ToJson()
+        {
+            return JsonUtility.ToJson(value);
         }
     }
 
     [Serializable]
-    public class JsonDictionary<TKey, TValue> : ISerializationCallbackReceiver
+    public class JHash<TKey, TValue> : ISerializationCallbackReceiver
     {
         [SerializeField]
         private List<TKey> keys;
@@ -37,7 +50,7 @@ namespace UnityEngine
         private Dictionary<TKey, TValue> dictionary;
         public Dictionary<TKey, TValue> Dictionary { get { return dictionary; } }
 
-        public JsonDictionary(Dictionary<TKey, TValue> dict)
+        public JHash(Dictionary<TKey, TValue> dict)
         {
             dictionary = dict;
         }
@@ -55,6 +68,18 @@ namespace UnityEngine
         {
             keys = new List<TKey>(dictionary.Keys);
             values = new List<TValue>(dictionary.Values);
+        }
+
+        public JHash<TKey,TValue> Overwrite(string json)
+        {
+            var hash = JsonUtility.FromJson<JHash<TKey,TValue>>(json);
+            dictionary = hash.dictionary;
+            return this;
+        }
+
+        public string ToJson()
+        {
+            return JsonUtility.ToJson(this);
         }
     }
 }

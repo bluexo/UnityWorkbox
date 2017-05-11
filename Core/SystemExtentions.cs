@@ -40,7 +40,8 @@ namespace System.Collections
 
         public static void Replace<Tkey, TValue>(this IDictionary<Tkey, TValue> dict, Tkey k, TValue v)
         {
-            if (dict.ContainsKey(k)) dict.Remove(k);
+            if (dict.ContainsKey(k))
+                dict.Remove(k);
             dict.Add(k, v);
         }
 
