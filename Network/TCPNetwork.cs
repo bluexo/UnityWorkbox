@@ -64,7 +64,7 @@ namespace Arthas.Network
         /// <summary>
         /// 连接到服务器
         /// </summary>
-        public void Connect(string ip, int port, INetworkMessageHandler handler = null)
+        private void Connect(string ip, int port, INetworkMessageHandler handler = null)
         {
             if (connector.IsConnected) connector.Close();
             MessageHandler = handler ?? new DefaultMessageHandler();
@@ -181,12 +181,12 @@ namespace Arthas.Network
             }
         }
 
-        public static void Send(object cmd, byte[] buf, Action<INetworkMessage> callback, params object[] parameters)
+        public static void Send(object cmd, object content, Action<INetworkMessage> callback, params object[] parameters)
         {
             try
             {
                 responseActions.Replace(cmd, callback);
-                var message = MessageHandler.PackMessage(cmd, buf, callback, parameters);
+                var message = MessageHandler.PackMessage(cmd, content, callback, parameters);
                 var buffer = message.GetBuffer(true, IsLittleEndian);
                 connector.Send(buffer);
 #if UNITY_EDITOR

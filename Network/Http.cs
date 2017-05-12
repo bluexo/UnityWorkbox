@@ -4,7 +4,7 @@ using System.Collections;
 using UnityEngine;
 #if UNITY_5_3
 using UnityEngine.Experimental.Networking;
-#elif UNITY_5_3_NEWER
+#elif UNITY_5_6 || UNITY_5_4 || UNITY_5_5
 using UnityEngine.Networking;
 #endif
 
