@@ -11,13 +11,15 @@ namespace Arthas.UI
     public class UIExclusiveAttribute : Attribute { }
 
     /// <summary>
-    /// Specify UIOrder.SortOrder for window , than window will be show order by SortOrder   All ui has a default SortOrder = 0 
-    /// 为窗口指定排列顺序，将会按照指定的顺序显示， 所有的UI都有一个默认排序为0
+    /// Specify UIOrder.SortOrder for window , than window will be show order by SortOrder All ui has a default SortOrder = 0 
+    /// 为窗口指定排列顺序，将会按照指定的顺序显示， 所有的UI都有一个默认排序为 0 , 这里的Order会覆盖在编辑器中指定的Order
     /// </summary>
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = false)]
     public class UIOrderAttribute : Attribute
     {
-        public byte SortOrder { get; set; }
+        public UIOrderAttribute() { }
+        public UIOrderAttribute(int order) { SortOrder = order; }
+        public int SortOrder { get; set; }
     }
 
     /// <summary>
@@ -40,7 +42,7 @@ namespace Arthas.UI
     /// </summary>
     public class UIChildAttribute : Attribute
     {
-        public List<Type> Childs { get; private set; } 
+        public List<Type> Childs { get; private set; }
 
         public UIChildAttribute(params Type[] names)
         {

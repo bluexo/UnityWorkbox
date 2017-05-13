@@ -11,7 +11,7 @@ namespace Arthas.UI
 {
     public struct WindowInfo : IComparable<WindowInfo>
     {
-        public int Order { get; set; }
+        public int? Order { get; set; }
         public bool IsHeader { get; set; }
         public bool IsExclusive { get; set; }
         public BaseUI UI { get; set; }
@@ -30,7 +30,7 @@ namespace Arthas.UI
 
         public int CompareTo(WindowInfo other)
         {
-            return other.Order.CompareTo(Order);
+            return other.Order.Value.CompareTo(Order.Value);
         }
     }
 
@@ -53,9 +53,11 @@ namespace Arthas.UI
             base.Awake();
             Canvas = GetComponent<Canvas>();
             var uis = GetComponentsInChildren<BaseUI>(true);
-            for (var i = 0; i < uis.Length; i++) {
+            for (var i = 0; i < uis.Length; i++)
+            {
                 AddUI(uis[i]);
-                if (uis[i].isActiveAndEnabled) {
+                if (uis[i].isActiveAndEnabled)
+                {
                     var window = CreateWindowInfo(uis[i]);
                     var showed = window.IsHeader ? showedHeaderWindows : showedWindows;
                     showed.Add(window);
@@ -65,7 +67,8 @@ namespace Arthas.UI
 
         protected void Start()
         {
-            if (!startUI) {
+            if (!startUI)
+            {
 #if UNITY_EDITOR
                 UnityEditor.Selection.activeGameObject = gameObject;
 #endif
@@ -74,10 +77,12 @@ namespace Arthas.UI
                 return;
             }
             startUI.Show();
-            for (var i = 0; i < transform.childCount; i++) {
+            for (var i = 0; i < transform.childCount; i++)
+            {
                 var child = transform.GetChild(i);
                 var comp = child.GetComponent<BaseUI>();
-                if (!comp) {
+                if (!comp)
+                {
                     child.gameObject.SetActive(false);
                 }
             }
@@ -97,7 +102,8 @@ namespace Arthas.UI
         /// <param name="ui"></param>
         public static void AddUI(BaseUI ui)
         {
-            if (!windows.ContainsKey(ui)) {
+            if (!windows.ContainsKey(ui))
+            {
                 var window = CreateWindowInfo(ui);
                 windows.Add(ui, window);
                 ui.UIShowEvent += OnShow;
@@ -109,19 +115,21 @@ namespace Arthas.UI
         {
             var uiType = ui.GetType();
 #if WINDOWS_UWP
-                var header = uiType.GetTypeInfo().IsDefined(typeof(UIHeaderAttribute));
-                var exclusive = uiType.GetTypeInfo().IsDefined(typeof(UIExclusiveAttribute), false);
-                //var order = uiType.GetTypeInfo().GetCustomAttributes(typeof(UIOrderAttribute), false);
+            var header = uiType.GetTypeInfo().IsDefined(typeof(UIHeaderAttribute));
+            var exclusive = uiType.GetTypeInfo().IsDefined(typeof(UIExclusiveAttribute), false);
+            var order = uiType.GetTypeInfo().GetCustomAttributes(typeof(UIOrderAttribute), false);
 #else
             var header = uiType.IsDefined(typeof(UIHeaderAttribute), false);
             var exclusive = uiType.IsDefined(typeof(UIExclusiveAttribute), false);
-            //var order = uiType.GetCustomAttributes(typeof(UIOrderAttribute), false);
+            var order = uiType.GetCustomAttributes(typeof(UIOrderAttribute), false);
 #endif
+            var uiOrder = order.Length > 0 ? order[0] as UIOrderAttribute : new UIOrderAttribute(ui.SortOrder);
+
             var window = new WindowInfo()
             {
                 IsHeader = header,
                 IsExclusive = exclusive,
-				Order = ui.SortOrder,
+                Order = uiOrder.SortOrder,
                 UI = ui
             };
             return window;
@@ -133,12 +141,15 @@ namespace Arthas.UI
         /// <param name="name"></param>
         private static void OnShow(BaseUI ui)
         {
-            if (windows.ContainsKey(ui)) {
+            if (windows.ContainsKey(ui))
+            {
                 var window = windows[ui];
                 var windowList = window.IsHeader ? showedHeaderWindows : showedWindows;
-                if (window.IsExclusive) {
+                if (window.IsExclusive)
+                {
                     var array = windowList.ToArray();
-                    foreach (var item in array) {
+                    foreach (var item in array)
+                    {
                         if (window.ContainBrother(item.UI) || item.UI.Equals(ui)) continue;
                         item.UI.Hide();
                     }
@@ -147,14 +158,17 @@ namespace Arthas.UI
                 CurrentWindow = window;
                 var sortWindows = new List<WindowInfo>(new WindowInfo[] { CurrentWindow });
                 var brothers = CurrentWindow.UI.BrotherWindows;
-                for (var i = 0; i < brothers.Count; i++) {
-                    if (windows.ContainsKey(brothers[i])) {
+                for (var i = 0; i < brothers.Count; i++)
+                {
+                    if (windows.ContainsKey(brothers[i]))
+                    {
                         var brotherWindow = windows[brothers[i]];
                         sortWindows.Add(brotherWindow);
                     }
                 }
                 sortWindows.Sort();
-                for (var i = 0; i < sortWindows.Count; i++) {
+                for (var i = 0; i < sortWindows.Count; i++)
+                {
                     var sortWindow = sortWindows[i];
                     if (!windowList.Contains(sortWindow))
                         windowList.Add(sortWindow);
@@ -169,7 +183,8 @@ namespace Arthas.UI
         /// <param name="name"></param>
         private static void OnHide(BaseUI ui)
         {
-            if (windows.ContainsKey(ui)) {
+            if (windows.ContainsKey(ui))
+            {
                 var window = windows[ui];
                 if (window.IsHeader)
                     showedWindows.Remove(window);
