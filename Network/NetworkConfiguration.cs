@@ -66,7 +66,7 @@ public class NetworkConfiguration : ScriptableObject
     public const string kPath = "Assets/Resources/" + kConfigPath + "NetworkConfiguration.asset";
     public const string kMenu = "Network/切换网络", kLocal = "/localhost", kIntranet = "/内网", kInternet = "/外网";
 
-    [MenuItem(kMenu + kLocal)]
+    [MenuItem(kMenu + kLocal, priority = 1)]
     public static void SetLocal()
     {
         var conf = GetConfiguration();
@@ -75,7 +75,7 @@ public class NetworkConfiguration : ScriptableObject
         Debug.LogFormat("<color=cyan>当前服务器地址:[{0}:{1}]</color>", conf.current.ip, conf.current.port);
     }
 
-    [MenuItem(kMenu + kLocal, true)]
+    [MenuItem(kMenu + kLocal, true, priority = 1)]
     public static bool ToggleSetLocalValidate()
     {
         var conf = GetConfiguration();
@@ -83,7 +83,7 @@ public class NetworkConfiguration : ScriptableObject
         return true;
     }
 
-    [MenuItem(kMenu + kIntranet)]
+    [MenuItem(kMenu + kIntranet, priority = 1)]
     public static void SetIntranet()
     {
         var conf = GetConfiguration();
@@ -92,7 +92,7 @@ public class NetworkConfiguration : ScriptableObject
         Debug.LogFormat("<color=cyan>当前服务器地址:[{0}:{1}]</color>", conf.current.ip, conf.current.port);
     }
 
-    [MenuItem(kMenu + kIntranet, true)]
+    [MenuItem(kMenu + kIntranet, true, priority = 1)]
     public static bool ToggleSetIntranetValidate()
     {
         var conf = GetConfiguration();
@@ -100,7 +100,7 @@ public class NetworkConfiguration : ScriptableObject
         return true;
     }
 
-    [MenuItem(kMenu + kInternet)]
+    [MenuItem(kMenu + kInternet, priority = 1)]
     public static void SetInternet()
     {
         var conf = GetConfiguration();
@@ -109,7 +109,7 @@ public class NetworkConfiguration : ScriptableObject
         Debug.LogFormat("<color=cyan>当前服务器地址:[{0}:{1}]</color>", conf.current.ip, conf.current.port);
     }
 
-    [MenuItem(kMenu + kInternet, true)]
+    [MenuItem(kMenu + kInternet, true, priority = 1)]
     public static bool ToggleSetInternetValidate()
     {
         var conf = GetConfiguration();
@@ -117,7 +117,7 @@ public class NetworkConfiguration : ScriptableObject
         return true;
     }
 
-    [MenuItem("Network/配置网络")]
+    [MenuItem("Network/配置网络", priority = 1)]
     public static void Configure()
     {
         Selection.activeObject = AssetDatabase.LoadAssetAtPath<NetworkConfiguration>(kPath);
