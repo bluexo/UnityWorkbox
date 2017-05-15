@@ -64,7 +64,7 @@ namespace Arthas.Network
         /// <summary>
         /// 连接到服务器
         /// </summary>
-        private void Connect(string ip, int port, INetworkMessageHandler handler = null)
+        public void Connect(string ip, int port, INetworkMessageHandler handler = null)
         {
             if (connector.IsConnected) connector.Close();
             MessageHandler = handler ?? new DefaultMessageHandler();
@@ -90,7 +90,7 @@ namespace Arthas.Network
         /// 根据网络配置连接到服务器
         /// </summary>
         /// <param name="configuration"></param>
-        public static void Connect(string ip,
+        public static void Connect(string ip, 
             int port,
             Action callback = null,
             Action<string> error = null,
@@ -111,17 +111,21 @@ namespace Arthas.Network
 
         private IEnumerator CheckeTimeout()
         {
-            while (true) {
+            while (true)
+            {
                 yield return timeoutWaiter;
-                if (connector.IsConnected) {
+                if (connector.IsConnected)
+                {
                     OnConnected();
                     StopCoroutine(checkTimeout);
                     yield break;
                 }
-                if ((currentTime += Time.deltaTime) > connectTimeout) {
+                if ((currentTime += Time.deltaTime) > connectTimeout)
+                {
                     currentTime = 0;
                     StopCoroutine(checkTimeout);
-                    if (ErrorCallback != null) {
+                    if (ErrorCallback != null)
+                    {
                         ErrorCallback("Cannot connect to server , please check your network!");
                     }
                 }
@@ -144,7 +148,8 @@ namespace Arthas.Network
 
         private void OnMessageRespond(byte[] buffer)
         {
-            lock (enterLock) {
+            lock (enterLock)
+            {
                 var msg = MessageHandler.ParseMessage(buffer);
                 msgQueue.Enqueue(msg);
 #if UNITY_EDITOR
@@ -155,43 +160,54 @@ namespace Arthas.Network
 
         private void Update()
         {
-            if (msgQueue.Count > 0) {
+            if (msgQueue.Count > 0)
+            {
                 var message = msgQueue.Dequeue();
                 if (responseActions.Count > 0
-                    && responseActions.ContainsKey(message.Command)) {
+                    && responseActions.ContainsKey(message.Command))
+                {
                     var action = responseActions[message.Command];
-                    if (action != null) {
+                    if (action != null)
+                    {
                         action.Invoke(message);
                         responseActions.Remove(message.Command);
                         return;
                     }
-                } else if (PushEvent != null) {
+                }
+                else if (PushEvent != null)
+                {
                     PushEvent(message);
                 }
             }
         }
 
-        public static void Send(object cmd, object content, Action<INetworkMessage> callback, params object[] parameters)
+        public static void Send(object cmd, object buf, Action<INetworkMessage> callback, params object[] parameters)
         {
-            try {
+            try
+            {
                 responseActions.Replace(cmd, callback);
-                var message = MessageHandler.PackMessage(cmd, content, callback, parameters);
+                var message = MessageHandler.PackMessage(cmd, buf, callback, parameters);
                 var buffer = message.GetBuffer(true, IsLittleEndian);
                 connector.Send(buffer);
 #if UNITY_EDITOR
                 Debug.LogFormat("<color=cyan>[TCPNetwork]</color> [Send] >> CMD:{0},TIME:{1}", cmd, DateTime.Now);
 #endif
-            } catch (Exception ex) {
+            }
+            catch (Exception ex)
+            {
                 Debug.LogError(ex.Message);
             }
         }
 
         private void HandleEvent(bool bind)
         {
-            if (bind) {
+            if (bind)
+            {
                 connector.MessageRespondEvent += OnMessageRespond;
                 connector.DisconnectEvent += OnDisconnected;
-            } else {
+            }
+            else
+            {
                 connector.MessageRespondEvent -= OnMessageRespond;
                 connector.DisconnectEvent -= OnDisconnected;
             }

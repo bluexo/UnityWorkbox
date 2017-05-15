@@ -45,18 +45,23 @@ namespace System.Collections
             dict.Add(k, v);
         }
 
-        public static byte[] Reverse(this byte[] arr)
+        public static T[] Reverse<T>(this T[] arr)
         {
             Array.Reverse(arr);
             return arr;
         }
 
+        public static T Random<T>(this T[] arr, int startIndex = 0)
+        {
+            if (arr.Length <= 0) return default(T);
+            var rand = UnityEngine.Random.Range(startIndex, arr.Length);
+            return arr[rand];
+        }
+
         public static void Foreach<Tkey, TValue>(this IDictionary<Tkey, TValue> dict, Action<KeyValuePair<Tkey, TValue>> action)
         {
-            foreach (var pair in dict)
-            {
-                if (action != null)
-                {
+            foreach (var pair in dict) {
+                if (action != null) {
                     action(pair);
                 }
             }
@@ -65,10 +70,8 @@ namespace System.Collections
         public static void Foreach(this Array arr, Action<int> action)
         {
             int len = arr.Length;
-            while (len-- > 0)
-            {
-                if (action != null)
-                {
+            while (len-- > 0) {
+                if (action != null) {
                     action(len);
                 }
             }

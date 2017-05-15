@@ -53,9 +53,9 @@ namespace Arthas.Network
     {
         public INetworkMessage PackMessage(object command, object obj, params object[] parameters)
         {
-            if (obj is byte[])
+            var bodyBuffer = obj as byte[];
+            if (bodyBuffer == null)
             {
-                var bodyBuffer = obj as byte[];
                 var cmdBytes = BitConverter.GetBytes((short)command);
                 var buffer = new byte[bodyBuffer.Length + cmdBytes.Length];
                 Buffer.BlockCopy(cmdBytes, 0, buffer, 0, cmdBytes.Length);
