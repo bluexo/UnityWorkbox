@@ -5,9 +5,12 @@ using System.IO;
 using UnityEditor;
 using UnityEditorInternal;
 using UnityEngine;
+using System;
 
 public class CommandEditor : EditorWindow
 {
+    public enum CommandType { String, Enum }
+    private CommandType cmdType;
     public const string kCommandKey = "Commands", kDefaultCmd = "[Empty]";
 
     [MenuItem("Network/Command/Open", priority = 10)]
@@ -18,40 +21,50 @@ public class CommandEditor : EditorWindow
         if (!EditorPrefs.HasKey(kCommandKey)) EditorPrefs.SetString(kCommandKey, string.Empty);
     }
 
-    [MenuItem("Network/Command/Generate", priority = 10)]
-    public static void GenerateCommandConst()
-    {
-        var commands = EditorPrefs.GetString(kCommandKey).Split('|');
-        var path = Path.Combine(Directory.GetCurrentDirectory(), "Assets/Scripts/CommandType.cs");
-        if (Directory.Exists(path)) Directory.CreateDirectory(path);
-        using (var writer = new StreamWriter(path))
-        {
-            writer.WriteLine("namespace Arthas.Network");
-            writer.WriteLine("{");
-            writer.WriteLine("  public class CommandType");
-            writer.WriteLine("      {");
-            for (var i = 0; i < commands.Length; i++)
-            {
-                if (string.IsNullOrEmpty(commands[i])) continue;
-                var textInfo = Thread.CurrentThread.CurrentCulture.TextInfo;
-                var arr = commands[i].ToCharArray();
-                arr[0] = textInfo.ToUpper(arr[0]);
-                writer.WriteLine("          public const string {0} = \"{1}\";", new string(arr), commands[i]);
-            }
-            writer.WriteLine("      }");
-            writer.WriteLine("}");
-        }
-        AssetDatabase.Refresh(ImportAssetOptions.ForceUpdate);
-    }
-
     [MenuItem("Network/Command/Clear", priority = 10)]
     public static void ClearCommands()
     {
         EditorPrefs.DeleteKey(kCommandKey);
     }
 
+    public static void GenerateCommands(CommandType cmdType)
+    {
+        var commands = EditorPrefs.GetString(kCommandKey).Split('|');
+        var path = Path.Combine(Directory.GetCurrentDirectory(), "Assets/Scripts/Command.cs");
+        if (Directory.Exists(path)) Directory.CreateDirectory(path);
+        using (var writer = new StreamWriter(path))
+        {
+            writer.WriteLine("namespace Arthas.Network");
+            writer.WriteLine("{");
+            writer.WriteLine("  public {0} Command", cmdType == CommandType.String ? "class" : "enum");
+            writer.WriteLine("  {");
+            for (var i = 0; i < commands.Length; i++)
+            {
+                if (string.IsNullOrEmpty(commands[i])) continue;
+                var textInfo = Thread.CurrentThread.CurrentCulture.TextInfo;
+                var arr = commands[i].ToCharArray();
+                arr[0] = textInfo.ToUpper(arr[0]);
+                switch (cmdType)
+                {
+                    case CommandType.String:
+                        writer.WriteLine("      public const string {0} = \"{1}\";", new string(arr), commands[i]);
+                        break;
+                    case CommandType.Enum:
+                        writer.WriteLine("      {0} = {1},", commands[i], i);
+                        break;
+                }
+            }
+            writer.WriteLine("  }");
+            writer.WriteLine("}");
+            AssetDatabase.Refresh(ImportAssetOptions.ImportRecursive);
+        }
+    }
+
     private void OnGUI()
     {
+        var generate = GUILayout.Button("GENERATE", GUILayout.Height(45f));
+        cmdType = (CommandType)EditorGUILayout.EnumPopup("CommandType", cmdType);
+        if (generate) GenerateCommands(cmdType);
         var cmdString = EditorPrefs.GetString(kCommandKey);
         var commands = new List<string>(cmdString.Split('|'));
         EditorGUILayout.BeginVertical();
