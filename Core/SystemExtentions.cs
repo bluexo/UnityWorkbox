@@ -58,21 +58,20 @@ namespace System.Collections
             return arr[rand];
         }
 
-        public static void Foreach<Tkey, TValue>(this IDictionary<Tkey, TValue> dict, Action<KeyValuePair<Tkey, TValue>> action)
+        public static void Foreach<Tkey, TValue>(this IDictionary<Tkey, TValue> dict, Action<Tkey, TValue> action)
         {
             foreach (var pair in dict) {
                 if (action != null) {
-                    action(pair);
+                    action(pair.Key, pair.Value);
                 }
             }
         }
 
-        public static void Foreach(this Array arr, Action<int> action)
+        public static void Foreach<T>(this IEnumerable<T> arr, Action<T> action)
         {
-            int len = arr.Length;
-            while (len-- > 0) {
+            foreach (var t in arr) {
                 if (action != null) {
-                    action(len);
+                    action(t);
                 }
             }
         }
