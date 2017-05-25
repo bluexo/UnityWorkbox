@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace Arthas.UI
 {
-    [CustomEditor(typeof(UIManager))]
+    [CustomEditor(typeof(UIManager), true)]
     public class UIManagerEditor : Editor
     {
         private void OnEnable()
@@ -25,12 +25,10 @@ namespace Arthas.UI
                     if (!comp)
                         comp = child.gameObject.AddComponent(type);
                     ui.objectReferenceValue = comp;
-                }
-                else {
+                } else {
                     if (EditorUtility.DisplayDialog("Create Script", "You must be have a StartUI class, \ncreate now?", "√")) {
                         UIEditor.CreateUIPanel(true);
-                    }
-                    else
+                    } else
                         Debug.LogError(@"UISystem initialize fail , Cannot found start ui which has a <color=cyan>[UIStart]</color> Attribute and inherit <color=cyan>:WindowUI<T></color>");
                 }
             }

@@ -14,25 +14,26 @@ namespace Arthas.UI
     [RequireComponent(typeof(CanvasRenderer))]
     public abstract class BaseUI : UIBehaviour
     {
-		[SerializeField] private int sortOrder;
-		
-		public virtual int SortOrder { get { return sortOrder; } }
+        [SerializeField]
+        [Range(1, 100)]
+        private int sortOrder;
+        public virtual int SortOrder { get { return sortOrder; } }
 
-		public event Action<BaseUI> UIShowEvent;
+        public event Action<BaseUI> UIShowEvent;
 
         public event Action<BaseUI> UIHideEvent;
 
         #region show or hide event when ui active or deactive!
-        [SerializeField, Header("Trigger when show")]
+        [SerializeField, HideInInspector]
         protected UnityEvent BeforeShow, AfterShow;
 
-        [SerializeField, Header("Trigger when hide")]
+        [SerializeField, HideInInspector]
         public UnityEvent BeforeHide, AfterHide;
 
-        [SerializeField, Header("Share screen with brothers")]
-        protected List<BaseUI> brotherWindows = new List<BaseUI>();
+        [SerializeField, HideInInspector]
+        protected List<BaseUI> group = new List<BaseUI>();
+        public IList<BaseUI> UIGroup { get { return group; } }
 
-        public IList<BaseUI> BrotherWindows { get { return brotherWindows; } }
 
         #endregion show or hide event when ui active or deactive!
 
@@ -63,27 +64,23 @@ namespace Arthas.UI
 
     public abstract class WindowUI<T> : BaseUI where T : BaseUI
     {
-
         public static T Instance
         {
             get
             {
-                if (!instance)
-                {
+                if (!instance) {
                     var uiName = typeof(T).Name;
                     var child = UIManager.Instance.transform.FindChild(uiName);
-                    if (child)
-                    {
+                    if (child) {
                         var ui = child.GetComponent<T>();
                         if (ui) instance = ui;
                         else instance = child.gameObject.AddComponent<T>();
-                    }
-                    else Debug.LogErrorFormat("Can not found ui gameobject : {0} in UICanvas!", uiName);
+                    } else Debug.LogErrorFormat("Can not found ui gameobject : {0} in UICanvas!", uiName);
                 }
                 return instance;
             }
         }
-   
+
         private static T instance;
 
         public new virtual void Show()
@@ -94,8 +91,7 @@ namespace Arthas.UI
 
         public virtual void Back()
         {
-            if (UIManager.PrevWindow.UI)
-            {
+            if (UIManager.PrevWindow.UI) {
                 UIManager.PrevWindow.UI.Show();
             }
         }

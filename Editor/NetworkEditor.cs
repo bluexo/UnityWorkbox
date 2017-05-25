@@ -8,8 +8,6 @@ using Arthas.Network;
 [CustomEditor(typeof(TCPNetwork))]
 public class NetworkEditor : Editor
 {
-    bool cmdFold = false;
-
     private void OnEnable()
     {
 

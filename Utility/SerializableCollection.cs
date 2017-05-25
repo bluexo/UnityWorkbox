@@ -10,7 +10,7 @@ namespace UnityEngine
         private List<T> value;
         public List<T> Value { get { return value; } }
 
-        public JArray() {}
+        public JArray() { }
 
         public JArray(List<T> list)
         {
@@ -29,7 +29,8 @@ namespace UnityEngine
 
         public JArray<T> Overwrite(string json)
         {
-            value = JsonUtility.FromJson<List<T>>(json);
+            var arr = JsonUtility.FromJson<JArray<T>>(json);
+            value = arr.value;
             return this;
         }
 
@@ -58,8 +59,7 @@ namespace UnityEngine
         public void OnAfterDeserialize()
         {
             dictionary = new Dictionary<TKey, TValue>();
-            for (var i = 0; i < Math.Min(keys.Count, values.Count); i++)
-            {
+            for (var i = 0; i < Math.Min(keys.Count, values.Count); i++) {
                 dictionary.Add(keys[i], values[i]);
             }
         }
@@ -70,9 +70,9 @@ namespace UnityEngine
             values = new List<TValue>(dictionary.Values);
         }
 
-        public JHash<TKey,TValue> Overwrite(string json)
+        public JHash<TKey, TValue> Overwrite(string json)
         {
-            var hash = JsonUtility.FromJson<JHash<TKey,TValue>>(json);
+            var hash = JsonUtility.FromJson<JHash<TKey, TValue>>(json);
             dictionary = hash.dictionary;
             return this;
         }

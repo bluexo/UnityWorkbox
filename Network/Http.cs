@@ -146,7 +146,7 @@ namespace Arthas.Network
 
             if (webRequest.isError || webRequest.responseCode >= (int)ResponseCode.BadRequest)
             {
-                if (webRequest.responseCode == (int)ResponseCode.UnAuthorized) //StartCoroutine(StartUI.Instance.Login());
+                if (webRequest.responseCode == (int)ResponseCode.UnAuthorized)
                 {
                     Debug.LogError("Request UnAuthorized!");
                 }

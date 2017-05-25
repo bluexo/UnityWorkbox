@@ -25,7 +25,7 @@ namespace Arthas.UI
 
         public bool ContainBrother(BaseUI ui)
         {
-            return UI && UI.BrotherWindows.Contains(ui);
+            return UI && UI.UIGroup.Contains(ui);
         }
 
         public int CompareTo(WindowInfo other)
@@ -53,11 +53,9 @@ namespace Arthas.UI
             base.Awake();
             Canvas = GetComponent<Canvas>();
             var uis = GetComponentsInChildren<BaseUI>(true);
-            for (var i = 0; i < uis.Length; i++)
-            {
+            for (var i = 0; i < uis.Length; i++) {
                 AddUI(uis[i]);
-                if (uis[i].isActiveAndEnabled)
-                {
+                if (uis[i].isActiveAndEnabled) {
                     var window = CreateWindowInfo(uis[i]);
                     var showed = window.IsHeader ? showedHeaderWindows : showedWindows;
                     showed.Add(window);
@@ -67,32 +65,32 @@ namespace Arthas.UI
 
         protected void Start()
         {
-            if (!startUI)
-            {
+            if (!startUI) {
+                Debug.LogError(@"UISystem initialize fail , Cannot found start ui which has a <color=cyan>[UIStart]</color> Attribute and inherit <color=cyan>:WindowUI<T></color>");
 #if UNITY_EDITOR
                 UnityEditor.Selection.activeGameObject = gameObject;
-#endif
-                Debug.LogError(@"UISystem initialize fail , Cannot found start ui which has a <color=cyan>[UIStart]</color> Attribute and inherit <color=cyan>:WindowUI<T></color>");
                 Debug.DebugBreak();
+#endif
                 return;
             }
             startUI.Show();
-            for (var i = 0; i < transform.childCount; i++)
-            {
+            for (var i = 0; i < transform.childCount; i++) {
                 var child = transform.GetChild(i);
                 var comp = child.GetComponent<BaseUI>();
-                if (!comp)
-                {
+                if (!comp) {
                     child.gameObject.SetActive(false);
                 }
             }
         }
 
         /// <summary>
-        /// 上一个显示的窗口
+        /// 当前窗口
         /// </summary>
         public static WindowInfo CurrentWindow { get; private set; }
 
+        /// <summary>
+        /// 上一个显示的窗口
+        /// </summary>
         public static WindowInfo PrevWindow { get; private set; }
 
         /// <summary>
@@ -102,8 +100,7 @@ namespace Arthas.UI
         /// <param name="ui"></param>
         public static void AddUI(BaseUI ui)
         {
-            if (!windows.ContainsKey(ui))
-            {
+            if (!windows.ContainsKey(ui)) {
                 var window = CreateWindowInfo(ui);
                 windows.Add(ui, window);
                 ui.UIShowEvent += OnShow;
@@ -141,37 +138,32 @@ namespace Arthas.UI
         /// <param name="name"></param>
         private static void OnShow(BaseUI ui)
         {
-            if (windows.ContainsKey(ui))
-            {
+            if (windows.ContainsKey(ui)) {
                 var window = windows[ui];
                 var windowList = window.IsHeader ? showedHeaderWindows : showedWindows;
-                if (window.IsExclusive)
-                {
+                if (window.IsExclusive) {
                     var array = windowList.ToArray();
-                    foreach (var item in array)
-                    {
-                        if (window.ContainBrother(item.UI) || item.UI.Equals(ui)) continue;
-                        item.UI.Hide();
+                    for (var i = 0; i < array.Length; i++) {
+                        if (window.ContainBrother(array[i].UI) || array[i].UI.Equals(ui)) continue;
+                        array[i].UI.Hide();
                     }
                 }
                 PrevWindow = CurrentWindow;
                 CurrentWindow = window;
                 var sortWindows = new List<WindowInfo>(new WindowInfo[] { CurrentWindow });
-                var brothers = CurrentWindow.UI.BrotherWindows;
-                for (var i = 0; i < brothers.Count; i++)
-                {
-                    if (windows.ContainsKey(brothers[i]))
-                    {
+                var brothers = CurrentWindow.UI.UIGroup;
+                for (var i = 0; i < brothers.Count; i++) {
+                    if (brothers[i] && windows.ContainsKey(brothers[i])) {
                         var brotherWindow = windows[brothers[i]];
                         sortWindows.Add(brotherWindow);
                     }
                 }
                 sortWindows.Sort();
-                for (var i = 0; i < sortWindows.Count; i++)
-                {
+                for (var i = 0; i < sortWindows.Count; i++) {
                     var sortWindow = sortWindows[i];
-                    if (!windowList.Contains(sortWindow))
+                    if (!windowList.Contains(sortWindow)) {
                         windowList.Add(sortWindow);
+                    }
                     sortWindow.SetOrder(showedHeaderWindows.Count, Instance.transform.childCount, i);
                 }
             }
@@ -183,13 +175,10 @@ namespace Arthas.UI
         /// <param name="name"></param>
         private static void OnHide(BaseUI ui)
         {
-            if (windows.ContainsKey(ui))
-            {
+            if (windows.ContainsKey(ui)) {
                 var window = windows[ui];
-                if (window.IsHeader)
-                    showedWindows.Remove(window);
-                else
-                    showedHeaderWindows.Remove(window);
+                var willRemoveWindows = window.IsHeader ? showedWindows : showedHeaderWindows;
+                willRemoveWindows.Remove(window);
             }
         }
     }

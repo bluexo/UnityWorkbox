@@ -56,8 +56,8 @@ public class CommandEditor : EditorWindow
             }
             writer.WriteLine("  }");
             writer.WriteLine("}");
-            AssetDatabase.Refresh(ImportAssetOptions.ImportRecursive);
         }
+        AssetDatabase.Refresh();
     }
 
     private void OnGUI()
