@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
@@ -59,6 +60,18 @@ namespace Arthas.UI
             gameObject.SetActive(true);
             if (AfterShow != null)
                 AfterShow.Invoke();
+        }
+
+        public virtual IEnumerator ShowAsync()
+        {
+            Show();
+            yield return new WaitForEndOfFrame();
+        }
+
+        public virtual IEnumerator HideAsync()
+        {
+            Hide();
+            yield return new WaitForEndOfFrame();
         }
     }
 
