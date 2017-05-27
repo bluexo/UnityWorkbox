@@ -64,7 +64,7 @@ namespace Arthas.Network
         /// <summary>
         /// 连接到服务器
         /// </summary>
-        public void Connect(string ip, int port, INetworkMessageHandler handler = null)
+        protected void Connect(string ip, int port, INetworkMessageHandler handler = null)
         {
             if (connector.IsConnected) connector.Close();
             MessageHandler = handler ?? new DefaultMessageHandler();

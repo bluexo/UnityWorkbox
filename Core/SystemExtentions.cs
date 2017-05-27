@@ -26,6 +26,8 @@ namespace System.Collections
 {
     public static class CollectionExtentions
     {
+        private static Random random = new Random();
+
         public static T First<T>(this IList<T> arr)
         {
             if (arr.Count > 0) return arr[0];
@@ -54,7 +56,7 @@ namespace System.Collections
         public static T Random<T>(this T[] arr, int startIndex = 0)
         {
             if (arr.Length <= 0) return default(T);
-            var rand = UnityEngine.Random.Range(startIndex, arr.Length);
+            var rand = random.Next(startIndex, arr.Length);
             return arr[rand];
         }
 

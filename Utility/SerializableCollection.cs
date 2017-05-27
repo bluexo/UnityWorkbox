@@ -27,16 +27,18 @@ namespace UnityEngine
             value = new List<T>(arr);
         }
 
-        public JArray<T> Overwrite(string json)
+        public JArray<T> Overwrite(string json, bool pureArray = false)
         {
+            if (pureArray) json = '{' + string.Format("\"value\":{0}", json) + '}';
             var arr = JsonUtility.FromJson<JArray<T>>(json);
             value = arr.value;
             return this;
         }
 
-        public string ToJson()
+        public string ToJson(bool pureArray = false)
         {
-            return JsonUtility.ToJson(value);
+            var json = JsonUtility.ToJson(this);
+            return pureArray ? json.TrimStart('{').Substring("\"value:\"".Length).TrimEnd('}') : json;
         }
     }
 

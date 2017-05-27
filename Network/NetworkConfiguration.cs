@@ -20,7 +20,6 @@ public class NetworkConfiguration : ScriptableObject
 {
     public const string kConfigPath = "Configs/";
 
-
     /// <summary>
     /// 网络地址
     /// </summary>
