@@ -39,7 +39,6 @@ public class ConsoleLogger : MonoBehaviour
     private Rect titleBarRect = new Rect(0, 0, 10000, 45);
     private GUIContent clearLabel = new GUIContent("Clear", "Clear the contents of the console.");
     private GUIContent collapseLabel = new GUIContent("Collapse", "Hide repeated messages.");
-    private LogType? currentLogType = null;
 
     private void OnEnable()
     {
@@ -56,8 +55,6 @@ public class ConsoleLogger : MonoBehaviour
         Application.logMessageReceived -= HandleLog;
 #endif
     }
-
-    private float prevToggleTime = 0;
 
     const float fpsMeasurePeriod = 0.5f;
     private int m_FpsAccumulator = 0;

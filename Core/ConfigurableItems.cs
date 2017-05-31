@@ -40,7 +40,7 @@ namespace Arthas.Common
                         property.InsertArrayElementAtIndex(i);
                     }
                     GUI.color = Color.red;
-                    if (GUILayout.Button("-")) {
+                    if (property.arraySize > 1 && GUILayout.Button("-")) {
                         property.DeleteArrayElementAtIndex(i);
                         ArrayUtility.RemoveAt(ref folds, i);
                     }
@@ -62,7 +62,10 @@ namespace Arthas.Common
             EditorGUILayout.EndHorizontal();
         }
 
-        public virtual void DrawItemProperty(SerializedProperty property, int index) { }
+        public virtual void DrawItemProperty(SerializedProperty property, int index)
+        {
+            EditorGUILayout.PropertyField(property);
+        }
     }
 
 #endif
