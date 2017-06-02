@@ -89,6 +89,7 @@ public class ConsoleLogger : MonoBehaviour
         showConsole = !showConsole;
     }
 
+#if DEVELOPMENT_BUILD
     private void OnGUI()
     {
         // measure average frames per second
@@ -106,6 +107,7 @@ public class ConsoleLogger : MonoBehaviour
         }
 
     }
+#endif
 
     private void ConsoleWindow(int windowID)
     {
