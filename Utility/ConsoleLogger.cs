@@ -58,7 +58,7 @@ public class ConsoleLogger : MonoBehaviour
 
     const float fpsMeasurePeriod = 0.5f;
     private int m_FpsAccumulator = 0;
-    private float m_FpsNextPeriod = 0;
+    private float m_FpsNextPeriod = 0, prevToggleTime;
     private int m_CurrentFps;
     const string display = "{0} FPS";
 
@@ -79,8 +79,7 @@ public class ConsoleLogger : MonoBehaviour
                 ToggleShowDebug();
         }
 #endif
-        if (Input.GetKeyDown(toggleKey))
-        {
+        if (Input.GetKeyDown(toggleKey)) {
             showConsole = !showConsole;
         }
     }
@@ -93,19 +92,16 @@ public class ConsoleLogger : MonoBehaviour
     private void OnGUI()
     {
         // measure average frames per second
-        if (showFPS)
-        {
+        if (showFPS) {
             m_FpsAccumulator++;
-            if (Time.realtimeSinceStartup > m_FpsNextPeriod)
-            {
+            if (Time.realtimeSinceStartup > m_FpsNextPeriod) {
                 m_CurrentFps = (int)(m_FpsAccumulator / fpsMeasurePeriod);
                 m_FpsAccumulator = 0;
                 m_FpsNextPeriod += fpsMeasurePeriod;
             }
             GUI.Box(new Rect(10, 5, 60, 25), string.Format(display, m_CurrentFps));
         }
-        if (showConsole)
-        {
+        if (showConsole) {
             windowRect = GUILayout.Window(123456, windowRect, ConsoleWindow, "Console");
         }
 
@@ -115,16 +111,13 @@ public class ConsoleLogger : MonoBehaviour
     {
         scrollPosition = GUILayout.BeginScrollView(scrollPosition);
 
-        for (int i = 0; i < logs.Count; i++)
-        {
+        for (int i = 0; i < logs.Count; i++) {
             var log = logs[i];
 
-            if (collapse)
-            {
+            if (collapse) {
                 var messageSameAsPrevious = i > 0 && log.message == logs[i - 1].message;
 
-                if (messageSameAsPrevious)
-                {
+                if (messageSameAsPrevious) {
                     continue;
                 }
             }
@@ -139,8 +132,7 @@ public class ConsoleLogger : MonoBehaviour
 
         GUILayout.BeginHorizontal();
 
-        if (GUILayout.Button(clearLabel))
-        {
+        if (GUILayout.Button(clearLabel)) {
             logs.Clear();
         }
 
