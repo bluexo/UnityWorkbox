@@ -69,9 +69,10 @@ namespace Arthas.Common
             GUILayout.Space(12f);
             importOption = EditorGUILayout.Foldout(importOption, "Import And Export");
             if (importOption) {
-                var name = EditorPrefs.GetString(GetType().FullName, typeof(T).Name);
+                var id = serializedObject.targetObject.GetInstanceID();
+                var name = EditorPrefs.GetString(id.ToString(), typeof(T).Name);
                 var fileName = EditorGUILayout.TextField("FileName", name);
-                if (fileName != name) EditorPrefs.SetString(GetType().FullName, fileName);
+                if (fileName != name) EditorPrefs.SetString(id.ToString(), fileName);
 
                 var r = EditorGUILayout.BeginHorizontal();
                 if (GUILayout.Button("To JSON", EditorStyles.miniButtonLeft, GUILayout.Height(25f))) {
@@ -100,8 +101,9 @@ namespace Arthas.Common
 
         public abstract void DrawItemProperty(SerializedProperty property, int index);
     }
-
 #endif
+
+
     public class ConfigurableArray<T> : ScriptableObject
     {
         [SerializeField, HideInInspector]

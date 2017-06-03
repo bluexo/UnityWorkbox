@@ -40,8 +40,8 @@ namespace Arthas.UI
     public class UIManager : SingletonBehaviour<UIManager>
     {
         private static readonly Dictionary<BaseUI, WindowInfo> windows = new Dictionary<BaseUI, WindowInfo>();
-        private static readonly List<WindowInfo> showedWindows = new List<WindowInfo>();
         private static readonly List<WindowInfo> showedHeaderWindows = new List<WindowInfo>();
+        private static readonly List<WindowInfo> showedWindows = new List<WindowInfo>();
 
         public static Canvas Canvas { get; private set; }
 
