@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-
+﻿
 namespace System
 {
     // Action
@@ -24,6 +22,8 @@ namespace System
 
 namespace System.Collections
 {
+    using System.Collections.Generic;
+
     public static class CollectionExtentions
     {
         private static Random random = new Random();
@@ -42,8 +42,7 @@ namespace System.Collections
 
         public static void Replace<Tkey, TValue>(this IDictionary<Tkey, TValue> dict, Tkey k, TValue v)
         {
-            if (dict.ContainsKey(k))
-                dict.Remove(k);
+            if (dict.ContainsKey(k)) dict.Remove(k);
             dict.Add(k, v);
         }
 
