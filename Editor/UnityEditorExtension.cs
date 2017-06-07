@@ -5,7 +5,6 @@ using UnityEngine;
 
 public class UnityEditorExtension : MonoBehaviour
 {
-
     // Use this for initialization
     void Start()
     {

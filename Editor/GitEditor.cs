@@ -3,8 +3,8 @@ using System.IO;
 using System.Diagnostics;
 using UnityEditor;
 using UnityEngine;
-using Debug = UnityEngine.Debug;
 using System.Collections.Generic;
+using Debug = UnityEngine.Debug;
 
 public class GitEditor : EditorWindow
 {

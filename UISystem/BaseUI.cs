@@ -42,24 +42,18 @@ namespace Arthas.UI
 
         public virtual void Hide()
         {
-            if (BeforeHide != null)
-                BeforeHide.Invoke();
+            if (BeforeHide != null) BeforeHide.Invoke();
             gameObject.SetActive(false);
-            if (UIHideEvent != null)
-                UIHideEvent(this);
-            if (AfterHide != null)
-                AfterHide.Invoke();
+            if (UIHideEvent != null) UIHideEvent(this);
+            if (AfterHide != null) AfterHide.Invoke();
         }
 
         public virtual void Show()
         {
-            if (BeforeShow != null)
-                BeforeShow.Invoke();
-            if (UIShowEvent != null)
-                UIShowEvent(this);
+            if (BeforeShow != null) BeforeShow.Invoke();
+            if (UIShowEvent != null) UIShowEvent(this);
             gameObject.SetActive(true);
-            if (AfterShow != null)
-                AfterShow.Invoke();
+            if (AfterShow != null) AfterShow.Invoke();
         }
 
         public virtual IEnumerator ShowAsync()
