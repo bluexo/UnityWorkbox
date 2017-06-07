@@ -6,7 +6,7 @@ using UnityEngine;
 using Debug = UnityEngine.Debug;
 using System.Collections.Generic;
 
-public class GitTools : EditorWindow
+public class GitEditor : EditorWindow
 {
     public const string gitPathKey = "gitPath", gitExtensionPathKey = "gitExtensionPath";
 
@@ -25,7 +25,7 @@ public class GitTools : EditorWindow
     [MenuItem("Git/Options", priority = 1)]
     public static void Open()
     {
-        var win = GetWindow<GitTools>();
+        var win = GetWindow<GitEditor>();
         win.minSize = new Vector2(320, 100);
         win.titleContent = new GUIContent("GitConfig");
         InitializeConfig();
@@ -51,16 +51,32 @@ public class GitTools : EditorWindow
 
     private void OnGUI()
     {
+        GUILayout.Space(10f);
         EditorGUILayout.BeginHorizontal();
-        EditorGUILayout.LabelField("Git[bash|cmd]" , GUILayout.Width(85));
+        EditorGUILayout.LabelField("Git[bash|cmd]", GUILayout.Width(85));
         EditorGUILayout.TextField(GitPath);
-        if (GUILayout.Button("+")) GitPath = EditorUtility.OpenFilePanel("Select file", GitPath.Replace(@"/", "\\"), "exe");
+        if (GUILayout.Button("⊙", EditorStyles.miniButtonMid, GUILayout.Width(25f)))
+            GitPath = EditorUtility.OpenFilePanel("Select file", GitPath.Replace(@"/", "\\"), "exe");
         EditorGUILayout.EndHorizontal();
 
         EditorGUILayout.BeginHorizontal();
         EditorGUILayout.LabelField("GitExtensions", GUILayout.Width(85));
         EditorGUILayout.TextField(GitExtensionPath);
-        if (GUILayout.Button("+")) GitExtensionPath = EditorUtility.OpenFilePanel("Select file", GitExtensionPath.Replace(@"/", "\\"), "exe");
+        if (GUILayout.Button("⊙", EditorStyles.miniButtonMid, GUILayout.Width(25f)))
+            GitExtensionPath = EditorUtility.OpenFilePanel("Select file", GitExtensionPath.Replace(@"/", "\\"), "exe");
+        EditorGUILayout.EndHorizontal();
+
+        GUILayout.Space(10f);
+        EditorGUILayout.BeginHorizontal();
+        var gitUrl = "https://git-scm.com/downloads";
+        EditorGUILayout.LabelField(gitUrl);
+        if (GUILayout.Button("Download Git", GUILayout.Width(150f))) Application.OpenURL(gitUrl);
+        EditorGUILayout.EndHorizontal();
+
+        EditorGUILayout.BeginHorizontal();
+        var gitextUrl = "https://github.com/gitextensions/gitextensions/releases";
+        EditorGUILayout.LabelField(gitextUrl);
+        if (GUILayout.Button("Download GitExtensions", GUILayout.Width(150f))) Application.OpenURL(gitextUrl);
         EditorGUILayout.EndHorizontal();
     }
 
