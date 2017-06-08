@@ -77,22 +77,16 @@ namespace Arthas.Common
                 var r = EditorGUILayout.BeginHorizontal();
                 if (GUILayout.Button("To JSON", EditorStyles.miniButtonLeft, GUILayout.Height(25f))) {
                     var path = EditorUtility.SaveFilePanel("Save to json", "", "Json", "json");
-                    var stream = File.Open(path, FileMode.OpenOrCreate);
-                    using (var writer = new StreamWriter(stream)) {
-                        var conf = serializedObject.targetObject as ConfigurableArray<T>;
-                        writer.Write(conf.ToJson());
-                        writer.Flush();
-                    }
+                    var conf = serializedObject.targetObject as ConfigurableArray<T>;
+                    Debug.Log(conf.ToJson());
+                    File.WriteAllText(path, conf.ToJson());
                 }
                 if (GUILayout.Button("From JSON", EditorStyles.miniButtonRight, GUILayout.Height(25f))) {
                     var path = EditorUtility.OpenFilePanel("Overwrite from json", "", "json");
-                    var stream = File.OpenRead(path);
-                    using (var reader = new StreamReader(stream)) {
-                        var conf = serializedObject.targetObject as ConfigurableArray<T>;
-                        var json = reader.ReadToEnd();
-                        conf.FromJson(json);
-                        serializedObject.ApplyModifiedProperties();
-                    }
+                    var conf = serializedObject.targetObject as ConfigurableArray<T>;
+                    var json = File.ReadAllText(path);
+                    conf.FromJson(json);
+                    serializedObject.ApplyModifiedProperties();
                 }
                 EditorGUILayout.EndHorizontal();
                 EditorGUI.DrawRect(r, Color.blue / 3);
@@ -110,7 +104,7 @@ namespace Arthas.Common
         [SerializeField]
         protected T[] items = { new T() };
 
-        public T[] Items { get { return items; } }
+        public virtual T[] Items { get { return items; } }
 
         public virtual string ToJson()
         {

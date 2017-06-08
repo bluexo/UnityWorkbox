@@ -187,6 +187,11 @@ namespace Arthas.Network
             }
         }
 
+        public static IEnumerator SendAsync(object cmd, object buf, Action<INetworkMessage> callback, params object[] parameters)
+        {
+            yield return null;
+        }
+
         private void HandleEvent(bool bind)
         {
             if (bind) {
