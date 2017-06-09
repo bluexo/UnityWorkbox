@@ -13,7 +13,7 @@ namespace Arthas.Common
     /// </summary>
     /// <typeparam name="T"></typeparam>
     [CustomEditor(typeof(ConfigurableArray<>), true)]
-    public abstract class ConfigurableArrayEditor<T> : Editor
+    public abstract class ConfigurableArrayEditor<T> : Editor where T : new()
     {
         protected SerializedProperty property;
 
@@ -21,7 +21,7 @@ namespace Arthas.Common
 
         protected bool importOption;
 
-        protected virtual void OnEnable()
+        protected void OnEnable()
         {
             property = serializedObject.FindProperty("items");
             if (property.arraySize <= 0) property.arraySize++;
@@ -31,7 +31,7 @@ namespace Arthas.Common
 
         public override void OnInspectorGUI()
         {
-            base.OnInspectorGUI();
+            if (ShowBaseInspactor) base.OnInspectorGUI();
             EditorGUILayout.BeginHorizontal();
             GUI.color = Color.yellow;
             if (GUILayout.Button(">", EditorStyles.miniButtonLeft, GUILayout.Height(25f)))
@@ -99,15 +99,16 @@ namespace Arthas.Common
             }
         }
 
+        public virtual bool ShowBaseInspactor { get { return false; } }
+
         public abstract void DrawItemProperty(SerializedProperty property, int index);
     }
 #endif
 
-
-    public class ConfigurableArray<T> : ScriptableObject
+    public abstract class ConfigurableArray<T> : ScriptableObject where T : new()
     {
-        [SerializeField, HideInInspector]
-        protected T[] items;
+        [SerializeField]
+        protected T[] items = { new T() };
 
         public T[] Items { get { return items; } }
 
