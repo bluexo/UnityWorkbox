@@ -8,7 +8,7 @@ using Debug = UnityEngine.Debug;
 
 public class GitEditor : EditorWindow
 {
-    public const string gitPathKey = "gitPath", gitExtensionPathKey = "gitExtensionPath";
+    public const string gitPathKey = "gitBashPath", gitExtensionPathKey = "gitExtensionPath";
 
     public static string GitPath
     {
@@ -38,15 +38,22 @@ public class GitEditor : EditorWindow
             && !string.IsNullOrEmpty(GitExtensionPath)
             && File.Exists(GitExtensionPath)) return;
         var pathString = Environment.GetEnvironmentVariable("PATH");
-        var paths = pathString.Split(';');
-        var files = new List<string>();
+        var paths = Array.FindAll(pathString.Split(';'), s => s.IndexOf("git", StringComparison.InvariantCultureIgnoreCase) > 0);
+        var files = new List<FileInfo>();
         for (var i = 0; i < paths.Length; i++) {
             var path = paths[i];
             if (!Directory.Exists(path)) continue;
-            files.AddRange(Directory.GetFiles(path, "*.exe"));
+            var dir = new DirectoryInfo(path);
+            files.AddRange(dir.GetFiles());
+            files.AddRange(dir.Parent.GetFiles());
         }
-        GitPath = files.Find(f => f.EndsWith("git-bash.exe", StringComparison.InvariantCultureIgnoreCase));
-        GitExtensionPath = files.Find(f => f.EndsWith("GitExtensions.exe", StringComparison.InvariantCultureIgnoreCase));
+
+        GitPath = files.Find(f => {
+            var hasBash = f.FullName.IndexOf("bash", StringComparison.InvariantCultureIgnoreCase) > 0;
+            var hasCmd = f.FullName.IndexOf("cmd", StringComparison.InvariantCultureIgnoreCase) > 0;
+            return hasCmd || hasCmd;
+        }).FullName;
+        GitExtensionPath = files.Find(f => f.FullName.EndsWith("GitExtensions.exe", StringComparison.InvariantCultureIgnoreCase)).FullName;
     }
 
     private void OnGUI()
