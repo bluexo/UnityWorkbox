@@ -43,15 +43,12 @@ namespace Arthas.UI
         private static readonly List<WindowInfo> showedHeaderWindows = new List<WindowInfo>();
         private static readonly List<WindowInfo> showedWindows = new List<WindowInfo>();
 
-        public static Canvas Canvas { get; private set; }
-
         [SerializeField]
         private BaseUI startUI;
 
         protected override void Awake()
         {
             base.Awake();
-            Canvas = GetComponent<Canvas>();
             var uis = GetComponentsInChildren<BaseUI>(true);
             for (var i = 0; i < uis.Length; i++) {
                 AddUI(uis[i]);
