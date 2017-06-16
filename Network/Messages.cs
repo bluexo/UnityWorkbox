@@ -13,6 +13,8 @@ namespace Arthas.Network
         /// </summary>
         object Command { get; }
 
+        object Body { get; }
+
         /// <summary>
         /// 消息参数
         /// </summary>
@@ -22,7 +24,7 @@ namespace Arthas.Network
         /// 获取消息包含长度
         /// </summary>
         /// <returns></returns>
-        byte[] GetBuffer(bool withLength = false , bool littleEndian = false);
+        byte[] GetBuffer(bool littleEndian = false);
 
         /// <summary>
         /// 获取对象

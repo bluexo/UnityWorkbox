@@ -14,30 +14,32 @@ namespace Arthas.Network
     {
         protected byte[] buffer = { };
 
+        public bool WithLength { get; private set; }
+
         public object[] Parameters { get; private set; }
+
+        public object Body { get { return buffer; } }
 
         public object Command { get; private set; }
 
-        public DefaultMessage(object command, byte[] buf, params object[] parameters)
+        public DefaultMessage(object command, byte[] buf, bool withLength = true, params object[] parameters)
         {
             Command = command;
             buffer = buf;
+            WithLength = withLength;
             Parameters = parameters;
         }
 
-        public byte[] GetBuffer(bool withLength = false, bool littleEndian = false)
+        public byte[] GetBuffer(bool littleEndian = false)
         {
-            if (withLength)
-            {
-                var lenBytes = littleEndian && BitConverter.IsLittleEndian
-                    ? BitConverter.GetBytes(buffer.Length)
-                    : BitConverter.GetBytes(buffer.Length).Reverse();
-                var newBuffer = new byte[buffer.Length + lenBytes.Length];
-                Buffer.BlockCopy(lenBytes, 0, newBuffer, 0, lenBytes.Length);
-                Buffer.BlockCopy(buffer, 0, newBuffer, lenBytes.Length, buffer.Length);
-                return newBuffer;
-            }
-            return buffer;
+            if (WithLength) return buffer;
+            var lenBytes = littleEndian && BitConverter.IsLittleEndian
+                ? BitConverter.GetBytes(buffer.Length)
+                : BitConverter.GetBytes(buffer.Length).Reverse();
+            var newBuffer = new byte[buffer.Length + lenBytes.Length];
+            Buffer.BlockCopy(lenBytes, 0, newBuffer, 0, lenBytes.Length);
+            Buffer.BlockCopy(buffer, 0, newBuffer, lenBytes.Length, buffer.Length);
+            return newBuffer;
         }
 
         public T GetValue<T>()
@@ -54,16 +56,13 @@ namespace Arthas.Network
         public INetworkMessage PackMessage(object command, object obj, params object[] parameters)
         {
             var bodyBuffer = obj as byte[];
-            if (bodyBuffer == null)
-            {
+            if (bodyBuffer == null) {
                 var cmdBytes = BitConverter.GetBytes((short)command);
                 var buffer = new byte[bodyBuffer.Length + cmdBytes.Length];
                 Buffer.BlockCopy(cmdBytes, 0, buffer, 0, cmdBytes.Length);
                 Buffer.BlockCopy(bodyBuffer, 0, buffer, cmdBytes.Length, bodyBuffer.Length);
-                return new DefaultMessage(command, buffer, parameters);
-            }
-            else
-            {
+                return new DefaultMessage(command, buffer, false, parameters);
+            } else {
                 throw new NotSupportedException();
             }
         }

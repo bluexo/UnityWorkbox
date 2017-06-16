@@ -15,17 +15,17 @@ namespace Arthas.Common
     [CustomEditor(typeof(ConfigurableArray<>), true)]
     public abstract class ConfigurableArrayEditor<T> : Editor where T : new()
     {
-        protected SerializedProperty property;
+        protected SerializedProperty itemsProperty;
 
         protected bool[] folds;
 
         protected bool importOption;
 
-        protected void OnEnable()
+        protected virtual void OnEnable()
         {
-            property = serializedObject.FindProperty("items");
-            if (property.arraySize <= 0) property.arraySize++;
-            folds = new bool[property.arraySize];
+            itemsProperty = serializedObject.FindProperty("items");
+            if (itemsProperty.arraySize <= 0) itemsProperty.arraySize++;
+            folds = new bool[itemsProperty.arraySize];
             serializedObject.ApplyModifiedProperties();
         }
 
@@ -42,21 +42,21 @@ namespace Arthas.Common
             EditorGUILayout.EndHorizontal();
 
             var rect = EditorGUILayout.BeginVertical();
-            for (var i = 0; i < property.arraySize; i++) {
+            for (var i = 0; i < itemsProperty.arraySize; i++) {
                 folds[i] = EditorGUILayout.Foldout(folds[i], string.Format("Item [{0}]", i));
                 if (folds[i]) {
-                    var item = property.GetArrayElementAtIndex(i);
+                    var item = itemsProperty.GetArrayElementAtIndex(i);
                     DrawItemProperty(item, i);
                     EditorGUILayout.Space();
                     EditorGUILayout.BeginHorizontal();
                     GUI.color = Color.green;
                     if (GUILayout.Button("+")) {
                         ArrayUtility.Insert(ref folds, i, false);
-                        property.InsertArrayElementAtIndex(i);
+                        itemsProperty.InsertArrayElementAtIndex(i);
                     }
                     GUI.color = Color.red;
-                    if (property.arraySize > 1 && GUILayout.Button("-")) {
-                        property.DeleteArrayElementAtIndex(i);
+                    if (itemsProperty.arraySize > 1 && GUILayout.Button("-")) {
+                        itemsProperty.DeleteArrayElementAtIndex(i);
                         ArrayUtility.RemoveAt(ref folds, i);
                     }
                     GUI.color = Color.white;
