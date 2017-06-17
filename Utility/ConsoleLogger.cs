@@ -37,22 +37,23 @@ public class ConsoleLogger : MonoBehaviour
 
     private Rect windowRect = new Rect(margin, margin * 2, Screen.width * .9f, Screen.height - (margin * 3));
     private Rect titleBarRect = new Rect(0, 0, 10000, 45);
-    private GUIContent clearLabel = new GUIContent("Clear", "Clear the contents of the console.");
-    private GUIContent collapseLabel = new GUIContent("Collapse", "Hide repeated messages.");
+    private readonly GUIContent clearLabel = new GUIContent("Clear", "Clear the contents of the console."),
+        collapseLabel = new GUIContent("Collapse", "Hide repeated messages."),
+        closeLabel = new GUIContent("Close", "close window");
 
     private void OnEnable()
     {
 #if UNITY_4_6
 		Application.RegisterLogCallback(HandleLog);
 #else
-        Application.logMessageReceived += HandleLog;
+        Application.logMessageReceivedThreaded += HandleLog;
 #endif
     }
 
     private void OnDisable()
     {
 #if !UNITY_4_6
-        Application.logMessageReceived -= HandleLog;
+        Application.logMessageReceivedThreaded -= HandleLog;
 #endif
     }
 
@@ -132,11 +133,11 @@ public class ConsoleLogger : MonoBehaviour
 
         GUILayout.BeginHorizontal();
 
-        if (GUILayout.Button(clearLabel)) {
-            logs.Clear();
-        }
+        if (GUILayout.Button(closeLabel, GUILayout.Height(45f))) showConsole = false;
 
-        collapse = GUILayout.Toggle(collapse, collapseLabel, GUILayout.ExpandWidth(false));
+        if (GUILayout.Button(clearLabel, GUILayout.Height(45f))) logs.Clear();
+
+        if (GUILayout.Button(collapseLabel, GUILayout.Height(45f))) collapse = !collapse;
 
         GUILayout.EndHorizontal();
 
@@ -145,11 +146,12 @@ public class ConsoleLogger : MonoBehaviour
 
     private void HandleLog(string message, string stackTrace, LogType type)
     {
-        logs.Add(new Log()
+        var log = new Log()
         {
             message = message,
             stackTrace = stackTrace,
             type = type,
-        });
+        };
+        logs.Add(log);
     }
 }
