@@ -76,9 +76,8 @@ namespace Arthas.Common
 
                 var r = EditorGUILayout.BeginHorizontal();
                 if (GUILayout.Button("To JSON", EditorStyles.miniButtonLeft, GUILayout.Height(25f))) {
-                    var path = EditorUtility.SaveFilePanel("Save to json", "", "Json", "json");
+                    var path = EditorUtility.SaveFilePanel("Save to json", "", fileName, "json");
                     var conf = serializedObject.targetObject as ConfigurableArray<T>;
-                    Debug.Log(conf.ToJson());
                     File.WriteAllText(path, conf.ToJson());
                 }
                 if (GUILayout.Button("From JSON", EditorStyles.miniButtonRight, GUILayout.Height(25f))) {
