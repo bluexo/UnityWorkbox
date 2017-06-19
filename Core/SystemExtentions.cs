@@ -76,5 +76,12 @@ namespace System.Collections
                 }
             }
         }
+
+        public static string ToArrayString<T>(this T[] arr)
+        {
+            var str = string.Empty;
+            Array.ForEach(arr, a => str += a + " ");
+            return str;
+        }
     }
 }

@@ -174,9 +174,9 @@ namespace Arthas.Network
         public static void Send(object cmd, object buf, Action<INetworkMessage> callback, params object[] parameters)
         {
             try {
-                responseActions.Replace(cmd, callback);
                 var message = MessageHandler.PackMessage(cmd, buf, callback, parameters);
                 var buffer = message.GetBuffer(IsLittleEndian);
+                responseActions.Replace(message.Command, callback);
                 connector.Send(buffer);
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
                 Debug.LogFormat("<color=cyan>[TCPNetwork]</color> [Send] >> CMD:{0},TIME:{1}", cmd, DateTime.Now);

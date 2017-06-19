@@ -22,10 +22,17 @@ namespace Arthas.Network
 
         public object Command { get; private set; }
 
-        public DefaultMessage(object command, byte[] buf, bool withLength = true, params object[] parameters)
+        /// <summary>
+        /// 默认消息构造
+        /// </summary>
+        /// <param name="command">命令</param>
+        /// <param name="bodyBuffer">消息体</param>
+        /// <param name="withLength">消息体是否包含长度</param>
+        /// <param name="parameters">消息其他参数</param>
+        public DefaultMessage(object command, byte[] bodyBuffer, bool withLength = true, params object[] parameters)
         {
             Command = command;
-            buffer = buf;
+            buffer = bodyBuffer;
             WithLength = withLength;
             Parameters = parameters;
         }
@@ -53,7 +60,7 @@ namespace Arthas.Network
     /// </summary>
     public class DefaultMessageHandler : INetworkMessageHandler
     {
-        public INetworkMessage PackMessage(object command, object obj, params object[] parameters)
+        public virtual INetworkMessage PackMessage(object command, object obj, params object[] parameters)
         {
             var bodyBuffer = obj as byte[];
             if (bodyBuffer == null) {
@@ -67,7 +74,7 @@ namespace Arthas.Network
             }
         }
 
-        public INetworkMessage ParseMessage(byte[] buffer)
+        public virtual INetworkMessage ParseMessage(byte[] buffer)
         {
             var len = BitConverter.ToInt16(buffer, 0);
             var command = BitConverter.ToInt16(buffer, sizeof(short));
