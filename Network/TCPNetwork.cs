@@ -44,8 +44,8 @@ namespace Arthas.Network
         private readonly static Queue<INetworkMessage> msgQueue = new Queue<INetworkMessage>();
         private readonly static Dictionary<object, Action<INetworkMessage>> responseActions = new Dictionary<object, Action<INetworkMessage>>();
 
-        private WaitForSeconds heartbeatWaiter, timeoutWaiter;
-        private Coroutine checkTimeout;
+        private WaitForSeconds heartbeatWaiter, timeoutWaiter, connectPollWaiter = new WaitForSeconds(.5f);
+        private Coroutine checkTimeoutCor, checkConnectCor;
         private float currentTime, connectCheckDuration = .1f;
         private static object enterLock = new object();
 
@@ -69,12 +69,16 @@ namespace Arthas.Network
             if (connector.IsConnected) connector.Close();
             MessageHandler = handler ?? new DefaultMessageHandler();
             connector.Connect(ip, port);
-            checkTimeout = StartCoroutine(CheckeTimeout());
+            checkTimeoutCor = StartCoroutine(CheckeTimeoutAsync());
 #if UNITY_EDITOR
             Debug.LogFormat("Connect to server , <color=cyan>Addr:[{0}:{1}] ,wrapper:{2}.</color>", ip, port, MessageHandler.GetType());
 #endif
         }
 
+        /// <summary>
+        /// 根据网络配置连接到服务器
+        /// </summary>
+        /// <param name="configuration"></param>
         public static void Connect(Action callback = null,
            Action<string> error = null,
            INetworkMessageHandler handler = null)
@@ -85,11 +89,15 @@ namespace Arthas.Network
                 error,
                 handler);
         }
-
+      
         /// <summary>
-        /// 根据网络配置连接到服务器
+        /// 根据IP连接到服务器
         /// </summary>
-        /// <param name="configuration"></param>
+        /// <param name="ip"></param>
+        /// <param name="port"></param>
+        /// <param name="callback"></param>
+        /// <param name="error"></param>
+        /// <param name="handler"></param>
         public static void Connect(string ip,
             int port,
             Action callback = null,
@@ -109,18 +117,18 @@ namespace Arthas.Network
             Instance.Connect(ip, port, handler);
         }
 
-        private IEnumerator CheckeTimeout()
+        private IEnumerator CheckeTimeoutAsync()
         {
             while (true) {
                 yield return timeoutWaiter;
                 if (connector.IsConnected) {
                     OnConnected();
-                    StopCoroutine(checkTimeout);
+                    StopCoroutine(checkTimeoutCor);
                     yield break;
                 }
                 if ((currentTime += Time.deltaTime) > connectTimeout) {
                     currentTime = 0;
-                    StopCoroutine(checkTimeout);
+                    StopCoroutine(checkTimeoutCor);
                     if (ErrorCallback != null) {
                         ErrorCallback("Cannot connect to server , please check your network!");
                     }
@@ -128,18 +136,29 @@ namespace Arthas.Network
             }
         }
 
+        private IEnumerator CheckConnectionAsync()
+        {
+            while (true) {
+                yield return connectPollWaiter;
+                if (!connector.IsConnected) {
+                    OnDisconnected();
+                    StopCoroutine(checkConnectCor);
+                }
+            }
+        }
+
         private void OnConnected()
         {
-            if (ConnectedEvent != null)
-                ConnectedEvent();
-            HandleEvent(true);
+            if (ConnectedEvent != null) ConnectedEvent();
+            checkConnectCor = StartCoroutine(CheckConnectionAsync());
+            connector.MessageRespondEvent += OnMessageRespond;
             Debug.LogFormat("Connect server success, Addr : {0} .", connector.Address);
         }
 
         private void OnDisconnected()
         {
             if (DisconnectedEvent != null) DisconnectedEvent();
-            HandleEvent(false);
+            connector.MessageRespondEvent -= OnMessageRespond;
         }
 
         private void OnMessageRespond(byte[] buffer)
@@ -187,15 +206,9 @@ namespace Arthas.Network
             }
         }
 
-        private void HandleEvent(bool bind)
+        public static IEnumerator SendAsync(object cmd, object buf, Action<INetworkMessage> callback, params object[] parameters)
         {
-            if (bind) {
-                connector.MessageRespondEvent += OnMessageRespond;
-                connector.DisconnectEvent += OnDisconnected;
-            } else {
-                connector.MessageRespondEvent -= OnMessageRespond;
-                connector.DisconnectEvent -= OnDisconnected;
-            }
+            yield return null;
         }
 
         public static void Close()

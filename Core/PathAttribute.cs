@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System.IO;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -19,10 +20,12 @@ public class PathAttributeDrawer : PropertyDrawer
                 property.stringValue);
             GUI.color = Color.green;
             if (GUI.Button(new Rect(p.x + p.width * ratio, p.y, p.width * (1 - ratio), p.height), "+")) {
-                var path = pathAttr.PathType == PathType.Folder
+                var path = pathAttr.Type == PathType.Folder
                     ? EditorUtility.OpenFolderPanel("Select folder", property.stringValue, "")
                     : EditorUtility.OpenFilePanel("Select file", property.stringValue, pathAttr.FileExtension);
-                if (!string.IsNullOrEmpty(path)) property.stringValue = path;
+                if (!string.IsNullOrEmpty(path)) {
+                    property.stringValue = pathAttr.Relative ? "Assets" + path.Replace(Application.dataPath, "") : path;
+                }
             }
             GUI.color = Color.white;
         } else base.OnGUI(p, property, label);
@@ -34,11 +37,14 @@ public enum PathType { File, Folder }
 
 public class PathAttribute : PropertyAttribute
 {
-    public PathAttribute(PathType type = PathType.File, string ext = "")
+    public PathAttribute()
     {
-        PathType = type;
-        FileExtension = ext;
+        Type = PathType.File;
+        FileExtension = "";
+        Relative = false;
     }
+
     public string FileExtension { get; set; }
-    public PathType PathType { get; set; }
+    public PathType Type { get; set; }
+    public bool Relative { get; set; }
 }

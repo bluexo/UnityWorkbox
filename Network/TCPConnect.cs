@@ -6,6 +6,7 @@ using System;
 using System.Collections;
 using UnityEngine;
 using System.Text;
+using System.Threading;
 
 #if WINDOWS_UWP
 using Windows.Networking;
@@ -23,7 +24,6 @@ namespace Arthas.Network
         public bool IsConnected { get; private set; }
         public string Address { get; private set; }
         public event Action<byte[]> MessageRespondEvent;
-        public event Action DisconnectEvent;
         const int READ_BUFFER_SIZE = 4096;
         const int MSG_LEN_SIZE = 4;
         private byte[] readBuffer = new byte[READ_BUFFER_SIZE];
@@ -76,15 +76,14 @@ namespace Arthas.Network
         public void Connect(string ip, int port)
         {
             Debug.LogFormat("Connect to server ip:{0} port:{1}", ip, port);
-            try
-            {
+            try {
                 client = new TcpClient(ip, port);
-                client.GetStream().BeginRead(readBuffer, 0, READ_BUFFER_SIZE, Read, null);
+                var stream = client.GetStream();
+                stream.BeginRead(readBuffer, 0, READ_BUFFER_SIZE, Read, null);
                 IsConnected = true;
-                Address = ip + ":" + port;
+                Address = string.Format("{0}:{1}", ip, port);
             }
-            catch (Exception ex)
-            {
+            catch (Exception ex) {
                 client = null;
                 IsConnected = false;
                 Debug.LogErrorFormat("Can not connect to Server. Detail: {0}\n{1}", ex.Message, ex.StackTrace);
@@ -151,15 +150,12 @@ namespace Arthas.Network
 #else
         private void Read(IAsyncResult ar)
         {
-            try
-            {
+            try {
                 if (client == null) return;
                 var stream = client.GetStream();
                 var lengthToRead = stream.EndRead(ar);
-                if (lengthToRead < 1 || lengthToRead > READ_BUFFER_SIZE)
-                {
+                if (lengthToRead < 1 || lengthToRead > READ_BUFFER_SIZE) {
                     Debug.LogError("Stream read error , network will be closed!");
-                    Close();
                     return;
                 }
                 var arr = new byte[lengthToRead];
@@ -167,8 +163,7 @@ namespace Arthas.Network
                 if (MessageRespondEvent != null) MessageRespondEvent(arr);
                 stream.BeginRead(readBuffer, 0, READ_BUFFER_SIZE, Read, null);
             }
-            catch (Exception ex)
-            {
+            catch (Exception ex) {
                 Debug.LogErrorFormat("Server Disconnected, Detail:{0},\n{1}", ex.Message, ex.StackTrace);
                 Close();
             }
@@ -177,7 +172,6 @@ namespace Arthas.Network
 
         public void Close()
         {
-            if (DisconnectEvent != null) DisconnectEvent();
             IsConnected = false;
             if (client == null) return;
 #if WINDOWS_UWP
