@@ -77,10 +77,10 @@ namespace System.Collections
             }
         }
 
-        public static string ToArrayString<T>(this T[] arr)
+        public static string ToArrayString<T>(this T[] arr, char separator = ' ')
         {
             var str = string.Empty;
-            Array.ForEach(arr, a => str += a + " ");
+            Array.ForEach(arr, a => str += a.ToString() + separator);
             return str;
         }
     }
