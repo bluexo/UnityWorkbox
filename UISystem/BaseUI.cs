@@ -18,7 +18,11 @@ namespace Arthas.UI
         [SerializeField]
         [Range(1, 100)]
         private int sortOrder;
-        public virtual int SortOrder { get { return sortOrder; } }
+        public virtual int SortOrder
+        {
+            get { return sortOrder; }
+            set { sortOrder = value; }
+        }
 
         public event Action<BaseUI> UIShowEvent;
 

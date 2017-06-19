@@ -6,10 +6,10 @@ using UnityEngine.UI;
 namespace Arthas.UI
 {
     [RequireComponent(typeof(Toggle))]
-    public class ToggleTrigger : MonoBehaviour , ISelectableUITrigger
+    public class ToggleTrigger : MonoBehaviour, ISelectableUITrigger
     {
         public event Action<GameObject> TriggerEvent;
-       
+
         private Toggle toggler;
 
         void Start()
@@ -20,8 +20,7 @@ namespace Arthas.UI
 
         private void OnValueChanged(bool on)
         {
-            if (TriggerEvent != null)
-                TriggerEvent(toggler.gameObject);
+            if (TriggerEvent != null) TriggerEvent(toggler.gameObject);
         }
     }
 }

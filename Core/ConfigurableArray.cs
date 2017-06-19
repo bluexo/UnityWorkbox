@@ -41,7 +41,7 @@ namespace Arthas.Common
             GUI.color = Color.white;
             EditorGUILayout.EndHorizontal();
 
-            var rect = EditorGUILayout.BeginVertical();
+            EditorGUILayout.BeginVertical();
             for (var i = 0; i < itemsProperty.arraySize; i++) {
                 folds[i] = EditorGUILayout.Foldout(folds[i], string.Format("Item [{0}]", i));
                 if (folds[i]) {
