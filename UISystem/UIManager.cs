@@ -112,18 +112,23 @@ namespace Arthas.UI
             var header = uiType.GetTypeInfo().IsDefined(typeof(UIHeaderAttribute));
             var exclusive = uiType.GetTypeInfo().IsDefined(typeof(UIExclusiveAttribute), false);
             var order = uiType.GetTypeInfo().GetCustomAttributes(typeof(UIOrderAttribute), false);
+            //var uiOrder = order.Count > 0 ? order.FirstOrDefault() : new UIOrderAttribute(ui.SortOrder);;
 #else
             var header = uiType.IsDefined(typeof(UIHeaderAttribute), false);
             var exclusive = uiType.IsDefined(typeof(UIExclusiveAttribute), false);
             var order = uiType.GetCustomAttributes(typeof(UIOrderAttribute), false);
-#endif
             var uiOrder = order.Length > 0 ? order[0] as UIOrderAttribute : new UIOrderAttribute(ui.SortOrder);
+#endif
 
             var window = new WindowInfo()
             {
                 IsHeader = header,
                 IsExclusive = exclusive,
+#if WINDOWS_UWP
+                Order = ui.SortOrder,
+#else
                 Order = uiOrder.SortOrder,
+#endif
                 UI = ui
             };
             return window;
