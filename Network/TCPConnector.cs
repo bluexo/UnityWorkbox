@@ -19,7 +19,7 @@ using System.Net.Sockets;
 
 namespace Arthas.Network
 {
-    public class TCPConnect
+    public class TCPConnector : IConnector
     {
         public bool IsConnected { get; private set; }
         public string Address { get; private set; }
@@ -38,7 +38,7 @@ namespace Arthas.Network
 #else
         private TcpClient client;
 #endif
-        public TCPConnect()
+        public TCPConnector()
         {
             IsConnected = false;
         }
@@ -75,7 +75,6 @@ namespace Arthas.Network
         /// <param name="port"></param>
         public void Connect(string ip, int port)
         {
-            Debug.LogFormat("Connect to server ip:{0} port:{1}", ip, port);
             try {
                 client = new TcpClient(ip, port);
                 var stream = client.GetStream();
@@ -179,6 +178,12 @@ namespace Arthas.Network
 #else
             client.Close();
 #endif
+        }
+
+        public void Dispose()
+        {
+            Close();
+            GC.SuppressFinalize(this);
         }
     }
 }

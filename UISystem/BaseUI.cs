@@ -35,7 +35,6 @@ namespace Arthas.UI
         protected List<BaseUI> group = new List<BaseUI>();
         public IList<BaseUI> UIGroup { get { return group; } }
 
-
         #endregion show or hide event when ui active or deactive!
 
         public RectTransform RectTransform { get { return transform as RectTransform; } }
@@ -90,7 +89,7 @@ namespace Arthas.UI
 
         private static T instance;
 
-        public new virtual void Show()
+        public override void Show()
         {
             UIManager.AddUI(this);
             base.Show();

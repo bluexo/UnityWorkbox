@@ -40,7 +40,7 @@ namespace Arthas.Network
 
         public static bool IsConnected { get { return connector.IsConnected; } }
 
-        private readonly static TCPConnect connector = new TCPConnect();
+        private readonly static IConnector connector = new TCPConnector();
         private readonly static Queue<INetworkMessage> msgQueue = new Queue<INetworkMessage>();
         private readonly static Dictionary<object, Action<INetworkMessage>> responseActions = new Dictionary<object, Action<INetworkMessage>>();
 
@@ -89,7 +89,7 @@ namespace Arthas.Network
                 error,
                 handler);
         }
-      
+
         /// <summary>
         /// 根据IP连接到服务器
         /// </summary>
@@ -152,7 +152,6 @@ namespace Arthas.Network
             if (ConnectedEvent != null) ConnectedEvent();
             checkConnectCor = StartCoroutine(CheckConnectionAsync());
             connector.MessageRespondEvent += OnMessageRespond;
-            Debug.LogFormat("Connect server success, Addr : {0} .", connector.Address);
         }
 
         private void OnDisconnected()
@@ -206,9 +205,9 @@ namespace Arthas.Network
             }
         }
 
-        public static IEnumerator SendAsync(object cmd, object buf, Action<INetworkMessage> callback, params object[] parameters)
+        public static IEnumerator SendAsync(object cmd, object buf, params object[] parameters)
         {
-            yield return null;
+            throw new NotImplementedException();
         }
 
         public static void Close()
