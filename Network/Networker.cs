@@ -8,7 +8,7 @@ namespace Arthas.Network
     /// <summary>
     /// TCP网络
     /// </summary>
-    public class TCPNetwork : SingletonBehaviour<TCPNetwork>
+    public class Networker : SingletonBehaviour<Networker>
     {
         /// <summary>
         /// 推送事件
@@ -30,7 +30,7 @@ namespace Arthas.Network
         /// </summary>
         private static Action<string> ErrorCallback;
 
-        public static INetworkMessageHandler MessageHandler { get; private set; }
+        public static INetworkMessageHandler MessageHandler { get { return messageHandler; } }
 
         public static bool IsLittleEndian
         {
@@ -40,7 +40,6 @@ namespace Arthas.Network
 
         public static bool IsConnected { get { return connector.IsConnected; } }
 
-        private readonly static IConnector connector = new TCPConnector();
         private readonly static Queue<INetworkMessage> msgQueue = new Queue<INetworkMessage>();
         private readonly static Dictionary<object, Action<INetworkMessage>> responseActions = new Dictionary<object, Action<INetworkMessage>>();
 
@@ -54,11 +53,18 @@ namespace Arthas.Network
         [SerializeField]
         private bool isLittleEndian = true;
 
+        [SerializeField, HideInInspector]
+        private string connectorTypeName, messageHandlerName;
+        private static IConnector connector;
+        private static INetworkMessageHandler messageHandler;
+
         protected override void Awake()
         {
             base.Awake();
             timeoutWaiter = new WaitForSeconds(connectCheckDuration);
             heartbeatWaiter = new WaitForSeconds(heartbeatInterval);
+            connector = (IConnector)Activator.CreateInstance(Type.GetType(connectorTypeName, true, true));
+            messageHandler = (INetworkMessageHandler)Activator.CreateInstance(Type.GetType(messageHandlerName, true, true));
         }
 
         /// <summary>
@@ -67,7 +73,7 @@ namespace Arthas.Network
         protected void Connect(string ip, int port, INetworkMessageHandler handler = null)
         {
             if (connector.IsConnected) connector.Close();
-            MessageHandler = handler ?? new DefaultMessageHandler();
+            messageHandler = handler ?? new DefaultMessageHandler();
             connector.Connect(ip, port);
             checkTimeoutCor = StartCoroutine(CheckeTimeoutAsync());
 #if UNITY_EDITOR
@@ -117,7 +123,7 @@ namespace Arthas.Network
             Instance.Connect(ip, port, handler);
         }
 
-        private IEnumerator CheckeTimeoutAsync()
+        protected IEnumerator CheckeTimeoutAsync()
         {
             while (true) {
                 yield return timeoutWaiter;
@@ -136,7 +142,7 @@ namespace Arthas.Network
             }
         }
 
-        private IEnumerator CheckConnectionAsync()
+        protected IEnumerator CheckConnectionAsync()
         {
             while (true) {
                 yield return connectPollWaiter;
@@ -147,7 +153,7 @@ namespace Arthas.Network
             }
         }
 
-        private void OnConnected()
+        protected virtual void OnConnected()
         {
             if (ConnectedEvent != null) ConnectedEvent();
             checkConnectCor = StartCoroutine(CheckConnectionAsync());
@@ -157,13 +163,13 @@ namespace Arthas.Network
 #endif
         }
 
-        private void OnDisconnected()
+        protected virtual void OnDisconnected()
         {
             if (DisconnectedEvent != null) DisconnectedEvent();
             connector.MessageRespondEvent -= OnMessageRespond;
         }
 
-        private void OnMessageRespond(byte[] buffer)
+        protected virtual void OnMessageRespond(byte[] buffer)
         {
             lock (enterLock) {
                 var msg = MessageHandler.ParseMessage(buffer);

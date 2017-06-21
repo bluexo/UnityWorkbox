@@ -40,6 +40,11 @@ public class NetworkConfiguration : ScriptableObject
         {
             return base.GetHashCode();
         }
+
+        public override string ToString()
+        {
+            return string.Format("{0}:{1}", ip, port);
+        }
     }
 
     public static NetworkAddress Current
@@ -63,7 +68,7 @@ public class NetworkConfiguration : ScriptableObject
 
 #if UNITY_EDITOR
     public const string kPath = "Assets/Resources/" + kConfigPath + "NetworkConfiguration.asset";
-    public const string kMenu = "Network/切换网络", kLocal = "/localhost", kIntranet = "/内网", kInternet = "/外网";
+    public const string kMenu = "Network/Switch", kLocal = "/LOCAL", kIntranet = "/LAN", kInternet = "/WAN";
 
     [MenuItem(kMenu + kLocal, priority = 1)]
     public static void SetLocal()
@@ -116,7 +121,7 @@ public class NetworkConfiguration : ScriptableObject
         return true;
     }
 
-    [MenuItem("Network/配置网络", priority = 1)]
+    [MenuItem("Network/Configure", priority = 1)]
     public static void Configure()
     {
         Selection.activeObject = AssetDatabase.LoadAssetAtPath<NetworkConfiguration>(kPath);
@@ -125,8 +130,7 @@ public class NetworkConfiguration : ScriptableObject
     private static NetworkConfiguration GetConfiguration()
     {
         var conf = AssetDatabase.LoadAssetAtPath<NetworkConfiguration>(kPath);
-        if (conf == null)
-        {
+        if (conf == null) {
             conf = new NetworkConfiguration()
             {
                 local = new NetworkAddress() { ip = "127.0.0.1", port = 10000 },

@@ -8,7 +8,8 @@
     {
         public static T Instance
         {
-            get {
+            get
+            {
                 if (!instance) {
                     instance = FindObjectOfType<T>();
                     if (!instance) {
@@ -24,12 +25,12 @@
 
         protected virtual void Awake()
         {
-            DontDestroyOnLoad(gameObject);
             if (!instance) {
                 instance = this as T;
+                DontDestroyOnLoad(gameObject);
             } else {
                 if (instance && !instance.Equals(this))
-                    Destroy(gameObject);
+                    Destroy(instance);
             }
         }
     }

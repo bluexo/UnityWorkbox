@@ -9,7 +9,7 @@ namespace Arthas.Network
 
         static MessageDispatcher()
         {
-            TCPNetwork.PushEvent += Invoke;
+            Networker.PushEvent += Invoke;
         }
 
         /// <summary>

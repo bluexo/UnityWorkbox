@@ -31,11 +31,5 @@ namespace Arthas.Network
         {
             throw new NotImplementedException();
         }
-
-        public void Dispose()
-        {
-            Close();
-            GC.SuppressFinalize(this);
-        }
     }
 }

@@ -1,24 +1,34 @@
 ﻿using System;
 using System.Collections;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 namespace Arthas.UI
 {
-    public interface ILuaInvoker
-    {
-        void Initialize();
+    public enum PointerEventType { Click, Down, Up, Enter, Exit, Drag, Drop }
 
-        void Invoke(string funcName, params object[] parameters);
+    public abstract class BaseLuaInvoker : MonoBehaviour
+    {
+        public abstract void Initialize();
+
+        public abstract object[] Invoke(string funcName, params object[] parameters);
     }
 
-    public class LuaBehaviourUI : BaseUI
+    public sealed class LuaBehaviourUI : BaseUI,
+        IPointerClickHandler,
+        IPointerDownHandler,
+        IPointerUpHandler,
+        IPointerEnterHandler,
+        IPointerExitHandler,
+        IDragHandler,
+        IDropHandler
     {
-        public ILuaInvoker Invoker { get; private set; }
+        public BaseLuaInvoker Invoker { get; private set; }
 
         protected override void Awake()
         {
             base.Awake();
-            Invoker = GetComponent<ILuaInvoker>();
+            Invoker = GetComponent<BaseLuaInvoker>();
             if (Invoker != null) {
                 Invoker.Initialize();
                 Invoker.Invoke("Awake");
@@ -48,6 +58,41 @@ namespace Arthas.UI
         {
             UIManager.AddUI(this);
             base.Show();
+        }
+
+        public void OnPointerDown(PointerEventData eventData)
+        {
+            if (Invoker != null) Invoker.Invoke("OnPointerEvent", eventData, PointerEventType.Down);
+        }
+
+        public void OnPointerUp(PointerEventData eventData)
+        {
+            if (Invoker != null) Invoker.Invoke("OnPointerEvent", eventData, PointerEventType.Up);
+        }
+
+        public void OnPointerEnter(PointerEventData eventData)
+        {
+            if (Invoker != null) Invoker.Invoke("OnPointerEvent", eventData, PointerEventType.Enter);
+        }
+
+        public void OnPointerExit(PointerEventData eventData)
+        {
+            if (Invoker != null) Invoker.Invoke("OnPointerEvent", eventData, PointerEventType.Exit);
+        }
+
+        public void OnDrag(PointerEventData eventData)
+        {
+            if (Invoker != null) Invoker.Invoke("OnPointerEvent", eventData, PointerEventType.Drag);
+        }
+
+        public void OnDrop(PointerEventData eventData)
+        {
+            if (Invoker != null) Invoker.Invoke("OnPointerEvent", eventData, PointerEventType.Drop);
+        }
+
+        public void OnPointerClick(PointerEventData eventData)
+        {
+            if (Invoker != null) Invoker.Invoke("OnPointerEvent", eventData, PointerEventType.Click);
         }
     }
 }

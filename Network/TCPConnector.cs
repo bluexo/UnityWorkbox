@@ -3,10 +3,7 @@
 //////////////////////////////////////////////////////////////                                                           
 
 using System;
-using System.Collections;
 using UnityEngine;
-using System.Text;
-using System.Threading;
 
 #if WINDOWS_UWP
 using Windows.Networking;
