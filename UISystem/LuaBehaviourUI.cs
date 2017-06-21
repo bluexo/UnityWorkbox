@@ -1,71 +1,53 @@
 ﻿using System;
-using UnityEngine;
-using UnityEngine.UI;
-using UnityEngine.EventSystems;
 using System.Collections;
-
-#if LUA
+using UnityEngine;
 
 namespace Arthas.UI
 {
-
-#if UNITY_EDITOR
-    using UnityEditor;
-
-    [InitializeOnLoad]
-    [CustomEditor(typeof(LuaBehaviourUI), true)]
-    public class LuaBehaviourInitializer : Editor
-    {
-        static ILuaInvoker invoker;
-
-        static LuaBehaviourInitializer()
-        {
-            var types = typeof(ILuaInvoker).Assembly.GetTypes();
-            var type = Array.Find(types, m => m.IsSubclassOf(typeof(ILuaInvoker)));
-            if (type == null) {
-                Debug.LogError("Cannot found LuaInvoker SubClass , LuaBehaviourUI will not invok ...!");
-                return;
-            }
-            invoker = (ILuaInvoker)Activator.CreateInstance(type);
-        }
-
-    }
-#endif
-
     public interface ILuaInvoker
     {
-        void CallMethod(string funcName, params object[] parameters);
+        void Initialize();
+
+        void Invoke(string funcName, params object[] parameters);
     }
 
     public class LuaBehaviourUI : BaseUI
     {
-        [SerializeField]
-        public ILuaInvoker luaInvoker;
+        public ILuaInvoker Invoker { get; private set; }
 
         protected override void Awake()
         {
             base.Awake();
-            luaInvoker.CallMethod("Awake");
+            Invoker = GetComponent<ILuaInvoker>();
+            if (Invoker != null) {
+                Invoker.Initialize();
+                Invoker.Invoke("Awake");
+            } else
+                Debug.LogErrorFormat("Cannot found LuaInvoker on UIGameobject {0}!!!", gameObject.name);
         }
 
         protected override void Start()
         {
             base.Start();
-            luaInvoker.CallMethod("Start");
+            if (Invoker != null) Invoker.Invoke("Start");
         }
 
-        public override void Hide()
+        protected override void OnEnable()
         {
-            base.Hide();
-            luaInvoker.CallMethod("Show");
+            base.OnEnable();
+            if (Invoker != null) Invoker.Invoke("OnEnable");
+        }
+
+        protected override void OnDisable()
+        {
+            base.OnDisable();
+            if (Invoker != null) Invoker.Invoke("OnDisable");
         }
 
         public override void Show()
         {
+            UIManager.AddUI(this);
             base.Show();
-            luaInvoker.CallMethod("Hide");
         }
     }
 }
-
-#endif

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using Arthas.Protocol;
 using UnityEngine;
 namespace Arthas.Network
 {

@@ -116,7 +116,7 @@ namespace Arthas.Network
 #else
         public void Send(byte[] buffer)
         {
-            if (client == null) return;
+            if (client == null || !client.Connected) return;
             var writer = new BinaryWriter(client.GetStream());
             writer.Write(buffer);
             writer.Flush();
@@ -178,12 +178,6 @@ namespace Arthas.Network
 #else
             client.Close();
 #endif
-        }
-
-        public void Dispose()
-        {
-            Close();
-            GC.SuppressFinalize(this);
         }
     }
 }
