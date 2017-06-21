@@ -172,7 +172,7 @@ namespace Arthas.Network
         protected virtual void OnMessageRespond(byte[] buffer)
         {
             lock (enterLock) {
-                var msg = MessageHandler.ParseMessage(buffer);
+                var msg = messageHandler.ParseMessage(buffer);
                 msgQueue.Enqueue(msg);
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
                 Debug.LogFormat("<color=blue>[TCPNetwork]</color> [Receive] << CMD:{0},TIME:{1}", msg.Command, DateTime.Now);
@@ -201,7 +201,7 @@ namespace Arthas.Network
         public static void Send(object cmd, object buf, Action<INetworkMessage> callback, params object[] parameters)
         {
             try {
-                var message = MessageHandler.PackMessage(cmd, buf, callback, parameters);
+                var message = messageHandler.PackMessage(cmd, buf, callback, parameters);
                 var buffer = message.GetBuffer(IsLittleEndian);
                 responseActions.Replace(message.Command, callback);
                 connector.Send(buffer);
