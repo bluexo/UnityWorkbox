@@ -15,20 +15,20 @@ public class NetworkerEditor : Editor
 
     private void OnEnable()
     {
-        var connTypes = typeof(IConnector).Assembly.GetTypes();
-        var conns = Array.FindAll(connTypes, t => t.GetInterface(typeof(IConnector).Name, true) != null && t != typeof(IConnector));
+        var allTypes = typeof(Networker).Assembly.GetTypes();
+
+        var conns = Array.FindAll(allTypes, t => t.GetInterface(typeof(IConnector).Name, true) != null && t != typeof(IConnector));
         conns.Foreach(c => ArrayUtility.Add(ref connectors, c));
 
-        var handlerTypes = typeof(INetworkMessageHandler).Assembly.GetTypes();
-        var handlerArray = Array.FindAll(connTypes, t => t.GetInterface(typeof(INetworkMessageHandler).Name, true) != null && t != typeof(INetworkMessageHandler));
+        var handlerArray = Array.FindAll(allTypes, t => t.GetInterface(typeof(INetworkMessageHandler).Name, true) != null && t != typeof(INetworkMessageHandler));
         handlerArray.Foreach(c => ArrayUtility.Add(ref handlers, c));
 
         connTypeName = serializedObject.FindProperty("connectorTypeName");
         handlerTypeName = serializedObject.FindProperty("messageHandlerName");
         var connType = Array.Find(connectors, c => c.FullName.Equals(connTypeName.stringValue, StringComparison.InvariantCultureIgnoreCase));
-        connectorIndex = Array.IndexOf(connectors, connType);
+        connectorIndex = connType == null ? 0 : Array.IndexOf(connectors, connType);
         var handlerType = Array.Find(handlers, h => h.FullName.Equals(handlerTypeName.stringValue, StringComparison.InvariantCultureIgnoreCase));
-        handlerIndex = Array.IndexOf(handlers, handlerType);
+        handlerIndex = handlerType == null ? 0 : Array.IndexOf(handlers, handlerType);
     }
 
     public override void OnInspectorGUI()
