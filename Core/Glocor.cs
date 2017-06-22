@@ -33,6 +33,9 @@ namespace UnityEngine
         public static void Stop(IEnumerator collection)
         {
             Count--;
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+            Debug.LogFormat("<color=cyan>Stop a global coroutine , count = <size=14>{0}</size></color> ", Count);
+#endif
             Instance.StopCoroutine(collection);
         }
 
@@ -43,6 +46,9 @@ namespace UnityEngine
         public static void Stop(Coroutine cor)
         {
             Count--;
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+            Debug.LogFormat("<color=cyan>Stop a global coroutine , count = <size=14>{0}</size></color> ", Count);
+#endif
             Instance.StopCoroutine(cor);
         }
 

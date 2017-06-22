@@ -6,7 +6,7 @@ using System.Collections.Generic;
 namespace Arthas.Network
 {
     /// <summary>
-    /// TCP网络
+    /// 网络
     /// </summary>
     public class Networker : SingletonBehaviour<Networker>
     {

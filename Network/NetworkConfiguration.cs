@@ -5,6 +5,7 @@
  * ******************************************************/
 
 using UnityEngine;
+using Arthas.AssetBundles;
 
 #if UNITY_EDITOR
 using UnityEditor;
@@ -51,7 +52,11 @@ public class NetworkConfiguration : ScriptableObject
     {
         get
         {
+#if ASSET_BUNDLES
+            var conf = AssetBundleManager.LoadMainAssetSync<NetworkConfiguration>(typeof(NetworkConfiguration).Name);
+#else
             var conf = Resources.Load<NetworkConfiguration>(kConfigPath + "NetworkConfiguration");
+#endif
             if (string.IsNullOrEmpty(conf.current.ip)) conf.current = conf.intranet;
             return conf.current;
         }
@@ -137,7 +142,7 @@ public class NetworkConfiguration : ScriptableObject
                 intranet = new NetworkAddress() { ip = "192.168.1.10", port = 10000 },
                 internet = new NetworkAddress() { ip = "0.0.0.0", port = 10000 }
             };
-            var path = Path.Combine(Application.dataPath, "Resouces/" + kConfigPath);
+            var path = Path.Combine(Application.dataPath, "Resources/" + kConfigPath);
             if (!Directory.Exists(path)) Directory.CreateDirectory(path);
             AssetDatabase.CreateAsset(conf, kPath);
             EditorUtility.SetDirty(conf);

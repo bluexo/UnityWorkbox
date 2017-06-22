@@ -14,7 +14,8 @@ namespace Arthas.Network
     {
         private Uri mUrl;
 
-        public WebSocketConnector() {
+        public WebSocketConnector()
+        {
         }
 
         public WebSocketConnector(Uri url)
@@ -110,7 +111,6 @@ namespace Arthas.Network
         bool m_IsConnected = false;
         string m_Error = null;
 
-        public event Action<byte[]> MessageRespondEvent;
 
         public IEnumerator Connect()
         {
@@ -125,7 +125,9 @@ namespace Arthas.Network
 
         public void Send(byte[] buffer)
         {
+#if !UNITY_WSA
             m_Socket.Send(buffer);
+#endif
         }
 
         public byte[] Recv()
@@ -140,14 +142,15 @@ namespace Arthas.Network
             m_Socket.Close();
         }
 
-        public void Connect(string ip, int port)
-        {
-        }
 
         public string Error { get { return m_Error; } }
 
-        public bool IsConnected { get { return m_Socket.IsAlive; } }
-
 #endif
+        public event Action<byte[]> MessageRespondEvent;
+
+        public void Connect(string ip, int port)
+        {
+        }
+        public bool IsConnected { get { return true; } }
     }
 }
