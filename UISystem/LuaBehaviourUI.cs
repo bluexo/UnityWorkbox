@@ -20,10 +20,13 @@ namespace Arthas.UI
             if (!comp && invokerType != null) go.AddComponent(invokerType);
             serializedObject.ApplyModifiedProperties();
         }
+
+
     }
 #endif
 
-    public enum PointerEventType { Click, Down, Up, Enter, Exit, Drag, Drop }
+    [Flags]
+    public enum PointerEventType { Nothing = 0, Click = 1, Down = 4, Up = 8, Enter = 16, Exit = 32, Drag = 64, Drop = 256, Everything = -1 }
 
     [DisallowMultipleComponent]
     public abstract class BaseLuaInvoker : MonoBehaviour
@@ -44,9 +47,9 @@ namespace Arthas.UI
         IDragHandler,
         IDropHandler
     {
-        private readonly HashSet<string> funcs = new HashSet<string>();
-
         public BaseLuaInvoker Invoker { get; private set; }
+        [SerializeField, EnumMaskField]
+        private PointerEventType pointerEventType;
 
         protected override void Start()
         {
@@ -79,37 +82,44 @@ namespace Arthas.UI
 
         public void OnPointerDown(PointerEventData eventData)
         {
-            if (Invoker != null) Invoker.TryInvoke("OnPointerEvent", eventData, PointerEventType.Down);
+            if (Invoker != null && (pointerEventType & PointerEventType.Down) != 0)
+                Invoker.TryInvoke("OnPointerEvent", eventData, PointerEventType.Down);
         }
 
         public void OnPointerUp(PointerEventData eventData)
         {
-            if (Invoker != null) Invoker.TryInvoke("OnPointerEvent", eventData, PointerEventType.Up);
+            if (Invoker != null && (pointerEventType & PointerEventType.Up) != 0)
+                Invoker.TryInvoke("OnPointerEvent", eventData, PointerEventType.Up);
         }
 
         public void OnPointerEnter(PointerEventData eventData)
         {
-            if (Invoker != null) Invoker.TryInvoke("OnPointerEvent", eventData, PointerEventType.Enter);
+            if (Invoker != null && (pointerEventType & PointerEventType.Enter) != 0)
+                Invoker.TryInvoke("OnPointerEvent", eventData, PointerEventType.Enter);
         }
 
         public void OnPointerExit(PointerEventData eventData)
         {
-            if (Invoker != null) Invoker.TryInvoke("OnPointerEvent", eventData, PointerEventType.Exit);
+            if (Invoker != null && (pointerEventType & PointerEventType.Exit) != 0)
+                Invoker.TryInvoke("OnPointerEvent", eventData, PointerEventType.Exit);
         }
 
         public void OnDrag(PointerEventData eventData)
         {
-            if (Invoker != null) Invoker.TryInvoke("OnPointerEvent", eventData, PointerEventType.Drag);
+            if (Invoker != null && (pointerEventType & PointerEventType.Drag) != 0)
+                Invoker.TryInvoke("OnPointerEvent", eventData, PointerEventType.Drag);
         }
 
         public void OnDrop(PointerEventData eventData)
         {
-            if (Invoker != null) Invoker.TryInvoke("OnPointerEvent", eventData, PointerEventType.Drop);
+            if (Invoker != null && (pointerEventType & PointerEventType.Drop) != 0)
+                Invoker.TryInvoke("OnPointerEvent", eventData, PointerEventType.Drop);
         }
 
         public void OnPointerClick(PointerEventData eventData)
         {
-            if (Invoker != null) Invoker.TryInvoke("OnPointerEvent", eventData, PointerEventType.Click);
+            if (Invoker != null && (pointerEventType & PointerEventType.Click) != 0)
+                Invoker.TryInvoke("OnPointerEvent", eventData, PointerEventType.Click);
         }
     }
 }
