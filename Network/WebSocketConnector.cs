@@ -1,4 +1,5 @@
-﻿using System;
+﻿#if !UNITY_WSA
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
@@ -14,7 +15,8 @@ namespace Arthas.Network
     {
         private Uri mUrl;
 
-        public WebSocketConnector() {
+        public WebSocketConnector()
+        {
         }
 
         public WebSocketConnector(Uri url)
@@ -146,8 +148,9 @@ namespace Arthas.Network
 
         public string Error { get { return m_Error; } }
 
-        public bool IsConnected { get { return m_Socket.IsAlive; } }
+        public bool IsConnected { get; private set; }
 
 #endif
     }
 }
+#endif
