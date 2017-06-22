@@ -1,4 +1,5 @@
-﻿using System;
+﻿#if !UNITY_WSA
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
@@ -111,6 +112,7 @@ namespace Arthas.Network
         bool m_IsConnected = false;
         string m_Error = null;
 
+        public event Action<byte[]> MessageRespondEvent;
 
         public IEnumerator Connect()
         {
@@ -125,9 +127,7 @@ namespace Arthas.Network
 
         public void Send(byte[] buffer)
         {
-#if !UNITY_WSA
             m_Socket.Send(buffer);
-#endif
         }
 
         public byte[] Recv()
@@ -142,15 +142,15 @@ namespace Arthas.Network
             m_Socket.Close();
         }
 
-
-        public string Error { get { return m_Error; } }
-
-#endif
-        public event Action<byte[]> MessageRespondEvent;
-
         public void Connect(string ip, int port)
         {
         }
-        public bool IsConnected { get { return true; } }
+
+        public string Error { get { return m_Error; } }
+
+        public bool IsConnected { get; private set; }
+
+#endif
     }
 }
+#endif

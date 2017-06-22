@@ -1,17 +1,41 @@
 ﻿using System;
-using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
 namespace Arthas.UI
 {
-    public enum PointerEventType { Click, Down, Up, Enter, Exit, Drag, Drop }
+#if UNITY_EDITOR
+    using UnityEditor;
 
+    [CustomEditor(typeof(LuaBehaviourUI), isFallback = true)]
+    public class LuaBehaviourUIEditor : Editor
+    {
+        private void OnEnable()
+        {
+            var types = typeof(BaseLuaInvoker).Assembly.GetTypes();
+            var invokerType = Array.Find(types, t => t.IsSubclassOf(typeof(BaseLuaInvoker)));
+            var go = (target as Component).gameObject;
+            var comp = go.GetComponent(typeof(BaseLuaInvoker));
+            if (!comp && invokerType != null) go.AddComponent(invokerType);
+            serializedObject.ApplyModifiedProperties();
+        }
+
+
+    }
+#endif
+
+    [Flags]
+    public enum PointerEventType { Nothing = 0, Click = 1, Down = 4, Up = 8, Enter = 16, Exit = 32, Drag = 64, Drop = 256, Everything = -1 }
+
+    [DisallowMultipleComponent]
     public abstract class BaseLuaInvoker : MonoBehaviour
     {
         public abstract void Initialize();
 
-        public abstract object[] Invoke(string funcName, params object[] parameters);
+        public abstract bool TryInvoke(string funcName, params object[] parameters);
+
+        public virtual object[] Invoke(string funcName, params object[] parameters) { throw new NotImplementedException(); }
     }
 
     public sealed class LuaBehaviourUI : BaseUI,
@@ -24,34 +48,30 @@ namespace Arthas.UI
         IDropHandler
     {
         public BaseLuaInvoker Invoker { get; private set; }
-
-        protected override void Awake()
-        {
-            base.Awake();
-            Invoker = GetComponent<BaseLuaInvoker>();
-            if (Invoker != null) {
-                Invoker.Initialize();
-                Invoker.Invoke("Awake");
-            } else
-                Debug.LogErrorFormat("Cannot found LuaInvoker on UIGameobject {0}!!!", gameObject.name);
-        }
+        [SerializeField, EnumMaskField]
+        private PointerEventType pointerEventType;
 
         protected override void Start()
         {
             base.Start();
-            if (Invoker != null) Invoker.Invoke("Start");
+            Invoker = GetComponent<BaseLuaInvoker>();
+            if (Invoker != null) {
+                Invoker.Initialize();
+                Invoker.TryInvoke("Start");
+            } else
+                Debug.LogErrorFormat("Cannot found LuaInvoker on UIGameobject {0}!!!", gameObject.name);
         }
 
         protected override void OnEnable()
         {
             base.OnEnable();
-            if (Invoker != null) Invoker.Invoke("OnEnable");
+            if (Invoker != null) Invoker.TryInvoke("OnEnable");
         }
 
         protected override void OnDisable()
         {
             base.OnDisable();
-            if (Invoker != null) Invoker.Invoke("OnDisable");
+            if (Invoker != null) Invoker.TryInvoke("OnDisable");
         }
 
         public override void Show()
@@ -62,37 +82,44 @@ namespace Arthas.UI
 
         public void OnPointerDown(PointerEventData eventData)
         {
-            if (Invoker != null) Invoker.Invoke("OnPointerEvent", eventData, PointerEventType.Down);
+            if (Invoker != null && (pointerEventType & PointerEventType.Down) != 0)
+                Invoker.TryInvoke("OnPointerEvent", eventData, PointerEventType.Down);
         }
 
         public void OnPointerUp(PointerEventData eventData)
         {
-            if (Invoker != null) Invoker.Invoke("OnPointerEvent", eventData, PointerEventType.Up);
+            if (Invoker != null && (pointerEventType & PointerEventType.Up) != 0)
+                Invoker.TryInvoke("OnPointerEvent", eventData, PointerEventType.Up);
         }
 
         public void OnPointerEnter(PointerEventData eventData)
         {
-            if (Invoker != null) Invoker.Invoke("OnPointerEvent", eventData, PointerEventType.Enter);
+            if (Invoker != null && (pointerEventType & PointerEventType.Enter) != 0)
+                Invoker.TryInvoke("OnPointerEvent", eventData, PointerEventType.Enter);
         }
 
         public void OnPointerExit(PointerEventData eventData)
         {
-            if (Invoker != null) Invoker.Invoke("OnPointerEvent", eventData, PointerEventType.Exit);
+            if (Invoker != null && (pointerEventType & PointerEventType.Exit) != 0)
+                Invoker.TryInvoke("OnPointerEvent", eventData, PointerEventType.Exit);
         }
 
         public void OnDrag(PointerEventData eventData)
         {
-            if (Invoker != null) Invoker.Invoke("OnPointerEvent", eventData, PointerEventType.Drag);
+            if (Invoker != null && (pointerEventType & PointerEventType.Drag) != 0)
+                Invoker.TryInvoke("OnPointerEvent", eventData, PointerEventType.Drag);
         }
 
         public void OnDrop(PointerEventData eventData)
         {
-            if (Invoker != null) Invoker.Invoke("OnPointerEvent", eventData, PointerEventType.Drop);
+            if (Invoker != null && (pointerEventType & PointerEventType.Drop) != 0)
+                Invoker.TryInvoke("OnPointerEvent", eventData, PointerEventType.Drop);
         }
 
         public void OnPointerClick(PointerEventData eventData)
         {
-            if (Invoker != null) Invoker.Invoke("OnPointerEvent", eventData, PointerEventType.Click);
+            if (Invoker != null && (pointerEventType & PointerEventType.Click) != 0)
+                Invoker.TryInvoke("OnPointerEvent", eventData, PointerEventType.Click);
         }
     }
 }

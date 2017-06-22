@@ -15,12 +15,12 @@ public class NetworkerEditor : Editor
 
     private void OnEnable()
     {
-        var connTypes = typeof(IConnector).Assembly.GetTypes();
-        var conns = Array.FindAll(connTypes, t => t.GetInterface(typeof(IConnector).Name, true) != null && t != typeof(IConnector));
+        var allTypes = typeof(Networker).Assembly.GetTypes();
+
+        var conns = Array.FindAll(allTypes, t => t.GetInterface(typeof(IConnector).Name, true) != null && t != typeof(IConnector));
         conns.Foreach(c => ArrayUtility.Add(ref connectors, c));
 
-        var handlerTypes = typeof(INetworkMessageHandler).Assembly.GetTypes();
-        var handlerArray = Array.FindAll(connTypes, t => t.GetInterface(typeof(INetworkMessageHandler).Name, true) != null && t != typeof(INetworkMessageHandler));
+        var handlerArray = Array.FindAll(allTypes, t => t.GetInterface(typeof(INetworkMessageHandler).Name, true) != null && t != typeof(INetworkMessageHandler));
         handlerArray.Foreach(c => ArrayUtility.Add(ref handlers, c));
 
         connTypeName = serializedObject.FindProperty("connectorTypeName");

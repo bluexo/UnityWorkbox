@@ -70,14 +70,15 @@ namespace Arthas.Network
         /// <summary>
         /// 连接到服务器
         /// </summary>
-        protected void Connect(string ip, int port, INetworkMessageHandler handler = null)
+        protected void Connect(string ip, int port, IConnector conn, INetworkMessageHandler handler = null)
         {
             if (connector.IsConnected) connector.Close();
             messageHandler = handler ?? new DefaultMessageHandler();
+            connector = conn ?? new TCPConnector();
             connector.Connect(ip, port);
             checkTimeoutCor = StartCoroutine(CheckeTimeoutAsync());
 #if UNITY_EDITOR
-            Debug.LogFormat("Connect to server , <color=cyan>Addr:[{0}:{1}] ,wrapper:{2}.</color>", ip, port, MessageHandler.GetType());
+            Debug.LogFormat("Connect to server , <color=cyan>Addr:[{0}:{1}] ,connector:{2} ,wrapper:{3}.</color>", ip, port, connector.GetType(), MessageHandler.GetType());
 #endif
         }
 
@@ -87,12 +88,14 @@ namespace Arthas.Network
         /// <param name="configuration"></param>
         public static void Connect(Action callback = null,
            Action<string> error = null,
+           IConnector conn = null,
            INetworkMessageHandler handler = null)
         {
             Connect(NetworkConfiguration.Current.ip,
                 NetworkConfiguration.Current.port,
                 callback,
                 error,
+                conn,
                 handler);
         }
 
@@ -108,6 +111,7 @@ namespace Arthas.Network
             int port,
             Action callback = null,
             Action<string> error = null,
+            IConnector connector = null,
             INetworkMessageHandler handler = null)
         {
 #if !UNITY_EDITOR && !UNITY_STANDALONE
@@ -120,7 +124,7 @@ namespace Arthas.Network
 #endif
             ErrorCallback = error;
             ConnectedEvent = callback;
-            Instance.Connect(ip, port, handler);
+            Instance.Connect(ip, port, connector, handler);
         }
 
         protected IEnumerator CheckeTimeoutAsync()
