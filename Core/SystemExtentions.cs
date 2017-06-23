@@ -80,7 +80,7 @@ namespace System.Collections
         public static string ToArrayString<T>(this T[] arr, char separator = ' ')
         {
             var str = string.Empty;
-            Array.ForEach(arr, a => str += a.ToString() + separator);
+            for (var i = 0; i < arr.Length; i++) str += arr[i].ToString() + separator;
             return str;
         }
     }

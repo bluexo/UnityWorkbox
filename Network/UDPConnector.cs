@@ -13,7 +13,7 @@ namespace Arthas.Network
     {
         public bool IsConnected { get; private set; }
 
-        public UdpClient client;
+        //public UdpClient client;
 
         public event Action<byte[]> MessageRespondEvent;
 

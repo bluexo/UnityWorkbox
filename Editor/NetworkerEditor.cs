@@ -9,7 +9,7 @@ using System.Reflection;
 [CustomEditor(typeof(Networker))]
 public class NetworkerEditor : Editor
 {
-    int connectorIndex, handlerIndex;
+    int connectorIndex = 0, handlerIndex = 0;
     private Type[] connectors = { }, handlers = { };
     private SerializedProperty connTypeName, handlerTypeName;
 
@@ -42,11 +42,13 @@ public class NetworkerEditor : Editor
 
         connectors.Foreach(c => ArrayUtility.Add(ref connectorNames, c.Name));
         connectorIndex = EditorGUILayout.Popup("Connector", connectorIndex, connectorNames);
-        connTypeName.stringValue = connectors[connectorIndex].FullName;
+        if (connectorIndex < connectors.Length)
+            connTypeName.stringValue = connectors[connectorIndex].FullName;
 
         handlers.Foreach(c => ArrayUtility.Add(ref handlerNames, c.Name));
         handlerIndex = EditorGUILayout.Popup("MessageHandler", handlerIndex, handlerNames);
-        handlerTypeName.stringValue = handlers[handlerIndex].FullName;
+        if (handlerIndex < handlers.Length)
+            handlerTypeName.stringValue = handlers[handlerIndex].FullName;
 
         EditorGUILayout.LabelField(new GUIContent("[Server Address] ?", "Click menu [ NETWORK ] switch or config address!"), new GUIContent(NetworkConfiguration.Current.ToString()));
         serializedObject.ApplyModifiedProperties();
