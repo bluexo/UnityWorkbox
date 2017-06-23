@@ -1,11 +1,12 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using UnityEditor;
 using UnityEngine;
 
 namespace Arthas.UI
 {
     [CustomEditor(typeof(BaseUI), true)]
-    public class UIEditor : Editor
+    public class BaseUIEditor : Editor
     {
         [MenuItem("UI/Create UIManager")]
         public static void AddUICanvas()
@@ -36,10 +37,7 @@ namespace Arthas.UI
         }
 
         [MenuItem("UI/Create UI Script with selection")]
-        public static void CreateUIScript()
-        {
-            CreateUIPanel();
-        }
+        public static void CreateUIScript() { CreateUIPanel(); }
 
         public static void CreateUIPanel(bool start = false)
         {
@@ -115,6 +113,20 @@ namespace Arthas.UI
                 EditorGUILayout.PropertyField(serializedObject.FindProperty("BeforeHide"));
                 EditorGUILayout.PropertyField(serializedObject.FindProperty("AfterHide"));
             }
+            serializedObject.ApplyModifiedProperties();
+        }
+    }
+
+    [CustomEditor(typeof(LuaBehaviourUI))]
+    public class LuaBehaviourUIEditor : Editor
+    {
+        private void OnEnable()
+        {
+            var types = typeof(BaseLuaInvoker).Assembly.GetTypes();
+            var invokerType = Array.Find(types, t => t.IsSubclassOf(typeof(BaseLuaInvoker)));
+            var go = (target as Component).gameObject;
+            var comp = go.GetComponent(typeof(BaseLuaInvoker));
+            if (!comp && invokerType != null) go.AddComponent(invokerType);
             serializedObject.ApplyModifiedProperties();
         }
     }

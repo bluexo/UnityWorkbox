@@ -5,28 +5,20 @@ using UnityEngine.EventSystems;
 
 namespace Arthas.UI
 {
-#if UNITY_EDITOR
-    using UnityEditor;
-
-    [CustomEditor(typeof(LuaBehaviourUI), isFallback = true)]
-    public class LuaBehaviourUIEditor : Editor
-    {
-        private void OnEnable()
-        {
-            var types = typeof(BaseLuaInvoker).Assembly.GetTypes();
-            var invokerType = Array.Find(types, t => t.IsSubclassOf(typeof(BaseLuaInvoker)));
-            var go = (target as Component).gameObject;
-            var comp = go.GetComponent(typeof(BaseLuaInvoker));
-            if (!comp && invokerType != null) go.AddComponent(invokerType);
-            serializedObject.ApplyModifiedProperties();
-        }
-
-
-    }
-#endif
-
     [Flags]
-    public enum PointerEventType { Nothing = 0, Click = 1, Down = 4, Up = 8, Enter = 16, Exit = 32, Drag = 64, Drop = 256, Everything = -1 }
+    public enum PointerEventType
+    {
+        Nothing = 0,
+        Click = 1,
+        Down = 4,
+        Up = 8,
+        Enter = 16,
+        Exit = 32,
+        Drag = 64,
+        Drop = 128,
+        Scroll = 256,
+        Everything = -1
+    }
 
     [DisallowMultipleComponent]
     public abstract class BaseLuaInvoker : MonoBehaviour
@@ -44,6 +36,7 @@ namespace Arthas.UI
         IPointerUpHandler,
         IPointerEnterHandler,
         IPointerExitHandler,
+        IScrollHandler,
         IDragHandler,
         IDropHandler
     {
@@ -120,6 +113,12 @@ namespace Arthas.UI
         {
             if (Invoker != null && (pointerEventType & PointerEventType.Click) != 0)
                 Invoker.TryInvoke("OnPointerEvent", eventData, PointerEventType.Click);
+        }
+
+        public void OnScroll(PointerEventData eventData)
+        {
+            if (Invoker != null && (pointerEventType & PointerEventType.Scroll) != 0)
+                Invoker.TryInvoke("OnPointerEvent", eventData, PointerEventType.Scroll);
         }
     }
 }

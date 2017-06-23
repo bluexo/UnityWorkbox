@@ -7,7 +7,7 @@ namespace UnityEngine
 #if UNITY_EDITOR
     using UnityEditor;
     [CustomPropertyDrawer(typeof(EnumMaskFieldAttribute))]
-    public class MaskAttrbuteDrawer : PropertyDrawer
+    public class EnumMaskFieldAttrbuteDrawer : PropertyDrawer
     {
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
@@ -15,7 +15,7 @@ namespace UnityEngine
                 base.OnGUI(position, property, label);
                 return;
             }
-            property.intValue = EditorGUILayout.MaskField("PointerEvent", property.intValue, Enum.GetNames(fieldInfo.FieldType));
+            property.intValue = EditorGUI.MaskField(position, "PointerEvents", property.intValue, Enum.GetNames(fieldInfo.FieldType));
         }
     }
 
