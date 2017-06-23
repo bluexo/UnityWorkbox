@@ -72,6 +72,7 @@ namespace Arthas.UI
         }
     }
 
+    [DisallowMultipleComponent]
     public abstract class WindowUI<T> : BaseUI where T : BaseUI
     {
         public static T Instance

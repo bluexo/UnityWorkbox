@@ -20,8 +20,6 @@ namespace Arthas.UI
             if (!comp && invokerType != null) go.AddComponent(invokerType);
             serializedObject.ApplyModifiedProperties();
         }
-
-
     }
 #endif
 
@@ -38,7 +36,7 @@ namespace Arthas.UI
         public virtual object[] Invoke(string funcName, params object[] parameters) { throw new NotImplementedException(); }
     }
 
-    public sealed class LuaBehaviourUI : BaseUI,
+    public class LuaBehaviourUI : BaseUI,
         IPointerClickHandler,
         IPointerDownHandler,
         IPointerUpHandler,
@@ -59,7 +57,7 @@ namespace Arthas.UI
                 Invoker.Initialize();
                 Invoker.TryInvoke("Start");
             } else
-                Debug.LogErrorFormat("Cannot found LuaInvoker on UIGameobject {0}!!!", gameObject.name);
+                Debug.LogErrorFormat("Cannot found LuaInvoker on {1} with {0} !!!", typeof(LuaBehaviourUI).Name, gameObject.name);
         }
 
         protected override void OnEnable()

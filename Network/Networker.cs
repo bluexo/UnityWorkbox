@@ -73,8 +73,8 @@ namespace Arthas.Network
         protected void Connect(string ip, int port, IConnector conn, INetworkMessageHandler handler = null)
         {
             if (connector.IsConnected) connector.Close();
-            messageHandler = handler ?? new DefaultMessageHandler();
-            connector = conn ?? new TCPConnector();
+            if (messageHandler == null) messageHandler = handler ?? new DefaultMessageHandler();
+            if (connector == null) connector = conn ?? new TCPConnector();
             connector.Connect(ip, port);
             checkTimeoutCor = StartCoroutine(CheckeTimeoutAsync());
 #if UNITY_EDITOR
@@ -157,7 +157,7 @@ namespace Arthas.Network
             }
         }
 
-        protected virtual void OnConnected()
+        protected void OnConnected()
         {
             if (ConnectedEvent != null) ConnectedEvent();
             checkConnectCor = StartCoroutine(CheckConnectionAsync());
@@ -167,13 +167,13 @@ namespace Arthas.Network
 #endif
         }
 
-        protected virtual void OnDisconnected()
+        protected void OnDisconnected()
         {
             if (DisconnectedEvent != null) DisconnectedEvent();
             connector.MessageRespondEvent -= OnMessageRespond;
         }
 
-        protected virtual void OnMessageRespond(byte[] buffer)
+        protected void OnMessageRespond(byte[] buffer)
         {
             lock (enterLock) {
                 var msg = messageHandler.ParseMessage(buffer);
