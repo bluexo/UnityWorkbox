@@ -27,7 +27,7 @@ namespace Arthas.UI
                     ui.objectReferenceValue = comp;
                 } else {
                     if (EditorUtility.DisplayDialog("Create Script", "You must be have a StartUI class, \ncreate now?", "√")) {
-                        UIEditor.CreateUIPanel(true);
+                        BaseUIEditor.CreateUIPanel(true);
                     } else
                         Debug.LogError(@"UISystem initialize fail , Cannot found start ui which has a <color=cyan>[UIStart]</color> Attribute and inherit <color=cyan>:WindowUI<T></color>");
                 }

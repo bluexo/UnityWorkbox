@@ -39,7 +39,7 @@ namespace Arthas.Network
         /// 发起
         /// </summary>
         /// <param name="msg"></param>
-        public static void Invoke(INetworkMessage msg)
+        private static void Invoke(INetworkMessage msg)
         {
             if (messages.ContainsKey(msg.Command))
                 messages[msg.Command].Invoke(msg);
