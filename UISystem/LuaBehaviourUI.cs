@@ -9,7 +9,7 @@ namespace Arthas.UI
     public enum PointerEventType
     {
         Nothing = 0,
-        Click = 1,
+        Click = 2,
         Down = 4,
         Up = 8,
         Enter = 16,
@@ -50,7 +50,7 @@ namespace Arthas.UI
             Invoker = GetComponent<BaseLuaInvoker>();
             if (Invoker != null) {
                 Invoker.Initialize();
-                Invoker.TryInvoke("Start");
+                Invoker.TryInvoke("Start", this);
             } else
                 Debug.LogErrorFormat("Cannot found LuaInvoker on UIGameobject {0}!!!", gameObject.name);
         }
