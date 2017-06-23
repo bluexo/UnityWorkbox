@@ -117,15 +117,15 @@ namespace Arthas.UI
         }
     }
 
-    [CustomEditor(typeof(LuaBehaviourUI))]
+    [CustomEditor(typeof(ScriptableBehaviourUI), isFallback = true)]
     public class LuaBehaviourUIEditor : Editor
     {
         private void OnEnable()
         {
-            var types = typeof(BaseLuaInvoker).Assembly.GetTypes();
-            var invokerType = Array.Find(types, t => t.IsSubclassOf(typeof(BaseLuaInvoker)));
+            var types = typeof(BaseScriptableInvoker).Assembly.GetTypes();
+            var invokerType = Array.Find(types, t => t.IsSubclassOf(typeof(BaseScriptableInvoker)));
             var go = (target as Component).gameObject;
-            var comp = go.GetComponent(typeof(BaseLuaInvoker));
+            var comp = go.GetComponent(typeof(BaseScriptableInvoker));
             if (!comp && invokerType != null) go.AddComponent(invokerType);
             serializedObject.ApplyModifiedProperties();
         }
