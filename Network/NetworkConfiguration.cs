@@ -5,8 +5,6 @@
  * ******************************************************/
 
 using UnityEngine;
-using Arthas.AssetBundles;
-
 #if UNITY_EDITOR
 using UnityEditor;
 using System.IO;
@@ -52,8 +50,8 @@ public class NetworkConfiguration : ScriptableObject
     {
         get
         {
-#if ASSET_BUNDLES
-            var conf = AssetBundleManager.LoadMainAssetSync<NetworkConfiguration>(typeof(NetworkConfiguration).Name);
+#if ABM
+            var conf = AssetBundles.AssetBundleManager.LoadMainAssetSync<NetworkConfiguration>(typeof(NetworkConfiguration).Name);
 #else
             var conf = Resources.Load<NetworkConfiguration>(kConfigPath + "NetworkConfiguration");
 #endif
