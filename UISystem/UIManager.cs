@@ -115,15 +115,13 @@ namespace Arthas.UI
             var header = uiType.IsDefined(typeof(UIHeaderAttribute), false);
             var exclusive = uiType.IsDefined(typeof(UIExclusiveAttribute), false);
 #endif
-            var bui = ui as ScriptableBehaviourUI;
-            var window = new WindowInfo()
+            return new WindowInfo()
             {
-                IsHeader = bui ? bui.IsHeader : header,
-                IsExclusive = bui ? bui.IsExlusive : exclusive,
+                IsHeader = header ? header : ui.IsHeader,
+                IsExclusive = exclusive ? exclusive : ui.IsExlusive,
                 Order = ui.SortOrder,
                 UI = ui
             };
-            return window;
         }
 
         /// <summary>
