@@ -11,18 +11,23 @@ using System.Reflection;
 
 namespace Arthas.UI
 {
-    [RequireComponent(typeof(CanvasRenderer))]
     [RequireComponent(typeof(RectTransform))]
+    [RequireComponent(typeof(CanvasRenderer))]
     public abstract class BaseUI : UIBehaviour
     {
         [SerializeField]
         [Range(1, 100)]
-        private int sortOrder;
-        public virtual int SortOrder
-        {
-            get { return sortOrder; }
-            set { sortOrder = value; }
-        }
+        protected int sortOrder;
+        public virtual int SortOrder { get { return sortOrder; } }
+
+        [SerializeField]
+        protected bool header;
+        public virtual bool IsHeader { get { return header; } }
+
+        [SerializeField]
+        protected bool exlusive;
+        public virtual bool IsExlusive { get { return exlusive; } }
+
 
         public event Action<BaseUI> UIShowEvent;
 
