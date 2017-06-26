@@ -11,8 +11,8 @@ using System.Reflection;
 
 namespace Arthas.UI
 {
-    [RequireComponent(typeof(RectTransform))]
     [RequireComponent(typeof(CanvasRenderer))]
+    [RequireComponent(typeof(RectTransform))]
     public abstract class BaseUI : UIBehaviour
     {
         [SerializeField]
@@ -72,7 +72,8 @@ namespace Arthas.UI
         }
     }
 
-    public abstract class WindowUI<T> : BaseUI where T : BaseUI
+    [DisallowMultipleComponent]
+    public abstract class PanelUI<T> : BaseUI where T : BaseUI
     {
         public static T Instance
         {

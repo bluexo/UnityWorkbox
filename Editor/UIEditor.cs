@@ -81,7 +81,7 @@ namespace Arthas.UI
         private bool showEvents, showGroup;
         private SerializedProperty groupProperty;
 
-        private void OnEnable()
+        protected virtual void OnEnable()
         {
             groupProperty = serializedObject.FindProperty("group");
             if (groupProperty.arraySize < 1) {
@@ -117,10 +117,10 @@ namespace Arthas.UI
         }
     }
 
-    [CustomEditor(typeof(ScriptableBehaviourUI), isFallback = true)]
-    public class LuaBehaviourUIEditor : Editor
+    [CustomEditor(typeof(ScriptableBehaviourUI))]
+    public class LuaBehaviourUIEditor : BaseUIEditor
     {
-        private void OnEnable()
+        protected override void OnEnable()
         {
             var types = typeof(BaseScriptableInvoker).Assembly.GetTypes();
             var invokerType = Array.Find(types, t => t.IsSubclassOf(typeof(BaseScriptableInvoker)));

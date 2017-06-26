@@ -7,7 +7,7 @@ namespace Arthas.UI
 {
     [UIHeader]
     [UIOrder(SortOrder = 100)]
-    public class TipsUI : WindowUI<TipsUI>
+    public class TipsUI : PanelUI<TipsUI>
     {
         public static readonly Color okColor = Color.green;
         public static readonly Color infoColor = Color.black;
