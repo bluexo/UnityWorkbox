@@ -38,12 +38,7 @@ namespace Arthas.UI
         IDragHandler,
         IDropHandler
     {
-
         public BaseScriptableInvoker Invoker { get; private set; }
-        public bool IsExlusive { get { return exlusive; } }
-        public bool IsHeader { get { return header; } }
-        [SerializeField]
-        private bool exlusive, header;
         [SerializeField, EnumMaskField]
         private PointerEventType pointerEventType;
 
