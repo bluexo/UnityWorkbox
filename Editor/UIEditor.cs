@@ -122,6 +122,7 @@ namespace Arthas.UI
     {
         protected override void OnEnable()
         {
+            base.OnEnable();
             var types = typeof(BaseScriptableInvoker).Assembly.GetTypes();
             var invokerType = Array.Find(types, t => t.IsSubclassOf(typeof(BaseScriptableInvoker)));
             var go = (target as Component).gameObject;

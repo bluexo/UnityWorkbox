@@ -58,21 +58,16 @@ namespace Arthas.Network
         private static IConnector connector;
         private static INetworkMessageHandler messageHandler;
 
-        protected override void Awake()
-        {
-            base.Awake();
-            timeoutWaiter = new WaitForSeconds(connectCheckDuration);
-            heartbeatWaiter = new WaitForSeconds(heartbeatInterval);
-            connector = (IConnector)Activator.CreateInstance(Type.GetType(connectorTypeName, true, true));
-            messageHandler = (INetworkMessageHandler)Activator.CreateInstance(Type.GetType(messageHandlerName, true, true));
-        }
-
         /// <summary>
         /// 连接到服务器
         /// </summary>
         protected void Connect(string ip, int port, IConnector conn, INetworkMessageHandler handler = null)
         {
-            if (connector.IsConnected) connector.Close();
+            if (connector != null && connector.IsConnected) connector.Close();
+            timeoutWaiter = new WaitForSeconds(connectCheckDuration);
+            heartbeatWaiter = new WaitForSeconds(heartbeatInterval);
+            connector = (IConnector)Activator.CreateInstance(Type.GetType(connectorTypeName, true, true));
+            messageHandler = (INetworkMessageHandler)Activator.CreateInstance(Type.GetType(messageHandlerName, true, true));
             if (messageHandler == null) messageHandler = handler ?? new DefaultMessageHandler();
             if (connector == null) connector = conn ?? new TCPConnector();
             connector.Connect(ip, port);
