@@ -13,9 +13,8 @@ namespace UnityEngine
         {
             if (!fieldInfo.FieldType.IsEnum) {
                 base.OnGUI(position, property, label);
-                return;
-            }
-            property.intValue = EditorGUI.MaskField(position, "PointerEvents", property.intValue, Enum.GetNames(fieldInfo.FieldType));
+            } else
+                property.intValue = EditorGUI.MaskField(position, "PointerEvents", property.intValue, Enum.GetNames(fieldInfo.FieldType));
         }
     }
 

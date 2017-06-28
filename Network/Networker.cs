@@ -38,7 +38,7 @@ namespace Arthas.Network
             set { Instance.isLittleEndian = value; }
         }
 
-        public static bool IsConnected { get { return connector != null && connector.IsConnected; } }
+        public static bool IsConnected { get { return connector.IsConnected; } }
 
         private readonly static Queue<INetworkMessage> msgQueue = new Queue<INetworkMessage>();
         private readonly static Dictionary<object, Action<INetworkMessage>> responseActions = new Dictionary<object, Action<INetworkMessage>>();
@@ -63,7 +63,7 @@ namespace Arthas.Network
         /// </summary>
         protected void Connect(string ip, int port, IConnector conn, INetworkMessageHandler handler = null)
         {
-            if (IsConnected) connector.Close();
+            if (connector != null && connector.IsConnected) connector.Close();
             timeoutWaiter = new WaitForSeconds(connectCheckDuration);
             heartbeatWaiter = new WaitForSeconds(heartbeatInterval);
             connector = (IConnector)Activator.CreateInstance(Type.GetType(connectorTypeName, true, true));
@@ -131,7 +131,7 @@ namespace Arthas.Network
                     StopCoroutine(checkTimeoutCor);
                     yield break;
                 }
-                if ((currentTime += connectCheckDuration) > connectTimeout) {
+                if ((currentTime += Time.deltaTime) > connectTimeout) {
                     currentTime = 0;
                     StopCoroutine(checkTimeoutCor);
                     if (ErrorCallback != null) {
@@ -158,7 +158,7 @@ namespace Arthas.Network
             checkConnectCor = StartCoroutine(CheckConnectionAsync());
             connector.MessageRespondEvent += OnMessageRespond;
 #if UNITY_EDITOR
-            Debug.LogFormat("<color=yellow>connected!</color>");
+            Debug.LogFormat("<color=yellow>Networker connected to server {0}!</color>",NetworkConfiguration.Current.ToString());
 #endif
         }
 

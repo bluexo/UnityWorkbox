@@ -81,7 +81,7 @@ namespace Arthas.UI
         private bool showEvents, showGroup;
         private SerializedProperty groupProperty;
 
-        private void OnEnable()
+        protected virtual void OnEnable()
         {
             groupProperty = serializedObject.FindProperty("group");
             if (groupProperty.arraySize < 1) {
@@ -101,8 +101,8 @@ namespace Arthas.UI
                     prop.objectReferenceValue = EditorGUILayout.ObjectField(prop.objectReferenceValue, typeof(BaseUI), true, GUILayout.Width(160f));
                     if (prop.objectReferenceValue)
                         GUILayout.Label(string.Format("[{0}]", (prop.objectReferenceValue as BaseUI).SortOrder), GUILayout.Width(45f));
-                    if (GUILayout.Button("+", GUILayout.Height(15))) groupProperty.InsertArrayElementAtIndex(i);
-                    if (GUILayout.Button("-", GUILayout.Height(15))) groupProperty.DeleteArrayElementAtIndex(i);
+                    if (GUILayout.Button("+", EditorStyles.miniButtonLeft, GUILayout.Height(15))) groupProperty.InsertArrayElementAtIndex(i);
+                    if (groupProperty.arraySize > 1 && GUILayout.Button("-", EditorStyles.miniButtonRight, GUILayout.Height(15))) groupProperty.DeleteArrayElementAtIndex(i);
                     EditorGUILayout.EndHorizontal();
                 }
             }
@@ -117,11 +117,12 @@ namespace Arthas.UI
         }
     }
 
-    [CustomEditor(typeof(ScriptableBehaviourUI), isFallback = true)]
-    public class LuaBehaviourUIEditor : Editor
+    [CustomEditor(typeof(ScriptableBehaviourUI))]
+    public class LuaBehaviourUIEditor : BaseUIEditor
     {
-        private void OnEnable()
+        protected override void OnEnable()
         {
+            base.OnEnable();
             var types = typeof(BaseScriptableInvoker).Assembly.GetTypes();
             var invokerType = Array.Find(types, t => t.IsSubclassOf(typeof(BaseScriptableInvoker)));
             var go = (target as Component).gameObject;

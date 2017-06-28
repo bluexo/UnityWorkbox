@@ -63,7 +63,7 @@ namespace Arthas.UI
         protected void Start()
         {
             if (!startUI) {
-                Debug.LogError(@"UISystem initialize fail , Cannot found start ui which has a <color=cyan>[UIStart]</color> Attribute and inherit <color=cyan>:WindowUI<T></color>");
+                Debug.LogError(@"UISystem initialize fail , Cannot found start ui which has a <color=cyan>[UIStart]</color> Attribute and inherit <color=cyan>:PanelUI<T></color>");
 #if UNITY_EDITOR
                 UnityEditor.Selection.activeGameObject = gameObject;
                 Debug.DebugBreak();
@@ -118,7 +118,7 @@ namespace Arthas.UI
             return new WindowInfo()
             {
                 IsHeader = header ? header : ui.IsHeader,
-                IsExclusive = exclusive ? exclusive : ui.IsExlusive,
+                IsExclusive = exclusive ? exclusive : ui.IsExclusive,
                 Order = ui.SortOrder,
                 UI = ui
             };

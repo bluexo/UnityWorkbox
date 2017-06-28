@@ -25,8 +25,8 @@ namespace Arthas.UI
         public virtual bool IsHeader { get { return header; } }
 
         [SerializeField]
-        protected bool exlusive;
-        public virtual bool IsExlusive { get { return exlusive; } }
+        protected bool exclusive;
+        public virtual bool IsExclusive { get { return exclusive; } }
 
 
         public event Action<BaseUI> UIShowEvent;
@@ -78,7 +78,7 @@ namespace Arthas.UI
     }
 
     [DisallowMultipleComponent]
-    public abstract class WindowUI<T> : BaseUI where T : BaseUI
+    public abstract class PanelUI<T> : BaseUI where T : BaseUI
     {
         public static T Instance
         {
