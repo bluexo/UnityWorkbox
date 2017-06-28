@@ -38,7 +38,7 @@ namespace Arthas.Network
             set { Instance.isLittleEndian = value; }
         }
 
-        public static bool IsConnected { get { return connector.IsConnected; } }
+        public static bool IsConnected { get { return connector != null && connector.IsConnected; } }
 
         private readonly static Queue<INetworkMessage> msgQueue = new Queue<INetworkMessage>();
         private readonly static Dictionary<object, Action<INetworkMessage>> responseActions = new Dictionary<object, Action<INetworkMessage>>();
@@ -58,21 +58,16 @@ namespace Arthas.Network
         private static IConnector connector;
         private static INetworkMessageHandler messageHandler;
 
-        protected override void Awake()
-        {
-            base.Awake();
-            timeoutWaiter = new WaitForSeconds(connectCheckDuration);
-            heartbeatWaiter = new WaitForSeconds(heartbeatInterval);
-            connector = (IConnector)Activator.CreateInstance(Type.GetType(connectorTypeName, true, true));
-            messageHandler = (INetworkMessageHandler)Activator.CreateInstance(Type.GetType(messageHandlerName, true, true));
-        }
-
         /// <summary>
         /// 连接到服务器
         /// </summary>
         protected void Connect(string ip, int port, IConnector conn, INetworkMessageHandler handler = null)
         {
-            if (connector.IsConnected) connector.Close();
+            if (IsConnected) connector.Close();
+            timeoutWaiter = new WaitForSeconds(connectCheckDuration);
+            heartbeatWaiter = new WaitForSeconds(heartbeatInterval);
+            connector = (IConnector)Activator.CreateInstance(Type.GetType(connectorTypeName, true, true));
+            messageHandler = (INetworkMessageHandler)Activator.CreateInstance(Type.GetType(messageHandlerName, true, true));
             if (messageHandler == null) messageHandler = handler ?? new DefaultMessageHandler();
             if (connector == null) connector = conn ?? new TCPConnector();
             connector.Connect(ip, port);
@@ -136,7 +131,7 @@ namespace Arthas.Network
                     StopCoroutine(checkTimeoutCor);
                     yield break;
                 }
-                if ((currentTime += Time.deltaTime) > connectTimeout) {
+                if ((currentTime += connectCheckDuration) > connectTimeout) {
                     currentTime = 0;
                     StopCoroutine(checkTimeoutCor);
                     if (ErrorCallback != null) {

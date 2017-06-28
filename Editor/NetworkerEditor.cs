@@ -36,7 +36,7 @@ public class NetworkerEditor : Editor
         var rect = EditorGUILayout.GetControlRect(true, 20);
         base.OnInspectorGUI();
         EditorGUI.LabelField(rect, typeof(Networker).ToString(), EditorStyles.whiteLargeLabel);
-        EditorGUI.DrawRect(rect, Color.yellow / 2);
+        EditorGUI.DrawRect(rect, (Application.isPlaying && Networker.IsConnected ? Color.green : Color.yellow) / 2f);
 
         string[] connectorNames = { }, handlerNames = { };
 
@@ -51,6 +51,7 @@ public class NetworkerEditor : Editor
             handlerTypeName.stringValue = handlers[handlerIndex].FullName;
 
         EditorGUILayout.LabelField(new GUIContent("[Server Address] ?", "Click menu [ NETWORK ] switch or config address!"), new GUIContent(NetworkConfiguration.Current.ToString()));
+
         serializedObject.ApplyModifiedProperties();
     }
 }
