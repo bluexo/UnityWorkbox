@@ -101,8 +101,8 @@ namespace Arthas.UI
                     prop.objectReferenceValue = EditorGUILayout.ObjectField(prop.objectReferenceValue, typeof(BaseUI), true, GUILayout.Width(160f));
                     if (prop.objectReferenceValue)
                         GUILayout.Label(string.Format("[{0}]", (prop.objectReferenceValue as BaseUI).SortOrder), GUILayout.Width(45f));
-                    if (GUILayout.Button("+", GUILayout.Height(15))) groupProperty.InsertArrayElementAtIndex(i);
-                    if (GUILayout.Button("-", GUILayout.Height(15))) groupProperty.DeleteArrayElementAtIndex(i);
+                    if (GUILayout.Button("+", EditorStyles.miniButtonLeft, GUILayout.Height(15))) groupProperty.InsertArrayElementAtIndex(i);
+                    if (groupProperty.arraySize > 1 && GUILayout.Button("-", EditorStyles.miniButtonRight, GUILayout.Height(15))) groupProperty.DeleteArrayElementAtIndex(i);
                     EditorGUILayout.EndHorizontal();
                 }
             }
