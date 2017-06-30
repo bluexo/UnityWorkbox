@@ -42,14 +42,16 @@ namespace UnityEngine
         /// <summary>
         /// 终止一个协程
         /// </summary>
-        /// <param name="cor"></param>
-        public static void Stop(Coroutine cor)
+        /// <param name="cors"></param>
+        public static void Stop(params Coroutine[] cors)
         {
-            Count--;
+            for (var i = 0; i < cors.Length; i++) {
+                Count--;
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
-            Debug.LogFormat("<color=cyan>Stop a global coroutine , count = <size=14>{0}</size></color> ", Count);
+                Debug.LogFormat("<color=cyan>Stop a global coroutine , count = <size=14>{0}</size></color> ", Count);
 #endif
-            Instance.StopCoroutine(cor);
+                Instance.StopCoroutine(cors[i]);
+            }
         }
 
         /// <summary>
