@@ -7,4 +7,4 @@ Unity3d developer workbox has some useful Unity3d script extensions and editor t
 ### Git
 ### ConfigurableArray
 ### ConsoleLogger
-### JArray && JHash
+### JArray & JHash
