@@ -71,7 +71,7 @@ namespace Arthas.Network
             if (messageHandler == null) messageHandler = handler ?? new DefaultMessageHandler();
             if (connector == null) connector = conn ?? new TCPConnector();
             connector.Connect(ip, port);
-            checkTimeoutCor = StartCoroutine(CheckeTimeoutAsync());
+            checkTimeoutCor = StartCoroutine(TimeoutDetectAsync());
 #if UNITY_EDITOR
             Debug.LogFormat("Connect to server , <color=cyan>Addr:[{0}:{1}] ,connector:{2} ,wrapper:{3}.</color>", ip, port, connector.GetType(), MessageHandler.GetType());
 #endif
@@ -122,7 +122,7 @@ namespace Arthas.Network
             Instance.Connect(ip, port, connector, handler);
         }
 
-        protected IEnumerator CheckeTimeoutAsync()
+        protected IEnumerator TimeoutDetectAsync()
         {
             while (true) {
                 yield return timeoutWaiter;
@@ -141,7 +141,7 @@ namespace Arthas.Network
             }
         }
 
-        protected IEnumerator CheckConnectionAsync()
+        protected IEnumerator ConnectionDetectAsync()
         {
             while (true) {
                 yield return connectPollWaiter;
@@ -155,7 +155,7 @@ namespace Arthas.Network
         protected void OnConnected()
         {
             if (ConnectedEvent != null) ConnectedEvent();
-            checkConnectCor = StartCoroutine(CheckConnectionAsync());
+            checkConnectCor = StartCoroutine(ConnectionDetectAsync());
             connector.MessageRespondEvent += OnMessageRespond;
 #if UNITY_EDITOR
             Debug.LogFormat("<color=yellow>Networker connected to server {0}!</color>",NetworkConfiguration.Current.ToString());

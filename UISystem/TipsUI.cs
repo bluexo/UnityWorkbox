@@ -21,11 +21,6 @@ namespace Arthas.UI
         [SerializeField]
         private Text text;
 
-        protected override void Awake()
-        {
-            text = transform.GetComponentFromChild<Text>("Text");
-        }
-
         public static void Info(string content)
         {
             Instance.Pop(infoColor, content);
@@ -78,7 +73,7 @@ namespace Arthas.UI
             }
         }
 
-        public void Slide(bool show = true)
+        public virtual void Slide(bool show = true)
         {
             var height = RectTransform.sizeDelta.y;
             var end = show ? -height / 2 + 3f : height / 2;
