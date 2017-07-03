@@ -1,5 +1,5 @@
 # UnityWorkbox
-Unity3d developer workbox has some useful Unity3d script extensions and editor tools
+Unity3d developer workbox that has some useful Unity3d script extensions and editor tools
 
 ## UISystem
 ## Network
