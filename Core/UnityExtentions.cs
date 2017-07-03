@@ -11,9 +11,9 @@ namespace UnityEngine
             return comp.StartCoroutine(InvokeAsync(comp, action, time));
         }
 
-        public static Coroutine InvokeRepeating(this MonoBehaviour comp, Action action, float delay, float rate)
+        public static Coroutine InvokeRepeating(this MonoBehaviour comp, Action action, float delay = 0, float duration = 0)
         {
-            return comp.StartCoroutine(InvokeRepatingAsync(comp, action, delay, rate));
+            return comp.StartCoroutine(InvokeRepatingAsync(comp, action, delay, duration));
         }
 
         private static IEnumerator InvokeAsync(MonoBehaviour comp, Action action, float time)
