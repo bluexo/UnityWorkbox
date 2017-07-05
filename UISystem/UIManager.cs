@@ -53,21 +53,27 @@ namespace Arthas.UI
 
         [SerializeField]
         private BaseUI startUI;
-        [SerializeField, HideInInspector]
-        private PreloadPanelInfo[] preloadPanels;
+        [SerializeField, ArrayField]
+        private BaseUI[] preloadPanels;
+
+        private volatile bool initialized = false;
 
         protected override void Awake()
         {
             base.Awake();
             for (var i = 0; i < preloadPanels.Length; i++) {
-                var go = Instantiate(preloadPanels[i].ui.gameObject);
+                var orgin = preloadPanels[i].RectTransform;
+                var go = Instantiate(preloadPanels[i].gameObject);
+                go.name = go.name.Replace("(Clone)", string.Empty);
                 var rect = go.GetComponent<RectTransform>();
                 rect.SetParent(transform);
-                rect.localScale = Vector3.one;
-                rect.offsetMin = Vector2.zero;
-                rect.offsetMax = Vector2.zero;
+                rect.anchoredPosition = orgin.anchoredPosition;
+                rect.localScale = orgin.localScale;
+                rect.anchorMin = orgin.anchorMin;
+                rect.anchorMax = orgin.anchorMax;
+                rect.offsetMin = orgin.offsetMin;
+                rect.offsetMax = orgin.offsetMax;
             }
-
             var uis = GetComponentsInChildren<BaseUI>(true);
             for (var i = 0; i < uis.Length; i++) {
                 AddUI(uis[i]);

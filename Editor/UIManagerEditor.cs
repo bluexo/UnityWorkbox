@@ -10,6 +10,9 @@ namespace Arthas.UI
     {
         private void OnEnable()
         {
+            var panels = serializedObject.FindProperty("preloadPanels");
+            if (panels != null && panels.isArray && panels.arraySize <= 0) panels.arraySize++;
+
             var canvasObject = (target as UIManager).gameObject;
             var ui = serializedObject.FindProperty("startUI");
             if (!ui.objectReferenceValue) {
@@ -38,15 +41,7 @@ namespace Arthas.UI
         public static Type GetChildStartUI()
         {
             var uiComps = Assembly.GetAssembly(typeof(BaseUI)).GetTypes();
-            for (var i = 0; i < uiComps.Length; i++) {
-                var comp = uiComps[i];
-                if (!comp.IsSubclassOf(typeof(BaseUI)))
-                    continue;
-                if (comp.IsDefined(typeof(UIStartAttribute), false)) {
-                    return comp;
-                }
-            }
-            return null;
+            return Array.Find(uiComps, ui => ui.IsSubclassOf(typeof(BaseUI)) && ui.IsDefined(typeof(UIStartAttribute), true));
         }
     }
 }
