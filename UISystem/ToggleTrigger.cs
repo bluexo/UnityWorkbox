@@ -8,7 +8,7 @@ namespace Arthas.UI
     [RequireComponent(typeof(Toggle))]
     public class ToggleTrigger : MonoBehaviour, ISelectableUITrigger
     {
-        public event Action<GameObject> TriggerEvent;
+        public event UITriggerDelegate TriggerEvent;
 
         private Toggle toggler;
 

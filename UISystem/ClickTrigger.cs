@@ -4,11 +4,10 @@ using UnityEngine.UI;
 
 namespace Arthas.UI
 {
-
     [RequireComponent(typeof(Button))]
     public class ClickTrigger : MonoBehaviour, ISelectableUITrigger
     {
-        public event Action<GameObject> TriggerEvent;
+        public event UITriggerDelegate TriggerEvent;
 
         private Button toggler;
 

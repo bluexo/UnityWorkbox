@@ -34,6 +34,14 @@ namespace Arthas.UI
         }
     }
 
+    [Serializable]
+    public struct PreloadPanelInfo
+    {
+        public BaseUI ui;
+        public Vector2 offsetMin;
+        public Vector2 offsetMax;
+    }
+
     [RequireComponent(typeof(Canvas))]
     [RequireComponent(typeof(CanvasScaler))]
     [RequireComponent(typeof(GraphicRaycaster))]
@@ -45,10 +53,21 @@ namespace Arthas.UI
 
         [SerializeField]
         private BaseUI startUI;
+        [SerializeField, HideInInspector]
+        private PreloadPanelInfo[] preloadPanels;
 
         protected override void Awake()
         {
             base.Awake();
+            for (var i = 0; i < preloadPanels.Length; i++) {
+                var go = Instantiate(preloadPanels[i].ui.gameObject);
+                var rect = go.GetComponent<RectTransform>();
+                rect.SetParent(transform);
+                rect.localScale = Vector3.one;
+                rect.offsetMin = Vector2.zero;
+                rect.offsetMax = Vector2.zero;
+            }
+
             var uis = GetComponentsInChildren<BaseUI>(true);
             for (var i = 0; i < uis.Length; i++) {
                 AddUI(uis[i]);

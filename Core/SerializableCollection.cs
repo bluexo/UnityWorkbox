@@ -5,33 +5,33 @@ using System.Collections.Generic;
 namespace UnityEngine
 {
     [Serializable]
-    public class JArray<T>
+    public class JsonList<T>
     {
         [SerializeField]
         private List<T> value;
         public List<T> Value { get { return value; } }
 
-        public JArray() { }
+        public JsonList() { }
 
-        public JArray(List<T> list)
+        public JsonList(List<T> list)
         {
             value = list;
         }
 
-        public JArray(T[] arr)
+        public JsonList(T[] arr)
         {
             value = new List<T>(arr);
         }
 
-        public JArray(IEnumerable<T> arr)
+        public JsonList(IEnumerable<T> arr)
         {
             value = new List<T>(arr);
         }
 
-        public JArray<T> Overwrite(string json, bool pureArray = false)
+        public JsonList<T> Overwrite(string json, bool pureArray = false)
         {
             if (pureArray) json = '{' + string.Format("\"value\":{0}", json) + '}';
-            var arr = JsonUtility.FromJson<JArray<T>>(json);
+            var arr = JsonUtility.FromJson<JsonList<T>>(json);
             value = arr.value;
             return this;
         }
@@ -44,39 +44,39 @@ namespace UnityEngine
     }
 
     [Serializable]
-    public class JHash<TKey, TValue> : ISerializationCallbackReceiver
+    public class JsonDict<TKey, TValue> : ISerializationCallbackReceiver
     {
         [SerializeField]
-        private List<TKey> keys;
+        private List<TKey> keyList;
         [SerializeField]
-        private List<TValue> values;
+        private List<TValue> valueList;
 
-        private Dictionary<TKey, TValue> dictionary;
-        public Dictionary<TKey, TValue> Dictionary { get { return dictionary; } }
+        private Dictionary<TKey, TValue> value;
+        public Dictionary<TKey, TValue> Value { get { return value; } }
 
-        public JHash(Dictionary<TKey, TValue> dict)
+        public JsonDict(Dictionary<TKey, TValue> dict)
         {
-            dictionary = dict;
+            value = dict;
         }
 
         public void OnAfterDeserialize()
         {
-            dictionary = new Dictionary<TKey, TValue>();
-            for (var i = 0; i < Math.Min(keys.Count, values.Count); i++) {
-                dictionary.Add(keys[i], values[i]);
+            value = new Dictionary<TKey, TValue>();
+            for (var i = 0; i < Math.Min(keyList.Count, valueList.Count); i++) {
+                value.Add(keyList[i], valueList[i]);
             }
         }
 
         public void OnBeforeSerialize()
         {
-            keys = new List<TKey>(dictionary.Keys);
-            values = new List<TValue>(dictionary.Values);
+            keyList = new List<TKey>(value.Keys);
+            valueList = new List<TValue>(value.Values);
         }
 
-        public JHash<TKey, TValue> Overwrite(string json)
+        public JsonDict<TKey, TValue> Overwrite(string json)
         {
-            var hash = JsonUtility.FromJson<JHash<TKey, TValue>>(json);
-            dictionary = hash.dictionary;
+            var hash = JsonUtility.FromJson<JsonDict<TKey, TValue>>(json);
+            value = hash.value;
             return this;
         }
 

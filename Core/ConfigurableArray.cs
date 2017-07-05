@@ -107,12 +107,12 @@ namespace Arthas.Common
 
         public virtual string ToJson()
         {
-            return new JArray<T>(items).ToJson(true);
+            return new JsonList<T>(items).ToJson(true);
         }
 
         public virtual void FromJson(string json)
         {
-            var jArray = new JArray<T>().Overwrite(json, true);
+            var jArray = new JsonList<T>().Overwrite(json, true);
             items = jArray.Value.ToArray();
         }
     }
