@@ -158,7 +158,7 @@ namespace Arthas.Network
             checkConnectCor = StartCoroutine(ConnectionDetectAsync());
             connector.MessageRespondEvent += OnMessageRespond;
 #if UNITY_EDITOR
-            Debug.LogFormat("<color=yellow>Networker connected to server {0}!</color>",NetworkConfiguration.Current.ToString());
+            Debug.LogFormat("<color=yellow>Networker connected to server {0}!</color>", NetworkConfiguration.Current.ToString());
 #endif
         }
 
@@ -222,5 +222,16 @@ namespace Arthas.Network
         {
             connector.Close();
         }
+
+        private void OnApplicationFocus(bool focus)
+        {
+            if (focus && !connector.IsConnected) { Connect(); }
+        }
+
+        private void OnApplicationQuit()
+        {
+            Close();
+        }
+
     }
 }

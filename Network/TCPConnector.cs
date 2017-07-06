@@ -18,11 +18,10 @@ namespace Arthas.Network
 {
     public class TCPConnector : IConnector
     {
-        public bool IsConnected { get; private set; }
+        public bool IsConnected { get { return client.Connected; } }
         public string Address { get; private set; }
         public event Action<byte[]> MessageRespondEvent;
-        const int READ_BUFFER_SIZE = 4096;
-        const int MSG_LEN_SIZE = 4;
+        const int READ_BUFFER_SIZE = 8192, MSG_LEN_SIZE = 4;
         private byte[] readBuffer = new byte[READ_BUFFER_SIZE];
 
         /// <summary>
@@ -35,10 +34,6 @@ namespace Arthas.Network
 #else
         private TcpClient client;
 #endif
-        public TCPConnector()
-        {
-            IsConnected = false;
-        }
 
 #if WINDOWS_UWP
         /// <summary>
@@ -73,16 +68,28 @@ namespace Arthas.Network
         public void Connect(string ip, int port)
         {
             try {
-                client = new TcpClient(ip, port);
-                var stream = client.GetStream();
-                stream.BeginRead(readBuffer, 0, READ_BUFFER_SIZE, Read, null);
-                IsConnected = true;
+                client = new TcpClient();
                 Address = string.Format("{0}:{1}", ip, port);
+                client.BeginConnect(ip, port, new AsyncCallback(ConnectCallback), client);
             }
             catch (Exception ex) {
                 client = null;
-                IsConnected = false;
                 Debug.LogErrorFormat("Can not connect to Server. Detail: {0}\n{1}", ex.Message, ex.StackTrace);
+            }
+        }
+
+        private void ConnectCallback(IAsyncResult ar)
+        {
+            if (client.Connected) {
+                try {
+                    var stream = client.GetStream();
+                    stream.BeginRead(readBuffer, 0, READ_BUFFER_SIZE, Read, null);
+                }
+                catch (Exception ex) {
+                    Debug.LogException(ex);
+                }
+            } else {
+                Debug.LogErrorFormat("Cannot connect to server {0}!", Address);
             }
         }
 #endif
@@ -168,7 +175,6 @@ namespace Arthas.Network
 
         public void Close()
         {
-            IsConnected = false;
             if (client == null) return;
 #if WINDOWS_UWP
             client.Dispose();
