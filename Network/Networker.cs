@@ -38,7 +38,7 @@ namespace Arthas.Network
             set { Instance.isLittleEndian = value; }
         }
 
-        public static bool IsConnected { get { return connector.IsConnected; } }
+        public static bool IsConnected { get { return connector != null && connector.IsConnected; } }
 
         private readonly static Queue<INetworkMessage> msgQueue = new Queue<INetworkMessage>();
         private readonly static Dictionary<object, Action<INetworkMessage>> responseActions = new Dictionary<object, Action<INetworkMessage>>();
@@ -220,18 +220,17 @@ namespace Arthas.Network
 
         public static void Close()
         {
-            connector.Close();
+            if (connector != null) connector.Close();
         }
 
-        private void OnApplicationFocus(bool focus)
+        private void OnApplicationPause(bool pause)
         {
-            if (focus && !connector.IsConnected) { Connect(); }
+            if (!pause && connector != null && !connector.IsConnected) Connect();
         }
 
         private void OnApplicationQuit()
         {
             Close();
         }
-
     }
 }

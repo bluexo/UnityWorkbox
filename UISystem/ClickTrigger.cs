@@ -9,17 +9,17 @@ namespace Arthas.UI
     {
         public event UITriggerDelegate TriggerEvent;
 
-        private Button toggler;
+        private Button button;
 
         void Start()
         {
-            toggler = GetComponent<Button>();
-            toggler.onClick.AddListener(OnValueChanged);
+            button = GetComponent<Button>();
+            button.onClick.AddListener(OnValueChanged);
         }
 
         private void OnValueChanged()
         {
-            if (TriggerEvent != null) TriggerEvent(toggler.gameObject);
+            if (TriggerEvent != null) TriggerEvent(button.gameObject);
         }
     }
 }

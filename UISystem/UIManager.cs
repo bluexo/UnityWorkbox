@@ -62,6 +62,7 @@ namespace Arthas.UI
         {
             base.Awake();
             for (var i = 0; i < preloadPanels.Length; i++) {
+                if (!preloadPanels[i]) continue;
                 var orgin = preloadPanels[i].RectTransform;
                 var go = Instantiate(preloadPanels[i].gameObject);
                 go.name = go.name.Replace("(Clone)", string.Empty);

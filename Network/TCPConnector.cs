@@ -18,7 +18,7 @@ namespace Arthas.Network
 {
     public class TCPConnector : IConnector
     {
-        public bool IsConnected { get { return client.Connected; } }
+        public bool IsConnected { get { return client != null && client.Connected; } }
         public string Address { get; private set; }
         public event Action<byte[]> MessageRespondEvent;
         const int READ_BUFFER_SIZE = 8192, MSG_LEN_SIZE = 4;
