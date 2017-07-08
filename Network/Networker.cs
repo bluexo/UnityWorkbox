@@ -66,8 +66,10 @@ namespace Arthas.Network
             if (connector != null && connector.IsConnected) connector.Close();
             timeoutWaiter = new WaitForSeconds(connectCheckDuration);
             heartbeatWaiter = new WaitForSeconds(heartbeatInterval);
-            connector = (IConnector)Activator.CreateInstance(Type.GetType(connectorTypeName, true, true));
-            messageHandler = (INetworkMessageHandler)Activator.CreateInstance(Type.GetType(messageHandlerName, true, true));
+            if (!string.IsNullOrEmpty(connectorTypeName))
+                connector = (IConnector)Activator.CreateInstance(Type.GetType(connectorTypeName, true, true));
+            if (!string.IsNullOrEmpty(messageHandlerName))
+                messageHandler = (INetworkMessageHandler)Activator.CreateInstance(Type.GetType(messageHandlerName, true, true));
             if (messageHandler == null) messageHandler = handler ?? new DefaultMessageHandler();
             if (connector == null) connector = conn ?? new TCPConnector();
             connector.Connect(ip, port);

@@ -4,7 +4,7 @@ using System.Collections;
 using UnityEngine;
 #if UNITY_5_3
 using UnityEngine.Experimental.Networking;
-#elif UNITY_5_6 || UNITY_5_4 || UNITY_5_5
+#elif UNITY_5_4_OR_NEWER
 using UnityEngine.Networking;
 #endif
 
@@ -127,39 +127,30 @@ namespace Arthas.Network
             if (!string.IsNullOrEmpty(cookie) && needAuthorize) webRequest.SetRequestHeader("Cookie", cookie);
             if (!string.IsNullOrEmpty(authorization) && needAuthorize) webRequest.SetRequestHeader("Authorization", authorization);
             yield return webRequest.Send();
-            if (saveCookie)
-            {
+            if (saveCookie) {
                 var responseHeaders = webRequest.GetResponseHeaders();
-                if (responseHeaders != null && responseHeaders.ContainsKey("Set-Cookie"))
-                {
+                if (responseHeaders != null && responseHeaders.ContainsKey("Set-Cookie")) {
                     cookie = responseHeaders["Set-Cookie"];
                     if (webRequest.responseCode < (int)ResponseCode.BadRequest
-                        && string.IsNullOrEmpty(authorization))
-                    {
+                        && string.IsNullOrEmpty(authorization)) {
                         var auth = string.Format("{0}:{1}", PlayerPrefs.GetString("UserName"), PlayerPrefs.GetString("Password"));
                         authorization = "Basic " + Convert.ToBase64String(Encoding.UTF8.GetBytes(auth));
                     }
-                }
-                else
+                } else
                     Debug.LogError("Cannot found Cookie header in response headers!");
             }
 
-            if (webRequest.isError || webRequest.responseCode >= (int)ResponseCode.BadRequest)
-            {
-                if (webRequest.responseCode == (int)ResponseCode.UnAuthorized)
-                {
+            if (webRequest.isError || webRequest.responseCode >= (int)ResponseCode.BadRequest) {
+                if (webRequest.responseCode == (int)ResponseCode.UnAuthorized) {
                     Debug.LogError("Request UnAuthorized!");
                 }
                 if (webRequest.responseCode == (int)ResponseCode.Error
-                    && errorAction != null)
-                {
+                    && errorAction != null) {
                     var headers = webRequest.GetResponseHeaders();
                     var values = Enum.GetValues(typeof(ErrorLevel));
-                    foreach (var val in values)
-                    {
+                    foreach (var val in values) {
                         var name = Enum.GetName(typeof(ErrorLevel), val);
-                        if (headers.ContainsKey(name))
-                        {
+                        if (headers.ContainsKey(name)) {
                             errorAction((ErrorLevel)val, headers[name]);
                             break;
                         }
@@ -170,8 +161,7 @@ namespace Arthas.Network
                     webRequest.responseCode,
                     webRequest.error,
                     webRequest.url);
-            }
-            else if (requestAction != null) requestAction.Invoke(webRequest);
+            } else if (requestAction != null) requestAction.Invoke(webRequest);
         }
     }
 }

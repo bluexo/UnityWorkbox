@@ -18,7 +18,7 @@ namespace Arthas.Network
 {
     public class TCPConnector : IConnector
     {
-        public bool IsConnected { get { return client != null && client.Connected; } }
+
         public string Address { get; private set; }
         public event Action<byte[]> MessageRespondEvent;
         const int READ_BUFFER_SIZE = 8192, MSG_LEN_SIZE = 4;
@@ -31,11 +31,15 @@ namespace Arthas.Network
         private StreamSocket client = new StreamSocket();
         private DataReader reader;
         private DataWriter writer;
+        public bool IsConnected { get; private set; }
 #else
         private TcpClient client;
+        public bool IsConnected { get { return client != null && client.Connected; } }
 #endif
 
 #if WINDOWS_UWP
+        public TCPConnector() { IsConnected = false; }
+
         /// <summary>
         /// 使用<see cref="StreamSocket"/> 建立连接并且异步接收数据
         /// </summary>
@@ -43,19 +47,16 @@ namespace Arthas.Network
         /// <param name="port"></param>
         public async void Connect(string ip, int port)
         {
-            try
-            {
+            try {
                 var serverHost = new HostName(ip);
                 await client.ConnectAsync(serverHost, port.ToString());
                 IsConnected = true;
                 Address = ip + port;
                 ReadAsync();
             }
-            catch (Exception ex)
-            {
+            catch (Exception ex) {
                 client.Dispose();
                 client = null;
-                IsConnected = false;
                 Debug.LogErrorFormat("Can not connect to Server. Detail: {0}.\n{1}", ex.Message, ex.StackTrace);
             }
         }
@@ -101,17 +102,14 @@ namespace Arthas.Network
         /// <param name="data"></param>
         public async void Send(byte[] buffer)
         {
-            using (writer = new DataWriter(client.OutputStream))
-            {
-                try
-                {
+            using (writer = new DataWriter(client.OutputStream)) {
+                try {
                     writer.WriteBytes(buffer);
                     await writer.StoreAsync();
                     await writer.FlushAsync();
                     writer.DetachStream();
                 }
-                catch (Exception ex)
-                {
+                catch (Exception ex) {
                     Debug.LogException(ex);
                 }
             }
@@ -121,17 +119,27 @@ namespace Arthas.Network
         public void Send(byte[] buffer)
         {
             if (client == null || !client.Connected) return;
-            var writer = new BinaryWriter(client.GetStream());
-            writer.Write(buffer);
-            writer.Flush();
+            try {
+                var stream = client.GetStream();
+                stream.BeginWrite(buffer, 0, buffer.Length, new AsyncCallback(EndWrite), null);
+            }
+            catch (Exception ex) {
+                Debug.LogException(ex);
+            }
+        }
+
+        public void EndWrite(IAsyncResult ar)
+        {
+            var stream = client.GetStream();
+            stream.EndWrite(ar);
+            stream.Flush();
         }
 #endif
 
 #if WINDOWS_UWP
         private async void ReadAsync()
         {
-            try
-            {
+            try {
                 reader = new DataReader(client.InputStream);
                 await reader.LoadAsync(MSG_LEN_SIZE);
                 var lenBuffer = new byte[MSG_LEN_SIZE];
@@ -143,8 +151,7 @@ namespace Arthas.Network
                 reader.DetachStream();
                 ReadAsync();
             }
-            catch (Exception exception)
-            {
+            catch (Exception exception) {
                 Debug.LogError(string.Format("Received data: \"{0}\"", "Read stream failed with error: " + exception.Message));
                 reader.DetachStream();
                 Close();

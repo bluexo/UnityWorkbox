@@ -64,13 +64,13 @@ namespace Arthas.UI
                 outfile.WriteLine("using UnityEngine.UI;");
                 outfile.WriteLine("using Arthas.UI;");
                 outfile.WriteLine("");
-                if (start) outfile.WriteLine("[UIStart]");
-                outfile.WriteLine("[UIExclusive]");
-                outfile.WriteLine(string.Format("public class {0} : WindowUI<{0}>", name));
+                if (start) outfile.WriteLine("[{0}]", typeof(UIStartAttribute).Name.Replace(typeof(Attribute).Name, ""));
+                outfile.WriteLine("[{0}]", typeof(UIExclusiveAttribute).Name.Replace(typeof(Attribute).Name, ""));
+                outfile.WriteLine(string.Format("public class {0} : {1}<{0}>", name, typeof(PanelUI<>).Name.Split('`')[0]));
                 outfile.WriteLine("{");
                 outfile.WriteLine("    protected override void Start()");
                 outfile.WriteLine("    {");
-                outfile.WriteLine("         ");
+                outfile.WriteLine(" ");
                 outfile.WriteLine("    }");
                 outfile.WriteLine("}");
             }
