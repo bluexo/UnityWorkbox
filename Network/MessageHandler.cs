@@ -63,14 +63,17 @@ namespace Arthas.Network
         public virtual INetworkMessage PackMessage(object command, object obj, params object[] parameters)
         {
             var bodyBuffer = obj as byte[];
-            if (bodyBuffer == null) {
-                var cmdBytes = BitConverter.GetBytes((short)command);
+            if (bodyBuffer != null) {
+                var cmdBytes = BitConverter.GetBytes(Convert.ToInt16(command));
                 var buffer = new byte[bodyBuffer.Length + cmdBytes.Length];
                 Buffer.BlockCopy(cmdBytes, 0, buffer, 0, cmdBytes.Length);
                 Buffer.BlockCopy(bodyBuffer, 0, buffer, cmdBytes.Length, bodyBuffer.Length);
                 return new DefaultMessage(command, buffer, false, parameters);
             } else {
-                throw new NotSupportedException();
+                var msg = string.Format(@"<color=cyan>{0}</color> cannot support <color=cyan>{1}</color> type message , \n please implement your custom message!",
+                    typeof(DefaultMessageHandler).FullName,
+                    obj.GetType().FullName);
+                throw new NotSupportedException(msg);
             }
         }
 
