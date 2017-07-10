@@ -28,6 +28,7 @@ namespace Arthas.UI
         public abstract object[] Invoke(string funcName, params object[] parameters);
     }
 
+    [DisallowMultipleComponent]
     public class ScriptableBehaviourUI : BaseUI,
         IPointerClickHandler,
         IPointerDownHandler,

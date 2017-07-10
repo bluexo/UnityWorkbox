@@ -41,6 +41,16 @@ namespace UnityEngine
             var json = JsonUtility.ToJson(this);
             return pureArray ? json.TrimStart('{').Substring("\"value:\"".Length).TrimEnd('}') : json;
         }
+
+        public static implicit operator JsonList<T> (List<T> list)
+        {
+            return new JsonList<T>(list);
+        }
+
+        public static implicit operator List<T>(JsonList<T> jsonList)
+        {
+            return jsonList.value;
+        }
     }
 
     [Serializable]
@@ -83,6 +93,16 @@ namespace UnityEngine
         public string ToJson()
         {
             return JsonUtility.ToJson(this);
+        }
+
+        public static implicit operator JsonDict<TKey,TValue>(Dictionary<TKey,TValue> dict)
+        {
+            return new JsonDict<TKey, TValue>(dict);
+        }
+
+        public static implicit operator Dictionary<TKey,TValue>(JsonDict<TKey,TValue> jsonDict)
+        {
+            return jsonDict.value;
         }
     }
 }
