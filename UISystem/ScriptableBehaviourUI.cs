@@ -57,6 +57,9 @@ namespace Arthas.UI
             if (Invoker != null) {
                 Invoker.Initialize();
                 Invoker.Invoke("Initialize", this);
+#if UNITY_EDITOR
+                Debug.LogFormat("{0} Intialized!", name);
+#endif
             } else
                 Debug.LogErrorFormat("Cannot found LuaInvoker on UIGameobject {0}!!!", gameObject.name);
         }

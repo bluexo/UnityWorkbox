@@ -51,7 +51,7 @@ public class GitEditor : EditorWindow
         GitPath = files.Find(f => {
             var hasBash = f.FullName.IndexOf("bash", StringComparison.InvariantCultureIgnoreCase) > 0;
             var hasCmd = f.FullName.IndexOf("cmd", StringComparison.InvariantCultureIgnoreCase) > 0;
-            return hasCmd || hasCmd;
+            return hasBash || hasCmd;
         }).FullName;
         GitExtensionPath = files.Find(f => f.FullName.EndsWith("GitExtensions.exe", StringComparison.InvariantCultureIgnoreCase)).FullName;
     }
