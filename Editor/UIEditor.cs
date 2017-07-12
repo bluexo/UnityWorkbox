@@ -54,10 +54,6 @@ namespace Arthas.UI
                 copyPath = EditorUtility.SaveFilePanel("Save Script", "Assets/Scripts/UI/", name, "cs");
             } else {
                 copyPath = copyPath + "StartUI.cs";
-                if (!File.Exists(copyPath)
-                    && !EditorUtility.DisplayDialog("Replace", "You already has a StartUI file , \nReplace it?", "√")) {
-                    return;
-                }
             }
             using (StreamWriter outfile = new StreamWriter(copyPath)) {
                 outfile.WriteLine("using UnityEngine;");
