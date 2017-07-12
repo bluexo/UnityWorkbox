@@ -143,7 +143,7 @@ namespace Arthas.UI
 #endif
             return new WindowInfo()
             {
-                IsHeader = header ? header : ui.IsHeader,
+                IsHeader = header ? header : ui.Floating,
                 IsExclusive = exclusive ? exclusive : ui.IsExclusive,
                 Order = ui.SortOrder,
                 UI = ui

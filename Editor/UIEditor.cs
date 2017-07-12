@@ -2,18 +2,21 @@
 using System.IO;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace Arthas.UI
 {
     [CustomEditor(typeof(BaseUI), true)]
     public class BaseUIEditor : Editor
     {
+        public static GUIStyle richTextStyle = new GUIStyle() { richText = true };
+
         [MenuItem("UI/Create UIManager")]
         public static void AddUICanvas()
         {
             var canvas = FindObjectOfType<UIManager>();
             if (!canvas) {
-                var go = new GameObject("UIManager");
+                var go = new GameObject(typeof(UIManager).Name);
                 canvas = go.AddComponent<UIManager>();
                 go.SetActive(true);
             } else {
@@ -56,9 +59,9 @@ namespace Arthas.UI
                 copyPath = copyPath + "StartUI.cs";
             }
             using (StreamWriter outfile = new StreamWriter(copyPath)) {
-                outfile.WriteLine("using UnityEngine;");
-                outfile.WriteLine("using UnityEngine.UI;");
-                outfile.WriteLine("using Arthas.UI;");
+                outfile.WriteLine("using {0};", typeof(Canvas).Namespace);
+                outfile.WriteLine("using {0};", typeof(Selectable).Namespace);
+                outfile.WriteLine("using {0};", typeof(BaseUI).Namespace);
                 outfile.WriteLine("");
                 if (start) outfile.WriteLine("[{0}]", typeof(UIStartAttribute).Name.Replace(typeof(Attribute).Name, ""));
                 outfile.WriteLine("[{0}]", typeof(UIExclusiveAttribute).Name.Replace(typeof(Attribute).Name, ""));
@@ -89,7 +92,8 @@ namespace Arthas.UI
         public override void OnInspectorGUI()
         {
             base.OnInspectorGUI();
-            showGroup = EditorGUILayout.Foldout(showGroup, "UIGroup");
+            var groupToolTips = string.Format("All group ui will appear at the same time with [{0}] .", target.GetType());
+            showGroup = EditorGUILayout.Foldout(showGroup, new GUIContent("UIGroup [?]", groupToolTips));
             if (showGroup) {
                 for (var i = 0; i < groupProperty.arraySize; i++) {
                     var prop = groupProperty.GetArrayElementAtIndex(i);
@@ -102,7 +106,8 @@ namespace Arthas.UI
                     EditorGUILayout.EndHorizontal();
                 }
             }
-            showEvents = EditorGUILayout.Foldout(showEvents, "UIEvents");
+            var eventsToolTips = string.Format("When [{0}] show or hide will be invoke this events .", target.GetType());
+            showEvents = EditorGUILayout.Foldout(showEvents, new GUIContent("UIEvents [?]", eventsToolTips));
             if (showEvents) {
                 EditorGUILayout.PropertyField(serializedObject.FindProperty("BeforeShow"));
                 EditorGUILayout.PropertyField(serializedObject.FindProperty("AfterShow"));
