@@ -27,7 +27,7 @@ namespace Arthas.UI
     /// 任何时候,顶层窗口都会显示在最前面，如果有多个顶层窗口，则按照 UIOrder.SortOrder 依次显示
     /// </summary>
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = false)]
-    public class UIHeaderAttribute : Attribute { }
+    public class UIFloatingAttribute : Attribute { }
 
     /// <summary>
     ///  Anyway , mustbe has a StartUI as First shown window 
