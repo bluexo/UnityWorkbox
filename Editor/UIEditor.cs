@@ -9,8 +9,6 @@ namespace Arthas.UI
     [CustomEditor(typeof(BaseUI), true)]
     public class BaseUIEditor : Editor
     {
-        public static GUIStyle richTextStyle = new GUIStyle() { richText = true };
-
         [MenuItem("UI/Create UIManager")]
         public static void AddUICanvas()
         {
