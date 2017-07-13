@@ -40,7 +40,7 @@ namespace Arthas.UI
     public class UIManager : SingletonBehaviour<UIManager>
     {
         private static readonly Dictionary<BaseUI, WindowInfo> windows = new Dictionary<BaseUI, WindowInfo>();
-        private static readonly List<WindowInfo> showedHeaderWindows = new List<WindowInfo>();
+        private static readonly List<WindowInfo> showedFloatingWindows = new List<WindowInfo>();
         private static readonly List<WindowInfo> showedWindows = new List<WindowInfo>();
 
         [SerializeField]
@@ -61,14 +61,7 @@ namespace Arthas.UI
                 rect.Overwrite(orgin);
             }
             var uis = GetComponentsInChildren<BaseUI>(true);
-            for (var i = 0; i < uis.Length; i++) {
-                AddUI(uis[i]);
-                if (uis[i].isActiveAndEnabled) {
-                    var window = CreateWindowInfo(uis[i]);
-                    var showed = window.IsHeader ? showedHeaderWindows : showedWindows;
-                    showed.Add(window);
-                }
-            }
+            for (var i = 0; i < uis.Length; i++) AddUI(uis[i]);
         }
 
         protected void Start()
@@ -82,12 +75,9 @@ namespace Arthas.UI
                 return;
             }
             startUI.Show();
-            for (var i = 0; i < transform.childCount; i++) {
-                var child = transform.GetChild(i);
-                var comp = child.GetComponent<BaseUI>();
-                if (!comp) {
-                    child.gameObject.SetActive(false);
-                }
+            var uis = GetComponentsInChildren<BaseUI>(true);
+            for (var i = 0; i < uis.Length; i++) {
+                if (!uis[i].Equals(startUI)) uis[i].gameObject.SetActive(false);
             }
         }
 
@@ -143,7 +133,7 @@ namespace Arthas.UI
         {
             if (windows.ContainsKey(ui)) {
                 var window = windows[ui];
-                var windowList = window.IsHeader ? showedHeaderWindows : showedWindows;
+                var windowList = window.IsHeader ? showedFloatingWindows : showedWindows;
                 if (window.IsExclusive) {
                     var array = windowList.ToArray();
                     for (var i = 0; i < array.Length; i++) {
@@ -167,7 +157,7 @@ namespace Arthas.UI
                     if (!windowList.Contains(sortWindow)) {
                         windowList.Add(sortWindow);
                     }
-                    sortWindow.SetOrder(showedHeaderWindows.Count, Instance.transform.childCount, i);
+                    sortWindow.SetOrder(showedFloatingWindows.Count, Instance.transform.childCount, i);
                 }
             }
         }
@@ -180,9 +170,16 @@ namespace Arthas.UI
         {
             if (windows.ContainsKey(ui)) {
                 var window = windows[ui];
-                var willRemoveWindows = window.IsHeader ? showedWindows : showedHeaderWindows;
+                var willRemoveWindows = window.IsHeader ? showedWindows : showedFloatingWindows;
                 willRemoveWindows.Remove(window);
             }
+        }
+
+        private void OnDestroy()
+        {
+            windows.Clear();
+            showedWindows.Clear();
+            showedFloatingWindows.Clear();
         }
     }
 }
