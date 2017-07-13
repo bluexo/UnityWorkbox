@@ -73,7 +73,7 @@ namespace Arthas.Network
                 var msg = string.Format(@"<color=cyan>{0}</color> cannot support <color=cyan>{1}</color> type message , \n please implement your custom message!",
                     typeof(DefaultMessageHandler).FullName,
                     obj.GetType().FullName);
-                throw new NotSupportedException(msg);
+                throw new NotImplementedException(msg);
             }
         }
 

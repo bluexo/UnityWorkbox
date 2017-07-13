@@ -8,13 +8,24 @@ Unity3d developer workbox that has some useful Unity3d script extensions and edi
 
 * UIManager
 * PanelUI
-* Group/Exclusive/Header
+* Group/Exclusive/Floating
 
 ## Network
 
 * Netwoker
+
 * Connector
+  * IConnector
+  * TCPConnector
+
 * MessageHandler
+  * INetworkMessage & DefaultMessage
+  * INetworkMessageHandler & DefaultMessageHandler
+
+* NetworkConfiguration
+  * Option
+  * Switch
+  * Command
 
 ## Tools
 * Git

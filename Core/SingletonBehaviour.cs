@@ -1,7 +1,7 @@
 ﻿namespace UnityEngine
 {
     /// <summary>
-    /// MonoBehaviour Singleton , if subclass has not attach to GameObject , will be create root GameObject that has a name equals <see cref="typeof(T).FullName"/>
+    /// MonoBehaviour Singleton , That will be create root GameObject which has a name equals <see cref="typeof(T).FullName"/> , if subclass hadn't attach to GameObject.
     /// MonoBehaviour 单例基类，如果子类没有附加到物体上，将会自动创建全局对象 , 以  <see cref="typeof(T).FullName"/> 来命名
     /// </summary>
     /// <typeparam name="T"></typeparam>
@@ -22,11 +22,11 @@
             }
         }
 
-        private static T instance;
+        protected static T instance;
 
         /// <summary>
-        /// 如果子类重写 Awake() 方法，必须调用基类的 Awake()
-        /// if subclass override Awake() , must be call base.Awake() 
+        /// The subclass must be call base.Awake() , if it override Awake()
+        /// 如果子类重写Awake方法，必须调用基类的Awake
         /// </summary>
         protected virtual void Awake()
         {

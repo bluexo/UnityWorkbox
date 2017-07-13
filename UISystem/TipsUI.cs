@@ -9,17 +9,22 @@ namespace Arthas.UI
     [UIOrder(SortOrder = 100)]
     public class TipsUI : PanelUI<TipsUI>
     {
-        public static readonly Color okColor = Color.green;
-        public static readonly Color infoColor = Color.black;
-        public static readonly Color alertColor = Color.yellow;
-        public static readonly Color errorColor = Color.red;
+        public static readonly Color okColor = Color.green, infoColor = Color.black, alertColor = Color.yellow, errorColor = Color.red;
         public Queue<KeyValuePair<string, Color>> queue = new Queue<KeyValuePair<string, Color>>();
-        private WaitForSeconds interval = new WaitForSeconds(.6f);
-        private WaitForSeconds waitForHide = new WaitForSeconds(3f);
+        private WaitForSeconds waitForInterval, waitForHide;
         private Coroutine coroutine;
 
         [SerializeField]
         private Text text;
+        [SerializeField]
+        private float intervalDur = 0.6f, hideDur = 6f;
+
+        protected override void Awake()
+        {
+            base.Awake();
+            waitForHide = new WaitForSeconds(hideDur);
+            waitForInterval = new WaitForSeconds(intervalDur);
+        }
 
         public static void Info(string content)
         {
@@ -43,15 +48,11 @@ namespace Arthas.UI
 
         private void Pop(Color color, string content, float delay = 3f)
         {
-            Debug.Log(content);
-            if (!IsActive())
-                Show();
+            if (!IsActive()) Show();
             var img = GetComponent<Image>();
-            var col = color - new Color(0, 0, 0, 0.3f);
-            var pair = new KeyValuePair<string, Color>(content, col);
+            var pair = new KeyValuePair<string, Color>(content, color - new Color(0, 0, 0, 0.3f));
             queue.Enqueue(pair);
-            if (coroutine == null)
-                coroutine = StartCoroutine(Pop());
+            if (coroutine == null) coroutine = StartCoroutine(Pop());
         }
 
         private IEnumerator Pop()
@@ -64,7 +65,7 @@ namespace Arthas.UI
             Slide();
             yield return waitForHide;
             Slide(false);
-            yield return interval;
+            yield return intervalDur;
             if (queue.Count <= 0) {
                 StopCoroutine(coroutine);
                 coroutine = null;
