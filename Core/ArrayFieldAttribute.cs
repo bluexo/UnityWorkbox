@@ -1,9 +1,8 @@
-﻿using System.Collections;
+﻿
+using UnityEngine;
 
-namespace UnityEngine
+namespace Arthas.UI
 {
-    using System;
-    using System.Collections.Generic;
 
 #if UNITY_EDITOR
     using UnityEditor;

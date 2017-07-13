@@ -37,9 +37,9 @@ public class DefineManager : EditorWindow
         EditorWindow.GetWindow<DefineManager>(true, "Global Define Manager", true);
         return;
         //TODO PlayerSetting Define
-        var defines = EditorUserBuildSettings.activeScriptCompilationDefines;
-        if (!Array.Exists(defines, d => d.Contains("LUA"))) ArrayUtility.AddRange(ref defines, new string[] { "LUA", "WTF?" });
-        PlayerSettings.SetScriptingDefineSymbolsForGroup(BuildTargetGroup.Standalone | BuildTargetGroup.Android | BuildTargetGroup.iOS, defines.ToArrayString());
+        //var defines = EditorUserBuildSettings.activeScriptCompilationDefines;
+        //if (!Array.Exists(defines, d => d.Contains("LUA"))) ArrayUtility.AddRange(ref defines, new string[] { "LUA", "WTF?" });
+        //PlayerSettings.SetScriptingDefineSymbolsForGroup(BuildTargetGroup.Standalone | BuildTargetGroup.Android | BuildTargetGroup.iOS, defines.ToArrayString());
     }
 
     void OnEnable()

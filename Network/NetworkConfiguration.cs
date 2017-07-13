@@ -62,11 +62,11 @@ public class NetworkConfiguration : ScriptableObject
 
     [SerializeField, HideInInspector]
     private NetworkAddress current;
-    [SerializeField, Header("本机服务器")]
+    [SerializeField, Header("LOCAL")]
     private NetworkAddress local;
-    [SerializeField, Header("内网服务器")]
+    [SerializeField, Header("LAN")]
     private NetworkAddress intranet;
-    [SerializeField, Header("外网服务器")]
+    [SerializeField, Header("WAN")]
     private NetworkAddress internet;
 
 #if UNITY_EDITOR
@@ -124,7 +124,7 @@ public class NetworkConfiguration : ScriptableObject
         return true;
     }
 
-    [MenuItem("Network/Configure", priority = 1)]
+    [MenuItem("Network/Configure", priority = 0)]
     public static void Configure()
     {
         Selection.activeObject = AssetDatabase.LoadAssetAtPath<NetworkConfiguration>(kPath);

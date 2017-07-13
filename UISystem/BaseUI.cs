@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Arthas.Common;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -20,14 +21,13 @@ namespace Arthas.UI
         protected int sortOrder;
         public virtual int SortOrder { get { return sortOrder; } }
 
-        [SerializeField]
-        protected bool header;
-        public virtual bool IsHeader { get { return header; } }
+        [SerializeField, Rename("Floating [?]"), Tooltip("[Floating] ui always on top of others")]
+        protected bool floating;
+        public virtual bool Floating { get { return floating; } }
 
-        [SerializeField]
+        [SerializeField, Rename("Exclusive [?]"), Tooltip("Other ui will be auto hide , when [Exclusive] ui show")]
         protected bool exclusive;
         public virtual bool IsExclusive { get { return exclusive; } }
-
 
         public event Action<BaseUI> UIShowEvent;
 

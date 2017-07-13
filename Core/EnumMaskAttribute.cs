@@ -1,6 +1,6 @@
-﻿using System.Collections;
+﻿using UnityEngine;
 
-namespace UnityEngine
+namespace Arthas.Common
 {
     using System;
 

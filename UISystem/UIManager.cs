@@ -120,15 +120,15 @@ namespace Arthas.UI
         {
             var uiType = ui.GetType();
 #if WINDOWS_UWP
-            var header = uiType.GetTypeInfo().IsDefined(typeof(UIHeaderAttribute));
+            var floating = uiType.GetTypeInfo().IsDefined(typeof(UIFloatingAttribute),false);
             var exclusive = uiType.GetTypeInfo().IsDefined(typeof(UIExclusiveAttribute), false);
 #else
-            var header = uiType.IsDefined(typeof(UIHeaderAttribute), false);
+            var floating = uiType.IsDefined(typeof(UIFloatingAttribute), false);
             var exclusive = uiType.IsDefined(typeof(UIExclusiveAttribute), false);
 #endif
             return new WindowInfo()
             {
-                IsHeader = header ? header : ui.IsHeader,
+                IsHeader = floating ? floating : ui.Floating,
                 IsExclusive = exclusive ? exclusive : ui.IsExclusive,
                 Order = ui.SortOrder,
                 UI = ui

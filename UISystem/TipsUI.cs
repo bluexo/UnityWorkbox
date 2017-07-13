@@ -5,7 +5,7 @@ using UnityEngine.UI;
 
 namespace Arthas.UI
 {
-    [UIHeader]
+    [UIFloating]
     [UIOrder(SortOrder = 100)]
     public class TipsUI : PanelUI<TipsUI>
     {
