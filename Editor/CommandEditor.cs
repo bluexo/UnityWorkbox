@@ -77,9 +77,9 @@ public class CommandEditor : EditorWindow
         EditorGUILayout.BeginVertical();
         for (var i = 0; i < commands.Count; i++) {
             if (string.IsNullOrEmpty(commands[i])) continue;
-            EditorGUILayout.BeginHorizontal();
             var cmds = commands[i].Split(':');
             if (cmds.Length < 2) continue;
+            EditorGUILayout.BeginHorizontal();
             if (cmdType == CommandType.Enum) cmds[0] = EditorGUILayout.TextField(string.Format("{0}", cmds[0]), GUILayout.Height(16f), GUILayout.Width(60f));
             else EditorGUILayout.LabelField(string.Format("[{0}]", i), GUILayout.Height(16f), GUILayout.Width(20f));
             cmds[1] = EditorGUILayout.TextField(cmds[1], GUILayout.Height(16f));
