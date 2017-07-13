@@ -19,8 +19,8 @@ Unity3d developer workbox that has some useful Unity3d script extensions and edi
   * TCPConnector
 
 * MessageHandler
-  * INetworkMessage & DefaultNetworkMessage
-  * IMessageHandler & DefaultNetworkMessageHandler
+  * INetworkMessage & DefaultMessage
+  * INetworkMessageHandler & DefaultMessageHandler
 
 * NetworkConfiguration
   * Option
