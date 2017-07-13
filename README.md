@@ -15,17 +15,17 @@ Unity3d developer workbox that has some useful Unity3d script extensions and edi
 * Netwoker
 
 * Connector
-  1. IConnector
-  2. TCPConnector
+  * IConnector
+  * TCPConnector
 
 * MessageHandler
-  1. INetworkMessage & DefaultNetworkMessage
-  2. IMessageHandler & DefaultNetworkMessageHandler
+  * INetworkMessage & DefaultNetworkMessage
+  * IMessageHandler & DefaultNetworkMessageHandler
 
 * NetworkConfiguration
-  1. Option
-  2. Switch
-  3. Command
+  * Option
+  * Switch
+  * Command
 
 ## Tools
 * Git
