@@ -7,12 +7,12 @@ UnityWorkbox 是一个针对Unity3d开发者的工具箱 , 包含大量的易用
 ## UI 管理
 
 * UIManager
-* PanelUI
-* UIExclusive / UIHeader / UIGroup
+* UI面板组件
+* UI的编组、互斥和浮动处理
 
 ## 网络
 
-* Networker
+* Networker 
 * Connector
 * MessageHandler
 
