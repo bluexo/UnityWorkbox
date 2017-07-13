@@ -25,7 +25,9 @@ namespace Arthas.UI
     {
         public abstract void Initialize();
 
-        public abstract object[] Invoke(string funcName, params object[] parameters);
+        public abstract object[] InvokeScript(string funcName, params object[] parameters);
+
+        public abstract void Dispose();
     }
 
     [DisallowMultipleComponent]
@@ -40,6 +42,7 @@ namespace Arthas.UI
         IDropHandler
     {
         public BaseScriptableInvoker Invoker { get; private set; }
+
         [SerializeField, EnumMaskField]
         private PointerEventType pointerEventType;
 
@@ -54,9 +57,12 @@ namespace Arthas.UI
         public void Initialize()
         {
             Invoker = GetComponent<BaseScriptableInvoker>();
-            if (Invoker != null) {
+            if (Invoker) {
                 Invoker.Initialize();
-                Invoker.Invoke("Initialize", this);
+                Invoker.InvokeScript("Initialize", this);
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+                Debug.LogFormat("{0} Initialized!", name);
+#endif
             } else
                 Debug.LogErrorFormat("Cannot found LuaInvoker on UIGameobject {0}!!!", gameObject.name);
         }
@@ -64,19 +70,19 @@ namespace Arthas.UI
         protected override void Start()
         {
             base.Start();
-            if (Invoker != null) Invoker.Invoke("Start");
+            if (Invoker) Invoker.InvokeScript("Start", this);
         }
 
         protected override void OnEnable()
         {
             base.OnEnable();
-            if (Invoker != null) Invoker.Invoke("OnEnable");
+            if (Invoker) Invoker.InvokeScript("OnEnable");
         }
 
         protected override void OnDisable()
         {
             base.OnDisable();
-            if (Invoker != null) Invoker.Invoke("OnDisable");
+            if (Invoker) Invoker.InvokeScript("OnDisable");
         }
 
         public override void Show()
@@ -87,50 +93,56 @@ namespace Arthas.UI
 
         public void OnPointerDown(PointerEventData eventData)
         {
-            if (Invoker != null && (pointerEventType & PointerEventType.Down) != 0)
-                Invoker.Invoke("OnPointerEvent", eventData, PointerEventType.Down);
+            if (Invoker && (pointerEventType & PointerEventType.Down) != 0)
+                Invoker.InvokeScript("OnPointerEvent", eventData, PointerEventType.Down);
         }
 
         public void OnPointerUp(PointerEventData eventData)
         {
-            if (Invoker != null && (pointerEventType & PointerEventType.Up) != 0)
-                Invoker.Invoke("OnPointerEvent", eventData, PointerEventType.Up);
+            if (Invoker && (pointerEventType & PointerEventType.Up) != 0)
+                Invoker.InvokeScript("OnPointerEvent", eventData, PointerEventType.Up);
         }
 
         public void OnPointerEnter(PointerEventData eventData)
         {
-            if (Invoker != null && (pointerEventType & PointerEventType.Enter) != 0)
-                Invoker.Invoke("OnPointerEvent", eventData, PointerEventType.Enter);
+            if (Invoker && (pointerEventType & PointerEventType.Enter) != 0)
+                Invoker.InvokeScript("OnPointerEvent", eventData, PointerEventType.Enter);
         }
 
         public void OnPointerExit(PointerEventData eventData)
         {
-            if (Invoker != null && (pointerEventType & PointerEventType.Exit) != 0)
-                Invoker.Invoke("OnPointerEvent", eventData, PointerEventType.Exit);
+            if (Invoker && (pointerEventType & PointerEventType.Exit) != 0)
+                Invoker.InvokeScript("OnPointerEvent", eventData, PointerEventType.Exit);
         }
 
         public void OnDrag(PointerEventData eventData)
         {
-            if (Invoker != null && (pointerEventType & PointerEventType.Drag) != 0)
-                Invoker.Invoke("OnPointerEvent", eventData, PointerEventType.Drag);
+            if (Invoker && (pointerEventType & PointerEventType.Drag) != 0)
+                Invoker.InvokeScript("OnPointerEvent", eventData, PointerEventType.Drag);
         }
 
         public void OnDrop(PointerEventData eventData)
         {
-            if (Invoker != null && (pointerEventType & PointerEventType.Drop) != 0)
-                Invoker.Invoke("OnPointerEvent", eventData, PointerEventType.Drop);
+            if (Invoker && (pointerEventType & PointerEventType.Drop) != 0)
+                Invoker.InvokeScript("OnPointerEvent", eventData, PointerEventType.Drop);
         }
 
         public void OnPointerClick(PointerEventData eventData)
         {
-            if (Invoker != null && (pointerEventType & PointerEventType.Click) != 0)
-                Invoker.Invoke("OnPointerEvent", eventData, PointerEventType.Click);
+            if (Invoker && (pointerEventType & PointerEventType.Click) != 0)
+                Invoker.InvokeScript("OnPointerEvent", eventData, PointerEventType.Click);
         }
 
         public void OnScroll(PointerEventData eventData)
         {
-            if (Invoker != null && (pointerEventType & PointerEventType.Scroll) != 0)
-                Invoker.Invoke("OnPointerEvent", eventData, PointerEventType.Scroll);
+            if (Invoker && (pointerEventType & PointerEventType.Scroll) != 0)
+                Invoker.InvokeScript("OnPointerEvent", eventData, PointerEventType.Scroll);
+        }
+
+        protected override void OnDestroy()
+        {
+            base.OnDestroy();
+            if (Invoker) Invoker.Dispose();
         }
     }
 }

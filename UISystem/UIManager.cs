@@ -34,14 +34,6 @@ namespace Arthas.UI
         }
     }
 
-    [Serializable]
-    public struct PreloadPanelInfo
-    {
-        public BaseUI ui;
-        public Vector2 offsetMin;
-        public Vector2 offsetMax;
-    }
-
     [RequireComponent(typeof(Canvas))]
     [RequireComponent(typeof(CanvasScaler))]
     [RequireComponent(typeof(GraphicRaycaster))]
@@ -56,8 +48,6 @@ namespace Arthas.UI
         [SerializeField, ArrayField]
         private BaseUI[] preloadPanels;
 
-        private volatile bool initialized = false;
-
         protected override void Awake()
         {
             base.Awake();
@@ -65,15 +55,10 @@ namespace Arthas.UI
                 if (!preloadPanels[i]) continue;
                 var orgin = preloadPanels[i].RectTransform;
                 var go = Instantiate(preloadPanels[i].gameObject);
-                go.name = go.name.Replace("(Clone)", string.Empty);
+                go.name = orgin.name;
                 var rect = go.GetComponent<RectTransform>();
                 rect.SetParent(transform);
-                rect.anchoredPosition = orgin.anchoredPosition;
-                rect.localScale = orgin.localScale;
-                rect.anchorMin = orgin.anchorMin;
-                rect.anchorMax = orgin.anchorMax;
-                rect.offsetMin = orgin.offsetMin;
-                rect.offsetMax = orgin.offsetMax;
+                rect.Overwrite(orgin);
             }
             var uis = GetComponentsInChildren<BaseUI>(true);
             for (var i = 0; i < uis.Length; i++) {
