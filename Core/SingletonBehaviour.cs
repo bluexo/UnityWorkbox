@@ -34,8 +34,10 @@
                 instance = this as T;
                 DontDestroyOnLoad(gameObject);
             } else {
-                if (instance && !instance.Equals(this))
+                if (instance && !instance.Equals(this)) {
                     Destroy(instance);
+                    Debug.LogErrorFormat("The {0} not allow running multiple instances , the redundant will be Destroy!", typeof(T).FullName);
+                }
             }
         }
     }
