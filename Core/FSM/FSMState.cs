@@ -5,7 +5,6 @@ using UnityEngine;
 
 namespace Arthas.FSM
 {
-
     /// <summary>
     /// 状态触发类型
     /// </summary>

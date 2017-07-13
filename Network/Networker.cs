@@ -43,7 +43,7 @@ namespace Arthas.Network
         private readonly static Queue<INetworkMessage> msgQueue = new Queue<INetworkMessage>();
         private readonly static Dictionary<object, Action<INetworkMessage>> responseActions = new Dictionary<object, Action<INetworkMessage>>();
 
-        private WaitForSeconds heartbeatWaiter, timeoutWaiter, connectPollWaiter = new WaitForSeconds(.5f);
+        private WaitForSeconds heartbeatWaitFor, timeoutWaiter, connectPollWaiter = new WaitForSeconds(.5f);
         private Coroutine checkTimeoutCor, checkConnectCor;
         private float currentTime, connectCheckDuration = .1f;
         private static object enterLock = new object();
@@ -61,11 +61,11 @@ namespace Arthas.Network
         /// <summary>
         /// 连接到服务器
         /// </summary>
-        protected void Connect(string ip, int port, IConnector conn, INetworkMessageHandler handler = null)
+        protected void ConnectInternal(string ip, int port, IConnector conn, INetworkMessageHandler handler = null)
         {
             if (connector != null && connector.IsConnected) connector.Close();
             timeoutWaiter = new WaitForSeconds(connectCheckDuration);
-            heartbeatWaiter = new WaitForSeconds(heartbeatInterval);
+            heartbeatWaitFor = new WaitForSeconds(heartbeatInterval);
             if (!string.IsNullOrEmpty(connectorTypeName))
                 connector = (IConnector)Activator.CreateInstance(Type.GetType(connectorTypeName, true, true));
             if (!string.IsNullOrEmpty(messageHandlerName))
@@ -121,7 +121,7 @@ namespace Arthas.Network
 #endif
             ErrorCallback = error;
             ConnectedEvent = callback;
-            Instance.Connect(ip, port, connector, handler);
+            Instance.ConnectInternal(ip, port, connector, handler);
         }
 
         protected IEnumerator TimeoutDetectAsync()
