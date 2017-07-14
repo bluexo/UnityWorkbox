@@ -16,6 +16,7 @@
                     if (!instance) {
                         var go = new GameObject(typeof(T).FullName);
                         instance = go.AddComponent<T>();
+                        DontDestroyOnLoad(go);
                     }
                 }
                 return instance;
@@ -30,14 +31,12 @@
         /// </summary>
         protected virtual void Awake()
         {
-            if (!instance) {
+            DontDestroyOnLoad(gameObject);
+            if (instance && !instance.Equals(this)) {
+                Destroy(instance);
+                Debug.LogErrorFormat("The {0} not allow running multiple instances , the redundant will be Destroy!", typeof(T).FullName);
+            } else if (!instance) {
                 instance = this as T;
-                DontDestroyOnLoad(gameObject);
-            } else {
-                if (instance && !instance.Equals(this)) {
-                    Destroy(instance);
-                    Debug.LogErrorFormat("The {0} not allow running multiple instances , the redundant will be Destroy!", typeof(T).FullName);
-                }
             }
         }
     }

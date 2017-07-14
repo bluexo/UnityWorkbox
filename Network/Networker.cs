@@ -133,7 +133,7 @@ namespace Arthas.Network
                     StopCoroutine(checkTimeoutCor);
                     yield break;
                 }
-                if ((currentTime += Time.deltaTime) > connectTimeout) {
+                if ((currentTime += connectCheckDuration) > connectTimeout) {
                     currentTime = 0;
                     StopCoroutine(checkTimeoutCor);
                     if (ErrorCallback != null) {
