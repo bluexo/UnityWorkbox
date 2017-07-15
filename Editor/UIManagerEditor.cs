@@ -18,7 +18,7 @@ namespace Arthas.UI
             if (!ui.objectReferenceValue) {
                 var type = GetChildStartUI();
                 if (type != null) {
-                    Transform child = canvasObject.transform.FindChild(type.Name);
+                    Transform child = canvasObject.transform.Find(type.Name);
                     if (!child) {
                         var obj = new GameObject(type.Name);
                         child = obj.transform;
