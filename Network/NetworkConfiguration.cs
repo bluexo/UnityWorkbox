@@ -124,7 +124,7 @@ public class NetworkConfiguration : ScriptableObject
         return true;
     }
 
-    [MenuItem("Network/Configure", priority = 0)]
+    [MenuItem("Network/Option", priority = 0)]
     public static void Configure()
     {
         Selection.activeObject = AssetDatabase.LoadAssetAtPath<NetworkConfiguration>(kPath);

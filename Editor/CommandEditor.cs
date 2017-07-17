@@ -10,9 +10,11 @@ using System.Text;
 
 public class CommandEditor : EditorWindow
 {
+    public const string kCommandKey = "Commands", kDefaultCmd = "0:Login", cmdPath = "Assets/Scripts/Command.cs";
     public enum CommandType { String, Enum }
     private CommandType cmdType;
-    public const string kCommandKey = "Commands", kDefaultCmd = "0:Login", cmdPath = "Assets/Scripts/Command.cs";
+    private Vector2 scrollViewPosition;
+    private static string cmdTypeName;
 
     [MenuItem("Network/Command/Open", priority = 10)]
     public static void OpenCommandEditor()
@@ -42,7 +44,7 @@ public class CommandEditor : EditorWindow
         var stringBuilder = new StringBuilder();
         stringBuilder.AppendLine("namespace Arthas.Network");
         stringBuilder.AppendLine("{");
-        stringBuilder.AppendLine(string.Format("      public {0} Command", cmdType == CommandType.String ? "class" : "enum"));
+        stringBuilder.AppendLine(string.Format("      public {0} {1}", cmdType == CommandType.String ? "class" : "enum", cmdTypeName));
         stringBuilder.AppendLine("      {");
         for (var i = 0; i < commands.Length; i++) {
             if (string.IsNullOrEmpty(commands[i])) continue;
@@ -69,19 +71,20 @@ public class CommandEditor : EditorWindow
     {
         var generate = GUILayout.Button("GENERATE", GUILayout.Height(45f));
         GUILayout.Space(5);
+        cmdTypeName = EditorGUILayout.TextField("CommandTypeName", cmdTypeName);
         cmdType = (CommandType)EditorGUILayout.EnumPopup("CommandType", cmdType);
         GUILayout.Space(5);
         if (generate) GenerateCommands(cmdType);
         var cmdString = EditorPrefs.GetString(kCommandKey);
         var commands = new List<string>(cmdString.Split('|'));
-        EditorGUILayout.BeginVertical();
+        scrollViewPosition = EditorGUILayout.BeginScrollView(scrollViewPosition);
         for (var i = 0; i < commands.Count; i++) {
             if (string.IsNullOrEmpty(commands[i])) continue;
             var cmds = commands[i].Split(':');
             if (cmds.Length < 2) continue;
             EditorGUILayout.BeginHorizontal();
             if (cmdType == CommandType.Enum) cmds[0] = EditorGUILayout.TextField(string.Format("{0}", cmds[0]), GUILayout.Height(16f), GUILayout.Width(60f));
-            else EditorGUILayout.LabelField(string.Format("[{0}]", i), GUILayout.Height(16f), GUILayout.Width(20f));
+            else EditorGUILayout.LabelField(string.Format("[{0}]", i), GUILayout.Height(16f), GUILayout.Width(30f));
             cmds[1] = EditorGUILayout.TextField(cmds[1], GUILayout.Height(16f));
             commands[i] = string.Format("{0}:{1}", cmds[0], cmds[1]);
             if (GUILayout.Button("-", GUILayout.Width(20f))) commands.Remove(commands[i]);
@@ -89,9 +92,9 @@ public class CommandEditor : EditorWindow
         }
         if (GUILayout.Button("+")) commands.Add(kDefaultCmd);
         GUILayout.Space(10);
-        EditorGUILayout.PrefixLabel("Code Proview");
+        EditorGUILayout.PrefixLabel("Code Preview");
         GUILayout.TextArea(GetCmdText(cmdType));
-        EditorGUILayout.EndVertical();
+        EditorGUILayout.EndScrollView();
         cmdString = string.Empty;
         commands.ForEach(r => { if (!string.IsNullOrEmpty(r)) cmdString += "|" + r; });
         EditorPrefs.SetString(kCommandKey, cmdString);
