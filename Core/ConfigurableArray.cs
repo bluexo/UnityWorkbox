@@ -100,7 +100,7 @@ namespace Arthas.Common
 
     public abstract class ConfigurableArray<T> : ScriptableObject where T : new()
     {
-        [SerializeField]
+        [SerializeField, HideInInspector]
         protected T[] items = { new T() };
 
         public virtual T[] Items { get { return items; } }

@@ -13,7 +13,7 @@ namespace Arthas.Network
         /// <summary>
         /// 推送事件
         /// </summary>
-        public static event Action<INetworkMessage> PushEvent;
+        public static event Action<INetworkMessage> ResponseEvent, PushEvent;
 
         /// <summary>
         /// 网络连接事件
