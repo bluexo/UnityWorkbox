@@ -196,6 +196,9 @@ namespace Arthas.Network
                 } else if (PushEvent != null) {
                     PushEvent(message);
                 }
+                if (ResponseEvent != null) {
+                    ResponseEvent(message);
+                }
             }
         }
 
