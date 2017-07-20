@@ -26,10 +26,10 @@ namespace System.Collections
 
     public static class CollectionExtentions
     {
-        private static Random random = new Random();
+        private readonly static Random random = new Random();
 
         public static T First<T>(this IList<T> arr)
-        {                            
+        {
             if (arr.Count > 0) return arr[0];
             else return default(T);
         }

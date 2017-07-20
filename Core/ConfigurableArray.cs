@@ -13,7 +13,7 @@ namespace Arthas.Common
     /// </summary>
     /// <typeparam name="T"></typeparam>
     [CustomEditor(typeof(ConfigurableArray<>), true)]
-    public abstract class ConfigurableArrayEditor<T> : Editor where T : new()
+    public class ConfigurableArrayEditor<T> : Editor where T : new()
     {
         protected SerializedProperty itemsProperty;
 
@@ -94,13 +94,16 @@ namespace Arthas.Common
 
         public virtual bool ShowBaseInspactor { get { return false; } }
 
-        public abstract void DrawItemProperty(SerializedProperty property, int index);
+        public virtual void DrawItemProperty(SerializedProperty property, int index)
+        {
+            EditorGUILayout.PropertyField(property);
+        }
     }
 #endif
 
     public abstract class ConfigurableArray<T> : ScriptableObject where T : new()
     {
-        [SerializeField]
+        [SerializeField, HideInInspector]
         protected T[] items = { new T() };
 
         public virtual T[] Items { get { return items; } }
