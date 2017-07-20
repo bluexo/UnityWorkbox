@@ -8,7 +8,7 @@ namespace UnityEngine
     public class JsonList<T>
     {
         [SerializeField]
-        private List<T> value;
+        private List<T> value = new List<T>();
         public List<T> Value { get { return value; } }
 
         public JsonList() { }
@@ -32,7 +32,7 @@ namespace UnityEngine
         {
             if (pureArray) json = '{' + string.Format("\"value\":{0}", json) + '}';
             var arr = JsonUtility.FromJson<JsonList<T>>(json);
-            value = arr.value;
+            if (arr != null) value = arr.value;
             return this;
         }
 
@@ -42,7 +42,7 @@ namespace UnityEngine
             return pureArray ? json.TrimStart('{').Substring("\"value:\"".Length).TrimEnd('}') : json;
         }
 
-        public static implicit operator JsonList<T> (List<T> list)
+        public static implicit operator JsonList<T>(List<T> list)
         {
             return new JsonList<T>(list);
         }
@@ -57,9 +57,9 @@ namespace UnityEngine
     public class JsonDict<TKey, TValue> : ISerializationCallbackReceiver
     {
         [SerializeField]
-        private List<TKey> keyList;
+        private List<TKey> keyList = new List<TKey>();
         [SerializeField]
-        private List<TValue> valueList;
+        private List<TValue> valueList = new List<TValue>();
 
         private Dictionary<TKey, TValue> value;
         public Dictionary<TKey, TValue> Value { get { return value; } }
@@ -95,12 +95,12 @@ namespace UnityEngine
             return JsonUtility.ToJson(this);
         }
 
-        public static implicit operator JsonDict<TKey,TValue>(Dictionary<TKey,TValue> dict)
+        public static implicit operator JsonDict<TKey, TValue>(Dictionary<TKey, TValue> dict)
         {
             return new JsonDict<TKey, TValue>(dict);
         }
 
-        public static implicit operator Dictionary<TKey,TValue>(JsonDict<TKey,TValue> jsonDict)
+        public static implicit operator Dictionary<TKey, TValue>(JsonDict<TKey, TValue> jsonDict)
         {
             return jsonDict.value;
         }
