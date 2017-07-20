@@ -46,7 +46,7 @@ namespace Arthas.UI
         [SerializeField]
         private BaseUI startUI;
         [SerializeField, ArrayField]
-        private BaseUI[] preloadPanels;
+        private BaseUI[] preloadPanels = { };
 
         protected override void Awake()
         {
