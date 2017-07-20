@@ -11,7 +11,7 @@ namespace Arthas.Network
     public class Networker : SingletonBehaviour<Networker>
     {
         /// <summary>
-        /// 推送事件
+        /// 推送和响应事件
         /// </summary>
         public static event Action<INetworkMessage> ResponseEvent, PushEvent;
 
@@ -75,7 +75,7 @@ namespace Arthas.Network
             connector.Connect(ip, port);
             checkTimeoutCor = StartCoroutine(TimeoutDetectAsync());
 #if UNITY_EDITOR
-            Debug.LogFormat("Connect to server , <color=cyan>Addr:[{0}:{1}] ,connector:{2} ,wrapper:{3}.</color>", ip, port, connector.GetType(), MessageHandler.GetType());
+            Debug.LogFormat("Connect to server , <color=cyan>Addr:[{0}:{1}] ,connector:{2} ,wrapper:{3}.</color>", ip, port, connector.GetType(), messageHandler.GetType());
 #endif
         }
 

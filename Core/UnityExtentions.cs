@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace UnityEngine
 {
-    public static class UnityExtentions
+    public static class UnityExtensions
     {
         public static Coroutine Invoke(this MonoBehaviour comp, Action action, float time = 0)
         {

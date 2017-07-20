@@ -33,10 +33,16 @@ public class NetworkerEditor : Editor
 
     public override void OnInspectorGUI()
     {
-        var rect = EditorGUILayout.GetControlRect(true, 20);
+        var rect = EditorGUILayout.GetControlRect(true, 30);
         base.OnInspectorGUI();
-        EditorGUI.LabelField(rect, typeof(Networker).ToString(), EditorStyles.whiteLargeLabel);
-        EditorGUI.DrawRect(rect, (Application.isPlaying && Networker.IsConnected ? Color.green : Color.yellow) / 2f);
+        var running = Application.isPlaying && Networker.IsConnected;
+        var style = new GUIStyle(EditorStyles.whiteLargeLabel) { richText = true , fontSize = 20 };
+        var label = string.Format("{0} [<color={2}>{1}</color>]",
+            typeof(Networker),
+            running ? "Online" : "Offline",
+            running ? "green" : "red");
+        EditorGUI.LabelField(rect, label, style);
+        EditorGUI.DrawRect(rect, (running ? Color.cyan : Color.yellow) / 3f);
 
         string[] connectorNames = { }, handlerNames = { };
 
