@@ -1,7 +1,7 @@
 ﻿
 using UnityEngine;
 
-namespace Arthas.UI
+namespace Arthas.Common
 {
 
 #if UNITY_EDITOR
@@ -22,6 +22,7 @@ namespace Arthas.UI
                 if (GUILayout.Button("-")) parent.arraySize--;
                 GUI.color = Color.white;
                 EditorGUILayout.EndHorizontal();
+
             }
         }
 

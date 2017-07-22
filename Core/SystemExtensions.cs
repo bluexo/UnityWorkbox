@@ -40,6 +40,13 @@ namespace System.Collections
             else return default(T);
         }
 
+        public static T RandomItem<T>(this IList<T> arr)
+        {
+            if (arr.Count > 0) {
+                return arr[random.Next(0, arr.Count)];
+            } else return default(T);
+        }
+
         public static void Replace<Tkey, TValue>(this IDictionary<Tkey, TValue> dict, Tkey k, TValue v)
         {
             if (dict.ContainsKey(k)) dict.Remove(k);

@@ -51,7 +51,7 @@ namespace Arthas.Common
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
                 Debug.LogFormat("<color=cyan>Stop a global coroutine , count = <size=14>{0}</size></color> ", Count);
 #endif
-                Instance.StopCoroutine(cors[i]);
+                if (cors[i] != null) Instance.StopCoroutine(cors[i]);
             }
         }
 
