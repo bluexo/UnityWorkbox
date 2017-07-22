@@ -26,7 +26,7 @@ namespace Arthas.UI
     {
         public abstract void Initialize();
 
-        public abstract object InvokeScript(string funcName, params object[] parameters);
+        public abstract object[] InvokeScript(string funcName, params object[] parameters);
 
         public abstract void Dispose();
     }
