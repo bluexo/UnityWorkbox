@@ -215,7 +215,7 @@ namespace Arthas.Network
             }
             catch (Exception ex) {
                 Debug.LogError(ex.Message);
-            }
+            }                                    
         }
 
         public static IEnumerator SendAsync(object cmd, object buf, params object[] parameters)
