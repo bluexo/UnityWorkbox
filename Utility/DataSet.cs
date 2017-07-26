@@ -10,7 +10,7 @@ namespace Arthas.Common
 
     public class DataSetEditor : EditorWindow
     {
-        [MenuItem("Tools/PlayerPref/DataSet Viewer")]
+        //[MenuItem("Tools/PlayerPref/DataSet Viewer")]
         public static void OpenOrInit()
         {
             var window = GetWindow<DataSetEditor>("DataSet");
