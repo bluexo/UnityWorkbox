@@ -26,6 +26,8 @@ namespace Arthas.Common
             itemsProperty = serializedObject.FindProperty("items");
             if (itemsProperty.arraySize <= 0) itemsProperty.arraySize++;
             folds = new bool[itemsProperty.arraySize];
+            var backupDir = serializedObject.FindProperty("backupDirectory");
+            backupDir.stringValue = Application.dataPath.Replace("/Assets","") + "/ProjectSettings";
             serializedObject.ApplyModifiedProperties();
         }
 
@@ -92,7 +94,7 @@ namespace Arthas.Common
             }
         }
 
-        public virtual bool ShowBaseInspactor { get { return false; } }
+        public virtual bool ShowBaseInspactor { get { return true; } }
 
         public virtual void DrawItemProperty(SerializedProperty property, int index)
         {
@@ -103,10 +105,17 @@ namespace Arthas.Common
 
     public abstract class ConfigurableArray<T> : ScriptableObject where T : new()
     {
+        [SerializeField]
+        protected bool autoBackup = true;
+
+        [SerializeField, Path(Type = PathType.Folder, Relative = false)]
+        protected string backupDirectory;
+
+        [Space(30)]
         [SerializeField, HideInInspector]
         protected T[] items = { new T() };
-
         public virtual T[] Items { get { return items; } }
+
 
         public virtual string ToJson()
         {

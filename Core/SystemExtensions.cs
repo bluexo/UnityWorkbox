@@ -77,7 +77,6 @@ namespace System.Collections
 
         public static void Foreach<T>(this IEnumerable<T> arr, Action<T> action)
         {
-            if (arr != null) return;
             foreach (var t in arr) {
                 if (action != null) {
                     action(t);
