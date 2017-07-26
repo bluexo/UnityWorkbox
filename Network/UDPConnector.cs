@@ -13,6 +13,8 @@ namespace Arthas.Network
     {
         public bool IsConnected { get; private set; }
 
+        public UdpClient clinet;
+
         public event Action<byte[]> MessageRespondEvent;
 
         public void Connect(string ip, int port)

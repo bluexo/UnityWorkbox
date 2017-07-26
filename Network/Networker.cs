@@ -173,11 +173,13 @@ namespace Arthas.Network
         protected void OnMessageRespond(byte[] buffer)
         {
             lock (enterLock) {
-                var msg = messageHandler.ParseMessage(buffer);
-                msgQueue.Enqueue(msg);
+                var msgs = messageHandler.ParseMessage(buffer);
+                for (var i = 0; i < msgs.Count; i++) {
+                    msgQueue.Enqueue(msgs[i]);
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
-                Debug.LogFormat("<color=blue>[TCPNetwork]</color> [Receive] << CMD:{0},TIME:{1}", msg.Command, DateTime.Now);
+                    Debug.LogFormat("<color=blue>[TCPNetwork]</color> [Receive] << CMD:{0},TIME:{1}", msgs[i].Command, DateTime.Now);
 #endif
+                }
             }
         }
 

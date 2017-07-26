@@ -5,6 +5,8 @@
  * ******************************************************/
 
 using UnityEngine;
+using System;
+using UnityEngine.Serialization;
 #if UNITY_EDITOR
 using UnityEditor;
 using System.IO;
@@ -22,28 +24,23 @@ public class NetworkConfiguration : ScriptableObject
     /// <summary>
     /// 网络地址
     /// </summary>
-    [System.Serializable]
-    public struct NetworkAddress
+    [Serializable]
+    public class NetworkAddress
     {
         public string ip;
         public short port;
+        [Space(10), Header("Http Only")]
+        public string scheme = "http";
+        public string path;
+        public Uri Uri { get { return new Uri(scheme); } }
+
+        #region Compare
         public static bool operator ==(NetworkAddress lhs, NetworkAddress rhs) { return lhs.ip == rhs.ip && lhs.port == rhs.port; }
         public static bool operator !=(NetworkAddress lhs, NetworkAddress rhs) { return lhs.ip != rhs.ip || lhs.port != rhs.port; }
-
-        public override bool Equals(object obj)
-        {
-            return base.Equals(obj);
-        }
-
-        public override int GetHashCode()
-        {
-            return base.GetHashCode();
-        }
-
-        public override string ToString()
-        {
-            return string.Format("{0}:{1}", ip, port);
-        }
+        public override bool Equals(object obj) { return base.Equals(obj); }
+        public override int GetHashCode() { return base.GetHashCode(); }
+        public override string ToString() { return string.Format("{0}:{1}", ip, port); }
+        #endregion
     }
 
     public static NetworkAddress Current
@@ -60,18 +57,24 @@ public class NetworkConfiguration : ScriptableObject
         }
     }
 
-    [SerializeField, HideInInspector]
-    private NetworkAddress current;
-    [SerializeField, Header("LOCAL")]
-    private NetworkAddress local;
-    [SerializeField, Header("LAN")]
-    private NetworkAddress intranet;
-    [SerializeField, Header("WAN")]
-    private NetworkAddress internet;
+    [Space(10)]
+    [SerializeField]
+    private bool fromAssetsBundle = false;
+    [SerializeField]
+    private string bundleName = typeof(NetworkConfiguration).FullName;
+    [Space(30)]
+    [HideInInspector]
+    public NetworkAddress current;
+    [Header("LOCAL")]
+    public NetworkAddress local;
+    [Header("LAN")]
+    public NetworkAddress intranet;
+    [Header("WAN")]
+    public NetworkAddress internet;
 
 #if UNITY_EDITOR
     public const string kPath = "Assets/Resources/" + kConfigPath + "NetworkConfiguration.asset";
-    public const string kMenu = "Network/Switch", kLocal = "/LOCAL", kIntranet = "/LAN", kInternet = "/WAN";
+    public const string kMenu = "Network/Address", kLocal = "/LOCAL", kIntranet = "/LAN", kInternet = "/WAN";
 
     [MenuItem(kMenu + kLocal, priority = 1)]
     public static void SetLocal()
@@ -79,7 +82,7 @@ public class NetworkConfiguration : ScriptableObject
         var conf = GetConfiguration();
         conf.current = conf.local;
         EditorUtility.SetDirty(conf);
-        Debug.LogFormat("<color=cyan>当前服务器地址:[{0}:{1}]</color>", conf.current.ip, conf.current.port);
+        Debug.LogFormat("<color=cyan>Current Address:[{0}:{1}]</color>", conf.current.ip, conf.current.port);
     }
 
     [MenuItem(kMenu + kLocal, true, priority = 1)]
@@ -96,7 +99,7 @@ public class NetworkConfiguration : ScriptableObject
         var conf = GetConfiguration();
         conf.current = conf.intranet;
         EditorUtility.SetDirty(conf);
-        Debug.LogFormat("<color=cyan>当前服务器地址:[{0}:{1}]</color>", conf.current.ip, conf.current.port);
+        Debug.LogFormat("<color=cyan>Current Address:[{0}:{1}]</color>", conf.current.ip, conf.current.port);
     }
 
     [MenuItem(kMenu + kIntranet, true, priority = 1)]
@@ -113,7 +116,7 @@ public class NetworkConfiguration : ScriptableObject
         var conf = GetConfiguration();
         conf.current = conf.internet;
         EditorUtility.SetDirty(conf);
-        Debug.LogFormat("<color=cyan>当前服务器地址:[{0}:{1}]</color>", conf.current.ip, conf.current.port);
+        Debug.LogFormat("<color=cyan>Current Address:[{0}:{1}]</color>", conf.current.ip, conf.current.port);
     }
 
     [MenuItem(kMenu + kInternet, true, priority = 1)]
@@ -145,7 +148,7 @@ public class NetworkConfiguration : ScriptableObject
             AssetDatabase.CreateAsset(conf, kPath);
             EditorUtility.SetDirty(conf);
             Selection.activeObject = conf;
-            EditorUtility.DisplayDialog("Configuration", "Please configure your network >>>>", "√");
+            EditorUtility.DisplayDialog("Configuration", "Please configure your network  >>>>", "√");
         }
         return conf;
     }

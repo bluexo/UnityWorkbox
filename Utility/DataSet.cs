@@ -64,7 +64,7 @@ namespace Arthas.Common
         public static List<string> Keys { get; private set; }
         private readonly static Dictionary<string, string> dicts = new Dictionary<string, string>();
 
-        [RuntimeInitializeOnLoadMethod]
+        //[RuntimeInitializeOnLoadMethod]
         public static void Initialize()
         {
             if (!PlayerPrefs.HasKey(DataSetKey)) {

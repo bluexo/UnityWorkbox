@@ -7,47 +7,51 @@ using UnityEngine;
 
 #if UNITY_EDITOR
 
-#endif
-[Serializable]
-public class TaskWorkerItem
+public class WorkItemBase
 {
     public volatile bool completed;
-    public Action<TaskWorkerItem> worker;
 }
 
-public class TaskWorker : MonoBehaviour
+#endif
+[Serializable]
+public class TaskWorkItem : WorkItemBase
 {
-    private readonly Queue<TaskWorkerItem> items = new Queue<TaskWorkerItem>();
-    private volatile bool isCompleted = false;
-    private List<int> arr = new List<int>();
+    public Action worker;
+}
 
-    // Use this for initialization
-    private IEnumerator Start()
-    {
-        ThreadPool.QueueUserWorkItem(o => {
-            for (var i = 0; i < 10000; i++) arr.Add(i);
-            Thread.Sleep(10000);
-            isCompleted = true;
-        });
-        yield return new WaitUntil(() => isCompleted);
-    }
+[Serializable]
+public class TaskWorkItem<TResult> : WorkItemBase
+{
+    public Func<TResult> worker;
+    public TResult result;
+}
 
-    public void AddWork(Action<TaskWorkerItem> worker)
-    {
-        var item = new TaskWorkerItem() { completed = false, worker = worker };
-        items.Enqueue(item);
-        ThreadPool.QueueUserWorkItem(o => {
-            worker(item);
-            item.completed = true;
-        });
-    }
+/// <summary>
+/// 基于线程池的多线程使用方式，可以将密集运算在子线程中运行，并将结果返回到主线程中，可以在检视窗口中查看线程的运行状态
+/// </summary>
+public class TaskWorker : SingletonBehaviour<TaskWorker>
+{
+    private static readonly List<WorkItemBase> workItems = new List<WorkItemBase>();
+    private static readonly List<WorkItemBase> removeList = new List<WorkItemBase>();
+    private static object enterLock = new object();
 
-    public IEnumerator WaitWork(Action<TaskWorkerItem> worker)
+    //public static void AddWork<TResult>(Func<TResult> worker, Action<TResult> func)
+    //{
+    //    lock (enterLock) {
+    //        var item = new TaskWorkItem<TResult>() { completed = false, worker = worker };
+    //        workItems.Add(item);
+    //        ThreadPool.QueueUserWorkItem(o => {
+    //            item.result = worker();
+    //            item.completed = true;
+    //        });
+    //    }
+    //}
+
+    public static IEnumerator WaitWork(Action worker)
     {
-        var item = new TaskWorkerItem() { completed = false, worker = worker };
-        items.Enqueue(item);
+        var item = new TaskWorkItem() { completed = false, worker = worker };
         ThreadPool.QueueUserWorkItem(o => {
-            worker(item);
+            worker();
             item.completed = true;
         });
         yield return new WaitUntil(() => item.completed);
@@ -55,6 +59,8 @@ public class TaskWorker : MonoBehaviour
 
     private void Update()
     {
-
+        //workItems.ForEach(i => { if (i.completed) removeList.Add(i); });
+        //removeList.ForEach(i => workItems.Remove(i));
+        //removeList.Clear();
     }
 }

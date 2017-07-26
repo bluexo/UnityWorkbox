@@ -47,11 +47,13 @@ namespace Arthas.Common
         public static void Stop(params Coroutine[] cors)
         {
             for (var i = 0; i < cors.Length; i++) {
-                Count--;
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
                 Debug.LogFormat("<color=cyan>Stop a global coroutine , count = <size=14>{0}</size></color> ", Count);
 #endif
-                if (cors[i] != null) Instance.StopCoroutine(cors[i]);
+                if (cors[i] != null) {
+                    Count--;
+                    Instance.StopCoroutine(cors[i]);
+                }
             }
         }
 

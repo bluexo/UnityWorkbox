@@ -77,13 +77,20 @@ namespace Arthas.Network
             }
         }
 
-        public virtual INetworkMessage ParseMessage(byte[] buffer)
+        public virtual IList<INetworkMessage> ParseMessage(byte[] buffer)
         {
-            var len = BitConverter.ToInt16(buffer, 0);
-            var command = BitConverter.ToInt16(buffer, sizeof(short));
-            var msgBuffer = new byte[buffer.Length - 4];
-            Buffer.BlockCopy(buffer, 4, msgBuffer, 0, msgBuffer.Length);
-            return new DefaultMessage(command, msgBuffer);
+            var messages = new List<INetworkMessage>();
+            using (var stream = new MemoryStream(buffer))
+            using (var reader = new BinaryReader(stream)) {
+                while (reader.BaseStream.Position < buffer.Length) {
+                    var len = reader.ReadInt16();
+                    var cmd = reader.ReadInt16();
+                    var content = reader.ReadBytes(len - sizeof(short));
+                    var msg = new DefaultMessage(cmd, content);
+                    messages.Add(msg);
+                }
+                return messages;
+            }
         }
     }
 }
