@@ -44,14 +44,34 @@ namespace Arthas.UI
         private static readonly List<WindowInfo> showedFloatingWindows = new List<WindowInfo>();
         private static readonly List<WindowInfo> showedWindows = new List<WindowInfo>();
 
+        public Canvas Canvas { get; private set; }
         [SerializeField]
         private BaseUI startUI;
         [SerializeField, ArrayField]
         private BaseUI[] preloadPanels = { };
 
+        [SerializeField, Tooltip("Overwrite camera on Awake")]
+        private bool overwriteCamera = false;
+        [SerializeField, HideInInspector]
+        private string cameraTag = "MainCamera"; 
+
         protected override void Awake()
         {
             base.Awake();
+            Canvas = GetComponent<Canvas>();
+            if (!Canvas) {
+                Debug.LogError("[UIManager] Cannot found [Canvas] Component!");
+                return;
+            }
+            if (overwriteCamera && Canvas.renderMode != RenderMode.ScreenSpaceOverlay) {
+                Camera camera = null;
+                var cameraObj = GameObject.FindGameObjectWithTag(cameraTag);
+                if (cameraObj && (camera = cameraObj.GetComponent<Camera>())) {
+                    Canvas.worldCamera = camera;
+                } else {
+                    Debug.LogErrorFormat("[UIManager] Cannot found [Camera] Component with tag:<color=cyan>{0}</color>", cameraTag);
+                }
+            }
             for (var i = 0; i < preloadPanels.Length; i++) {
                 if (!preloadPanels[i]) continue;
                 var orgin = preloadPanels[i].RectTransform;

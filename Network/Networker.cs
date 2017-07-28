@@ -217,7 +217,7 @@ namespace Arthas.Network
             }
             catch (Exception ex) {
                 Debug.LogError(ex.Message);
-            }                                    
+            }
         }
 
         public static IEnumerator SendAsync(object cmd, object buf, params object[] parameters)
@@ -235,7 +235,7 @@ namespace Arthas.Network
             if (!pause && connector != null && !connector.IsConnected) Connect();
         }
 
-        private void OnApplicationQuit()
+        private void OnDestroy()
         {
             Close();
         }

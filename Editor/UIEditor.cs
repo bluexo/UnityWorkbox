@@ -116,8 +116,8 @@ namespace Arthas.UI
         }
     }
 
-    [CustomEditor(typeof(ScriptableBehaviourUI))]
-    public class LuaBehaviourUIEditor : BaseUIEditor
+    [CustomEditor(typeof(ScriptableBehaviourUI), isFallback = true)]
+    public class ScriptableBehaviourUIEditor : BaseUIEditor
     {
         protected override void OnEnable()
         {
