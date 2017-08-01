@@ -13,13 +13,13 @@ namespace Arthas.UI
     public struct WindowInfo : IComparable<WindowInfo>
     {
         public int? Order { get; set; }
-        public bool IsHeader { get; set; }
+        public bool IsFloating { get; set; }
         public bool IsExclusive { get; set; }
         public BaseUI UI { get; set; }
 
-        public void SetOrder(int headerCount, int amountCount, int index)
+        public void SetOrder(int floatingCount, int amountCount, int index)
         {
-            var i = (IsHeader ? amountCount : amountCount - headerCount) - index - 1;
+            var i = (IsFloating ? amountCount : amountCount - floatingCount) - index - 1;
             UI.transform.SetSiblingIndex(i);
             UI.gameObject.SetActive(true);
         }
@@ -53,7 +53,7 @@ namespace Arthas.UI
         [SerializeField, Tooltip("Overwrite camera on Awake")]
         private bool overwriteCamera = false;
         [SerializeField, HideInInspector]
-        private string cameraTag = "MainCamera"; 
+        private string cameraTag = "MainCamera";
 
         protected override void Awake()
         {
@@ -63,7 +63,7 @@ namespace Arthas.UI
                 Debug.LogError("[UIManager] Cannot found [Canvas] Component!");
                 return;
             }
-            if (overwriteCamera && Canvas.renderMode != RenderMode.ScreenSpaceOverlay) {
+            if (overwriteCamera) {
                 Camera camera = null;
                 var cameraObj = GameObject.FindGameObjectWithTag(cameraTag);
                 if (cameraObj && (camera = cameraObj.GetComponent<Camera>())) {
@@ -88,7 +88,7 @@ namespace Arthas.UI
         protected void Start()
         {
             if (!startUI) {
-                Debug.LogError(@"UISystem initialize fail , Cannot found start ui which has a <color=cyan>[UIStart]</color> Attribute and inherit <color=cyan>:PanelUI<T></color>");
+                Debug.LogError(@"[UIManager] initialize fail , Cannot found a <color=cyan>startUI</color> shown as first one!");
 #if UNITY_EDITOR
                 UnityEditor.Selection.activeGameObject = gameObject;
                 Debug.DebugBreak();
@@ -139,7 +139,7 @@ namespace Arthas.UI
 #endif
             return new WindowInfo()
             {
-                IsHeader = floating ? floating : ui.Floating,
+                IsFloating = floating ? floating : ui.Floating,
                 IsExclusive = exclusive ? exclusive : ui.IsExclusive,
                 Order = ui.SortOrder,
                 UI = ui
@@ -154,7 +154,7 @@ namespace Arthas.UI
         {
             if (windows.ContainsKey(ui)) {
                 var window = windows[ui];
-                var windowList = window.IsHeader ? showedFloatingWindows : showedWindows;
+                var windowList = window.IsFloating ? showedFloatingWindows : showedWindows;
                 if (window.IsExclusive) {
                     var array = windowList.ToArray();
                     for (var i = 0; i < array.Length; i++) {
@@ -191,7 +191,7 @@ namespace Arthas.UI
         {
             if (windows.ContainsKey(ui)) {
                 var window = windows[ui];
-                var willRemoveWindows = window.IsHeader ? showedWindows : showedFloatingWindows;
+                var willRemoveWindows = window.IsFloating ? showedWindows : showedFloatingWindows;
                 willRemoveWindows.Remove(window);
             }
         }

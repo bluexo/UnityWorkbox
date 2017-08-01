@@ -21,7 +21,7 @@ namespace Arthas.Common
             foreach (var item in items) {
                 var rect = EditorGUILayout.GetControlRect(GUILayout.ExpandWidth(true), GUILayout.Height(32));
                 EditorGUI.DrawRect(rect, (item.completed ? Color.yellow : Color.green) / 1.5f);
-                var label = string.Format("<size=15><color=white>WorkThread: </color><color=cyan>{0}</color> {1} </size>", item.threadId, item.completed ? "Completed" : "Running");
+                var label = string.Format("<size=15><color=white> WorkThread: </color><color=cyan>{0}</color> {1} </size>", item.threadId, item.completed ? "Completed" : "Running");
                 EditorGUI.LabelField(rect, label, style);
             }
         }
