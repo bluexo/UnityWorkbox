@@ -27,7 +27,7 @@ namespace Arthas.Common
             if (itemsProperty.arraySize <= 0) itemsProperty.arraySize++;
             folds = new bool[itemsProperty.arraySize];
             var backupDir = serializedObject.FindProperty("backupDirectory");
-            backupDir.stringValue = Application.dataPath.Replace("/Assets","") + "/ProjectSettings";
+            backupDir.stringValue = Application.dataPath.Replace("/Assets", "") + "/ProjectSettings";
             serializedObject.ApplyModifiedProperties();
         }
 

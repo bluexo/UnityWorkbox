@@ -13,7 +13,9 @@ namespace Arthas.Network
     {
         public bool IsConnected { get; private set; }
 
+#if !UNITY_WSA
         public UdpClient clinet;
+#endif
 
         public event Action<byte[]> MessageRespondEvent;
 

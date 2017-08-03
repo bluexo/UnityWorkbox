@@ -52,7 +52,8 @@ namespace Arthas.Common
         /// </summary>
         /// <param name="worker"></param>
         /// <param name="callback"></param>
-        public static void AddWork(Action<TaskWorkItem> worker, Action<object> callback)
+        public static void AddWork(Action<TaskWorkItem> worker,
+            Action<object> callback)
         {
             lock (Instance.enterLock) {
                 var item = new TaskWorkItem() { completed = false, worker = worker };
@@ -71,7 +72,9 @@ namespace Arthas.Common
         /// <param name="worker"></param>
         /// <param name="callback"></param>
         /// <returns></returns>
-        public static Thread AddThreadWork(Action<TaskWorkItem> worker, Action<object> callback, ThreadPriority priority = ThreadPriority.Normal)
+        public static Thread AddThreadWork(Action<TaskWorkItem> worker,
+            Action<object> callback,
+            ThreadPriority priority = ThreadPriority.Normal)
         {
             lock (Instance.enterLock) {
                 var item = new TaskWorkItem() { completed = false, worker = worker };
@@ -94,14 +97,16 @@ namespace Arthas.Common
         /// <returns></returns>
         public static IEnumerator WaitWork(Action<TaskWorkItem> worker)
         {
-            var item = new TaskWorkItem() { completed = false, worker = worker };
-            workItems.Add(item, null);
-            ThreadPool.QueueUserWorkItem(o => {
-                item.threadId = Thread.CurrentThread.ManagedThreadId;
-                item.worker(item);
-                item.completed = true;
-            });
-            yield return new WaitUntil(() => item.completed);
+            lock (Instance.enterLock) {
+                var item = new TaskWorkItem() { completed = false, worker = worker };
+                workItems.Add(item, null);
+                ThreadPool.QueueUserWorkItem(o => {
+                    item.threadId = Thread.CurrentThread.ManagedThreadId;
+                    item.worker(item);
+                    item.completed = true;
+                });
+                yield return new WaitUntil(() => item.completed);
+            }
         }
 
         private void Update()

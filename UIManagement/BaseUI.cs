@@ -64,16 +64,16 @@ namespace Arthas.UI
             if (AfterShow != null) AfterShow.Invoke();
         }
 
-        public virtual IEnumerator ShowAsync()
+        public virtual IEnumerator ShowAsync(float delay = 0)
         {
-            Show();
-            yield return new WaitForEndOfFrame();
+            this.Invoke(Show, delay);
+            yield return new WaitUntil(() => isActiveAndEnabled);
         }
 
-        public virtual IEnumerator HideAsync()
+        public virtual IEnumerator HideAsync(float delay = 0)
         {
-            Hide();
-            yield return new WaitForEndOfFrame();
+            this.Invoke(Hide, delay);
+            yield return new WaitUntil(() => !isActiveAndEnabled);
         }
     }
 }
