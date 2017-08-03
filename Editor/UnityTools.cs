@@ -34,6 +34,18 @@ public static class UnityEditorTools
         }
     }
 
+    [MenuItem("Assets/CopyTo", priority = -1)]
+    public static void CopyTo()
+    {
+        var path = EditorUtility.OpenFolderPanel("CopyTo", Directory.GetCurrentDirectory(), string.Empty);
+        foreach (var go in Selection.objects) {
+            var src = Application.dataPath.Replace("Assets", "") + AssetDatabase.GetAssetPath(go);
+            var dst = path + src.Substring(src.LastIndexOf("/"));
+            File.Copy(src, dst);
+            Debug.LogFormat("Copy file from:<color=cyan>{0}</color>\nto:<color=cyan>{1}</color>", src, dst);
+        }
+    }
+
     [MenuItem("Tools/Scene/Add All Scenes to BuidSetting")]
     public static void AddAllScenesToBuildSetting()
     {
@@ -82,7 +94,6 @@ public static class UnityEditorTools
         Debug.Log("Creating Classfile: " + copyPath);
         AssetDatabase.Refresh(ImportAssetOptions.Default);
     }
-
 
     [MenuItem("Tools/PlayerPref/Delete All")]
     public static void DeleteAllPlayerPref()
