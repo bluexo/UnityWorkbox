@@ -22,7 +22,7 @@ namespace System
 
 namespace System.Collections
 {
-    using System.Collections.Generic;
+    using Generic;
 
     public static class CollectionExtentions
     {
@@ -84,10 +84,10 @@ namespace System.Collections
             }
         }
 
-        public static string ToArrayString<T>(this T[] arr, char separator = ' ')
+        public static string ToArrayString<T>(this IEnumerable<T> collection, char separator = ' ')
         {
             var str = string.Empty;
-            for (var i = 0; i < arr.Length; i++) str += arr[i].ToString() + separator;
+            foreach (var item in collection) str += item.ToString() + separator;
             return str;
         }
     }
