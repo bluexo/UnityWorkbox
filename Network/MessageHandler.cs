@@ -83,7 +83,7 @@ namespace Arthas.Network
             using (var stream = new MemoryStream(buffer))
             using (var reader = new BinaryReader(stream)) {
                 while (reader.BaseStream.Position < buffer.Length) {
-                    var len = reader.ReadInt32();
+                    var len = reader.ReadInt16();
                     var cmd = reader.ReadInt16();
                     var content = reader.ReadBytes(len - sizeof(short));
                     var msg = new DefaultMessage(cmd, content);
