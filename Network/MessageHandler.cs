@@ -37,7 +37,7 @@ namespace Arthas.Network
             Parameters = parameters;
         }
 
-        public byte[] GetBuffer(bool littleEndian = false)
+        public virtual byte[] GetBuffer(bool littleEndian = false)
         {
             if (WithLength) return buffer;
             var lenBytes = littleEndian && BitConverter.IsLittleEndian
@@ -49,7 +49,7 @@ namespace Arthas.Network
             return newBuffer;
         }
 
-        public T GetValue<T>()
+        public virtual T GetValue<T>()
         {
             throw new NotImplementedException();
         }
@@ -83,7 +83,7 @@ namespace Arthas.Network
             using (var stream = new MemoryStream(buffer))
             using (var reader = new BinaryReader(stream)) {
                 while (reader.BaseStream.Position < buffer.Length) {
-                    var len = reader.ReadInt16();
+                    var len = reader.ReadInt32();
                     var cmd = reader.ReadInt16();
                     var content = reader.ReadBytes(len - sizeof(short));
                     var msg = new DefaultMessage(cmd, content);

@@ -156,12 +156,12 @@ namespace Arthas.Network
 
         protected void OnConnected()
         {
-            if (ConnectedEvent != null) ConnectedEvent();
-            checkConnectCor = StartCoroutine(ConnectionDetectAsync());
-            connector.MessageRespondEvent += OnMessageRespond;
 #if UNITY_EDITOR
             Debug.LogFormat("<color=yellow>Networker connected to server {0}!</color>", NetworkConfiguration.Current.ToString());
 #endif
+            if (ConnectedEvent != null) ConnectedEvent();
+            checkConnectCor = StartCoroutine(ConnectionDetectAsync());
+            connector.MessageRespondEvent += OnMessageRespond;
         }
 
         protected void OnDisconnected()
