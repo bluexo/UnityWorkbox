@@ -140,7 +140,7 @@ namespace Arthas.Network
                     Debug.LogError("Cannot found Cookie header in response headers!");
             }
 
-            if (webRequest.isError || webRequest.responseCode >= (int)ResponseCode.BadRequest) {
+            if (webRequest.isNetworkError || webRequest.responseCode >= (int)ResponseCode.BadRequest) {
                 if (webRequest.responseCode == (int)ResponseCode.UnAuthorized) {
                     Debug.LogError("Request UnAuthorized!");
                 }

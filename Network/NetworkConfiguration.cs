@@ -47,21 +47,18 @@ public class NetworkConfiguration : ScriptableObject
     {
         get
         {
-#if ABM
-            var conf = AssetBundles.AssetBundleManager.LoadMainAssetSync<NetworkConfiguration>(typeof(NetworkConfiguration).Name);
-#else
-            var conf = Resources.Load<NetworkConfiguration>(kConfigPath + "NetworkConfiguration");
-#endif
+            NetworkConfiguration conf;
+            if (loader != null) conf = loader();
+            else conf = Resources.Load<NetworkConfiguration>(kConfigPath + "NetworkConfiguration");
+            if (!conf) throw new NullReferenceException("Cannot found <color=yellow>[NetworkConfiguration]</color>!");
             if (string.IsNullOrEmpty(conf.current.ip)) conf.current = conf.intranet;
             return conf.current;
         }
     }
 
-    [Space(10)]
-    [SerializeField]
-    private bool fromAssetsBundle = false;
-    [SerializeField]
-    private string bundleName = typeof(NetworkConfiguration).FullName;
+    public static void AddLoader(Func<NetworkConfiguration> configLoader) { loader = configLoader; }
+    private static Func<NetworkConfiguration> loader;
+
     [Space(30)]
     [HideInInspector]
     public NetworkAddress current;
@@ -136,7 +133,8 @@ public class NetworkConfiguration : ScriptableObject
     private static NetworkConfiguration GetConfiguration()
     {
         var conf = AssetDatabase.LoadAssetAtPath<NetworkConfiguration>(kPath);
-        if (conf == null) {
+        if (conf == null)
+        {
             conf = new NetworkConfiguration()
             {
                 local = new NetworkAddress() { ip = "127.0.0.1", port = 10000 },

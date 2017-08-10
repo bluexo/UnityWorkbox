@@ -36,10 +36,10 @@ public class NetworkerEditor : Editor
         var rect = EditorGUILayout.GetControlRect(true, 30);
         base.OnInspectorGUI();
         var running = Application.isPlaying && Networker.IsConnected;
-        var style = new GUIStyle(EditorStyles.whiteLargeLabel) { richText = true , fontSize = 20 };
+        var style = new GUIStyle(EditorStyles.whiteLargeLabel) { richText = true, fontSize = 20 };
         var label = string.Format("{0} [<color={2}>{1}</color>]",
             typeof(Networker),
-            running ? "Online" : "Offline",
+            running ? "On" : "Off",
             running ? "green" : "red");
         EditorGUI.LabelField(rect, label, style);
         EditorGUI.DrawRect(rect, (running ? Color.cyan : Color.yellow) / 3f);
@@ -53,10 +53,10 @@ public class NetworkerEditor : Editor
 
         handlers.Foreach(c => ArrayUtility.Add(ref handlerNames, c.Name));
         handlerIndex = EditorGUILayout.Popup("MessageHandler", handlerIndex, handlerNames);
-        if (handlerIndex < handlers.Length)
-            handlerTypeName.stringValue = handlers[handlerIndex].FullName;
+        if (handlerIndex < handlers.Length) handlerTypeName.stringValue = handlers[handlerIndex].FullName;
 
-        EditorGUILayout.LabelField(new GUIContent("[Server Address] ?", "Click menu [ NETWORK ] switch or config address!"), new GUIContent(NetworkConfiguration.Current.ToString()));
+        EditorGUILayout.LabelField(new GUIContent("[Server Address] ?", "Click menu [ NETWORK ] switch or config address!"),
+            new GUIContent(NetworkConfiguration.Current.ToString()));
 
         serializedObject.ApplyModifiedProperties();
     }
