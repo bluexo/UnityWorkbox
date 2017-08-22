@@ -47,14 +47,6 @@ namespace Arthas.UI
         [SerializeField, EnumMaskField]
         private PointerEventType pointerEventType;
 
-        public static void InitializeComponents()
-        {
-            var uis = UIManager.Instance.GetComponentsInChildren<ScriptableBehaviourUI>(true);
-            for (var i = 0; i < uis.Length; i++) {
-                uis[i].Initialize();
-            }
-        }
-
         public void Initialize()
         {
             Invoker = GetComponent<BaseScriptableInvoker>();

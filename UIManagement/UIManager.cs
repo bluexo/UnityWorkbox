@@ -83,6 +83,12 @@ namespace Arthas.UI
             }
             var uis = GetComponentsInChildren<BaseUI>(true);
             for (var i = 0; i < uis.Length; i++) AddUI(uis[i]);
+
+            var scriptableUIs = GetComponentsInChildren<ScriptableBehaviourUI>(true);
+            for (var i = 0; i < uis.Length; i++)
+            {
+                scriptableUIs[i].Initialize();
+            }
         }
 
         protected void Start()
