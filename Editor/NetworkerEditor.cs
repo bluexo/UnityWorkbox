@@ -1,10 +1,10 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using System;
+﻿using System;
+using System.Collections;
+
 using UnityEngine;
 using UnityEditor;
+
 using Arthas.Network;
-using System.Reflection;
 
 [CustomEditor(typeof(Networker))]
 public class NetworkerEditor : Editor
@@ -16,11 +16,10 @@ public class NetworkerEditor : Editor
     private void OnEnable()
     {
         var allTypes = typeof(Networker).Assembly.GetTypes();
-
-        var conns = Array.FindAll(allTypes, t => t.GetInterface(typeof(IConnector).Name, true) != null && t != typeof(IConnector));
+        var conns = Array.FindAll(allTypes, t => t.GetInterface(typeof(IConnector).Name) != null && t != typeof(IConnector));
         conns.Foreach(c => ArrayUtility.Add(ref connectors, c));
 
-        var handlerArray = Array.FindAll(allTypes, t => t.GetInterface(typeof(INetworkMessageHandler).Name, true) != null && t != typeof(INetworkMessageHandler));
+        var handlerArray = Array.FindAll(allTypes, t => t.GetInterface(typeof(INetworkMessageHandler).Name) != null && t != typeof(INetworkMessageHandler));
         handlerArray.Foreach(c => ArrayUtility.Add(ref handlers, c));
 
         connTypeName = serializedObject.FindProperty("connectorTypeName");
