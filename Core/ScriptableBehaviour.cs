@@ -1,21 +1,29 @@
 ﻿using UnityEngine;
 using System.Collections;
 
+/// <summary>
+/// 用于和脚本语言交互的组件
+/// </summary>
 public class ScriptableBehaviour : MonoBehaviour
 {
-    public static void Attach(GameObject go)
+    public static void InvokeScript(string methodName, params object[] parameters)
+    {
+
+    }
+
+    public virtual void Awake()
     {
 
     }
 
     // Use this for initialization
-    void Start()
+    public virtual void Start()
     {
 
     }
 
     // Update is called once per frame
-    void Update()
+    public virtual void Update()
     {
 
     }

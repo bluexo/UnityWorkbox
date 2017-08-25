@@ -4,6 +4,8 @@ using UnityEditor;
 using UnityEngine;
 using UnityEngine.UI;
 
+using Arthas.Common;
+
 namespace Arthas.UI
 {
     [CustomEditor(typeof(BaseUI), true)]

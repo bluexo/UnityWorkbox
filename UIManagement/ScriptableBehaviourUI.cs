@@ -22,16 +22,6 @@ namespace Arthas.UI
     }
 
     [DisallowMultipleComponent]
-    public abstract class BaseScriptableInvoker : MonoBehaviour
-    {
-        public abstract void Initialize();
-
-        public abstract object[] InvokeScript(string funcName, params object[] parameters);
-
-        public abstract void Dispose();
-    }
-
-    [DisallowMultipleComponent]
     public class ScriptableBehaviourUI : BaseUI,
         IPointerClickHandler,
         IPointerDownHandler,
