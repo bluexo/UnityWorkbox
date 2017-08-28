@@ -41,8 +41,8 @@ namespace Arthas.Network
         {
             if (WithLength) return buffer;
             var lenBytes = littleEndian && BitConverter.IsLittleEndian
-                ? BitConverter.GetBytes(buffer.Length)
-                : BitConverter.GetBytes(buffer.Length).Reverse();
+                ? BitConverter.GetBytes((short)buffer.Length)
+                : BitConverter.GetBytes((short)buffer.Length).Reverse();
             var newBuffer = new byte[buffer.Length + lenBytes.Length];
             Buffer.BlockCopy(lenBytes, 0, newBuffer, 0, lenBytes.Length);
             Buffer.BlockCopy(buffer, 0, newBuffer, lenBytes.Length, buffer.Length);

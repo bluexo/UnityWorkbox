@@ -10,8 +10,8 @@ using System.Text;
 
 public class CommandEditor : EditorWindow
 {
-    public const string kCommandKey = "Commands", kDefaultCmd = "0:Login", cmdPath = "Assets/Scripts/Command.cs";
-    public enum CommandType { String, Enum, Int32, Int16 }
+    public const string kCommandKey = "Commands", kDefaultCmd = "0:Login", cmdPath = "Assets/Scripts/Commands.cs";
+    public enum CommandType { Int16, String, Enum, Int32 }
     private CommandType cmdType;
     private Vector2 scrollViewPosition;
     private static string cmdTypeName;
@@ -46,11 +46,13 @@ public class CommandEditor : EditorWindow
         stringBuilder.AppendLine("{");
         stringBuilder.AppendLine(string.Format("      public {0} {1}", cmdType == CommandType.Enum ? "enum" : "class", cmdTypeName));
         stringBuilder.AppendLine("      {");
-        for (var i = 0; i < commands.Length; i++) {
+        for (var i = 0; i < commands.Length; i++)
+        {
             if (string.IsNullOrEmpty(commands[i])) continue;
             var cmds = commands[i].Split(':');
             if (cmds.Length < 2) continue;
-            switch (cmdType) {
+            switch (cmdType)
+            {
                 case CommandType.String:
                     stringBuilder.AppendLine(string.Format("            public const string {0} = \"{1}\";", cmds[1], cmds[1]));
                     break;
@@ -82,7 +84,8 @@ public class CommandEditor : EditorWindow
         var cmdString = EditorPrefs.GetString(kCommandKey);
         var commands = new List<string>(cmdString.Split('|'));
         scrollViewPosition = EditorGUILayout.BeginScrollView(scrollViewPosition);
-        for (var i = 0; i < commands.Count; i++) {
+        for (var i = 0; i < commands.Count; i++)
+        {
             if (string.IsNullOrEmpty(commands[i])) continue;
             var cmds = commands[i].Split(':');
             if (cmds.Length < 2) continue;
