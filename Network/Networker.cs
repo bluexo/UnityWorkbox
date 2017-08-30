@@ -28,7 +28,7 @@ namespace Arthas.Network
         /// <summary>
         /// 错误回调
         /// </summary>
-        private static Action<string> ErrorCallback;
+        private static event Action<string> ConnectErrorEvent;
 
         public static INetworkMessageHandler MessageHandler { get { return messageHandler; } }
 
@@ -119,7 +119,7 @@ namespace Arthas.Network
                 return;
             }
 #endif
-            ErrorCallback = error;
+            ConnectErrorEvent = error;
             ConnectedEvent = callback;
             Instance.ConnectInternal(ip, port, connector, handler);
         }
@@ -136,8 +136,8 @@ namespace Arthas.Network
                 if ((currentTime += connectCheckDuration) > connectTimeout) {
                     currentTime = 0;
                     StopCoroutine(checkTimeoutCor);
-                    if (ErrorCallback != null) {
-                        ErrorCallback("Cannot connect to server , please check your network!");
+                    if (ConnectErrorEvent != null) {
+                        ConnectErrorEvent("Cannot connect to server , please check your network!");
                     }
                 }
             }
@@ -207,7 +207,7 @@ namespace Arthas.Network
         public static void Send(object cmd, object buf, Action<INetworkMessage> callback, params object[] parameters)
         {
             try {
-                var message = messageHandler.PackMessage(cmd, buf, callback, parameters);
+                var message = messageHandler.PackMessage(cmd, buf, parameters);
                 var buffer = message.GetBuffer(IsLittleEndian);
                 responseActions.Replace(message.Command, callback);
                 connector.Send(buffer);

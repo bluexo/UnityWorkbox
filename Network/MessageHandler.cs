@@ -63,26 +63,27 @@ namespace Arthas.Network
         public virtual INetworkMessage PackMessage(object command, object obj, params object[] parameters)
         {
             var bodyBuffer = obj as byte[];
-            if (bodyBuffer != null) {
-                var cmdBytes = BitConverter.GetBytes(Convert.ToInt16(command));
-                var buffer = new byte[bodyBuffer.Length + cmdBytes.Length];
-                Buffer.BlockCopy(cmdBytes, 0, buffer, 0, cmdBytes.Length);
-                Buffer.BlockCopy(bodyBuffer, 0, buffer, cmdBytes.Length, bodyBuffer.Length);
-                return new DefaultMessage(command, buffer, false, parameters);
-            } else {
-                var msg = string.Format(@"<color=cyan>{0}</color> cannot support <color=cyan>{1}</color> type message , \n please implement your custom message!",
-                    typeof(DefaultMessageHandler).FullName,
-                    obj.GetType().FullName);
+            if (obj != null && bodyBuffer == null)
+            {
+                var msg = $"<color=cyan>{GetType()}</color> cannot support <color=cyan>{obj.GetType()}</color> type message , \n please implement your custom message!";
                 throw new NotImplementedException(msg);
             }
+            using (var stream = new MemoryStream())
+            {
+                var cmdBytes = BitConverter.GetBytes(Convert.ToInt16(command));
+                stream.Write(cmdBytes, 0, cmdBytes.Length);
+                if (bodyBuffer != null) stream.Write(bodyBuffer, 0, bodyBuffer.Length);
+                return new DefaultMessage(command, stream.ToArray(), false, parameters);
+            }
         }
-
         public virtual IList<INetworkMessage> ParseMessage(byte[] buffer)
         {
             var messages = new List<INetworkMessage>();
             using (var stream = new MemoryStream(buffer))
-            using (var reader = new BinaryReader(stream)) {
-                while (reader.BaseStream.Position < buffer.Length) {
+            using (var reader = new BinaryReader(stream))
+            {
+                while (reader.BaseStream.Position < buffer.Length)
+                {
                     var len = reader.ReadInt16();
                     var cmd = reader.ReadInt16();
                     var content = reader.ReadBytes(len - sizeof(short));
