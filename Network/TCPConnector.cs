@@ -68,12 +68,14 @@ namespace Arthas.Network
         /// <param name="port"></param>
         public void Connect(string ip, int port)
         {
-            try {
+            try
+            {
                 client = new TcpClient();
                 Address = string.Format("{0}:{1}", ip, port);
                 client.BeginConnect(ip, port, new AsyncCallback(ConnectCallback), client);
             }
-            catch (Exception ex) {
+            catch (Exception ex)
+            {
                 client = null;
                 Debug.LogErrorFormat("Can not connect to Server. Detail: {0}\n{1}", ex.Message, ex.StackTrace);
             }
@@ -81,15 +83,20 @@ namespace Arthas.Network
 
         private void ConnectCallback(IAsyncResult ar)
         {
-            if (client.Connected) {
-                try {
+            if (client.Connected)
+            {
+                try
+                {
                     var stream = client.GetStream();
                     stream.BeginRead(readBuffer, 0, READ_BUFFER_SIZE, Read, null);
                 }
-                catch (Exception ex) {
+                catch (Exception ex)
+                {
                     Debug.LogException(ex);
                 }
-            } else {
+            }
+            else
+            {
                 Debug.LogErrorFormat("Cannot connect to server {0}!", Address);
             }
         }
@@ -119,11 +126,13 @@ namespace Arthas.Network
         public void Send(byte[] buffer)
         {
             if (client == null || !client.Connected) return;
-            try {
+            try
+            {
                 var stream = client.GetStream();
                 stream.BeginWrite(buffer, 0, buffer.Length, new AsyncCallback(EndWrite), null);
             }
-            catch (Exception ex) {
+            catch (Exception ex)
+            {
                 Debug.LogException(ex);
             }
         }
@@ -160,14 +169,16 @@ namespace Arthas.Network
 #else
         private void Read(IAsyncResult ar)
         {
-            try {
+            try
+            {
                 if (client == null) return;
                 var stream = client.GetStream();
                 var lengthToRead = stream.EndRead(ar);
 #if UNITY_EDITOR
-                Debug.Log($"Received message , bytes length: {lengthToRead}");
+                Debug.LogFormat("Received message , bytes length: {0}", lengthToRead);
 #endif
-                if (lengthToRead < 1 || lengthToRead > READ_BUFFER_SIZE) {
+                if (lengthToRead < 1 || lengthToRead > READ_BUFFER_SIZE)
+                {
                     Debug.LogError("Stream read error , network will be closed!");
                     return;
                 }
@@ -176,7 +187,8 @@ namespace Arthas.Network
                 if (MessageRespondEvent != null) MessageRespondEvent(arr);
                 stream.BeginRead(readBuffer, 0, READ_BUFFER_SIZE, Read, null);
             }
-            catch (Exception ex) {
+            catch (Exception ex)
+            {
                 Debug.LogErrorFormat("Server Disconnected, Detail:{0},\n{1}", ex.Message, ex.StackTrace);
                 Close();
             }

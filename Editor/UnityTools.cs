@@ -38,7 +38,7 @@ public static class UnityEditorTools
     public static void CopyTo()
     {
         var path = EditorUtility.OpenFolderPanel("CopyTo", Directory.GetCurrentDirectory(), string.Empty);
-        if (string.IsNullOrEmpty(path) || string.IsNullOrWhiteSpace(path)) return;
+        if (string.IsNullOrEmpty(path)) return;
         foreach (var go in Selection.objects) {
             var src = Application.dataPath.Replace("Assets", "") + AssetDatabase.GetAssetPath(go);
             var dst = path + src.Substring(src.LastIndexOf("/"));

@@ -65,8 +65,9 @@ namespace Arthas.Network
             var bodyBuffer = obj as byte[];
             if (obj != null && bodyBuffer == null)
             {
-                var msg = $"<color=cyan>{GetType()}</color> cannot support <color=cyan>{obj.GetType()}</color> type message , \n please implement your custom message!";
-                throw new NotImplementedException(msg);
+                var msg = "<color=cyan>{0}</color> cannot support <color=cyan>{1}</color> type message , " +
+                    "\n please implement your custom message!";
+                throw new NotImplementedException(string.Format(msg, GetType(), obj.GetType()));
             }
             using (var stream = new MemoryStream())
             {
