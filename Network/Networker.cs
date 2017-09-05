@@ -159,9 +159,9 @@ namespace Arthas.Network
 #if UNITY_EDITOR
             Debug.LogFormat("<color=yellow>Networker connected to server {0}!</color>", NetworkConfiguration.Current.ToString());
 #endif
+            connector.MessageRespondEvent += OnMessageRespond;
             if (ConnectedEvent != null) ConnectedEvent();
             checkConnectCor = StartCoroutine(ConnectionDetectAsync());
-            connector.MessageRespondEvent += OnMessageRespond;
         }
 
         protected void OnDisconnected()
@@ -193,7 +193,6 @@ namespace Arthas.Network
                     if (action != null) {
                         action.Invoke(message);
                         responseActions.Remove(message.Command);
-                        return;
                     }
                 } else if (PushEvent != null) {
                     PushEvent(message);
