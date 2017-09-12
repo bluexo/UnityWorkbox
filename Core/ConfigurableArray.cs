@@ -105,69 +105,11 @@ namespace Arthas.Common
 
         public virtual bool ShowBaseInspactor { get { return true; } }
 
-        public virtual void DrawItemProperty(SerializedProperty property, int index)
-        {
-            EditorGUILayout.PropertyField(property);
-            var fields = typeof(T).GetFields();
-            for (var i = 0; i < fields.Length; i++)
-            {
-                if (fields[i].IsNotSerialized) continue;
-                DrawPropertyWithType(property, fields[i].Name, fields[i].FieldType);
-            }
-        }
-
-        protected virtual void DrawPropertyWithType(SerializedProperty property, string name, Type type)
-        {
-            var value = property.FindPropertyRelative(name);
-            if (type == typeof(string))
-            {
-                value.stringValue = EditorGUILayout.TextField(name, value.stringValue);
-            }
-            else if ((type == typeof(int))
-                || (type == typeof(uint))
-                || (type == typeof(short))
-                || (type == typeof(ushort))
-                || (type == typeof(long))
-                || (type == typeof(ulong))
-                || (type == typeof(byte))
-                || (type == typeof(sbyte)))
-            {
-                value.intValue = EditorGUILayout.IntField(name, value.intValue);
-            }
-            else if ((type == typeof(float))
-                || (type == typeof(double)))
-            {
-                value.floatValue = EditorGUILayout.FloatField(name, value.floatValue);
-            }
-            else if (type == typeof(Sprite))
-            {
-                var spriteName = value.objectReferenceValue ? value.objectReferenceValue.name : string.Empty;
-                value.objectReferenceValue = EditorGUILayout.ObjectField(spriteName, value.objectReferenceValue, typeof(Sprite), true);
-            }
-            else if (type == typeof(Vector3))
-            {
-                value.vector3Value = EditorGUILayout.Vector3Field(name, value.vector3Value);
-            }
-            else if (type == typeof(Vector2))
-            {
-                value.vector2Value = EditorGUILayout.Vector2Field(name, value.vector3Value);
-            }
-            else if (type == typeof(GameObject))
-            {
-                value.objectReferenceValue = EditorGUILayout.ObjectField(value.objectReferenceValue, typeof(GameObject), true);
-            }
-            else if (type == typeof(Color))
-            {
-                value.colorValue = EditorGUILayout.ColorField(name, value.colorValue);
-            }
-            else if (type == typeof(AnimationCurve))
-            {
-                value.animationCurveValue = EditorGUILayout.CurveField(name, value.animationCurveValue);
-            }
-        }
+        public virtual void DrawItemProperty(SerializedProperty property, int index) { }
     }
 #endif
 
+    [Obsolete("Use VisualList<T> instead")]
     public abstract class ConfigurableArray<T> : ScriptableObject where T : new()
     {
         [SerializeField]

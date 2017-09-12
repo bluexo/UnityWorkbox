@@ -31,7 +31,7 @@ public class DefineManager : EditorWindow
 
     List<string> csDefines = new List<string>();
 
-    [MenuItem("Window/Define Manager")]
+    [MenuItem("Tools/Define Manager")]
     public static void OpenDefManager()
     {
         EditorWindow.GetWindow<DefineManager>(true, "Global Define Manager", true);

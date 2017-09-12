@@ -14,8 +14,8 @@ namespace Arthas.Common
     /// 包含折叠的和展开列表，以及导出为Json数据或者从Json导入数据
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    [CustomEditor(typeof(VisualList<>), true, isFallback = true)]
-    public class VisualListEditor : Editor
+    [CustomEditor(typeof(VisualConfig<>), true, isFallback = true)]
+    public class VisualConfigEditor : Editor
     {
         protected SerializedProperty itemsProperty;
 
@@ -191,7 +191,7 @@ namespace Arthas.Common
         void FromJson(string json);
     }
 
-    public abstract class VisualList<T> : ScriptableObject, IJsonSerializable where T : new()
+    public abstract class VisualConfig<T> : ScriptableObject, IJsonSerializable where T : new()
     {
         [SerializeField]
         protected bool autoBackup = true;
@@ -203,7 +203,6 @@ namespace Arthas.Common
         [SerializeField, HideInInspector]
         protected T[] items = { new T() };
         public virtual T[] Items { get { return items; } }
-
 
         public virtual string ToJson()
         {
