@@ -7,13 +7,17 @@
     /// <typeparam name="T"></typeparam>
     public abstract class SingletonBehaviour<T> : MonoBehaviour where T : MonoBehaviour
     {
+        [SerializeField] bool dontDestroyOnLoad = true;
+
         public static T Instance
         {
             get
             {
-                if (!instance) {
+                if (!instance)
+                {
                     instance = FindObjectOfType<T>();
-                    if (!instance) {
+                    if (!instance)
+                    {
                         var go = new GameObject(typeof(T).FullName);
                         instance = go.AddComponent<T>();
                         DontDestroyOnLoad(go);
@@ -25,17 +29,21 @@
 
         protected static T instance;
 
+
         /// <summary>
         /// The subclass must be call base.Awake() , if it override Awake()
         /// 如果子类重写Awake方法，必须调用基类的Awake
         /// </summary>
         protected virtual void Awake()
         {
-            DontDestroyOnLoad(gameObject);
-            if (instance && !instance.Equals(this)) {
+            if (dontDestroyOnLoad) DontDestroyOnLoad(gameObject);
+            if (instance && !instance.Equals(this))
+            {
                 Destroy(instance);
                 Debug.LogErrorFormat("The {0} not allow running multiple instance , the redundant instance will be destroy!", typeof(T).FullName);
-            } else if (!instance) {
+            }
+            else if (!instance)
+            {
                 instance = this as T;
             }
         }
