@@ -5,17 +5,17 @@ namespace Arthas.Common
 {
 #if UNITY_EDITOR
     using System.IO;
+    using System.Linq;
     using System.Reflection;
     using UnityEditor;
-
 
     /// <summary>
     /// 可配置的列表编辑器
     /// 包含折叠的和展开列表，以及导出为Json数据或者从Json导入数据
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    [CustomEditor(typeof(ConfigurableArray<>), true)]
-    public class ConfigurableArrayEditor<T> : Editor where T : new()
+    [CustomEditor(typeof(VisualList<>), true, isFallback = true)]
+    public class VisualListEditor : Editor
     {
         protected SerializedProperty itemsProperty;
 
@@ -26,6 +26,11 @@ namespace Arthas.Common
         protected virtual void OnEnable()
         {
             itemsProperty = serializedObject.FindProperty("items");
+            if (itemsProperty == null)
+            {
+                Debug.LogError("Cannot found items ,you may be forgot add <color=cyan>[Serializable]</color> attribute to your item!");
+                return;
+            }
             if (itemsProperty.arraySize <= 0) itemsProperty.arraySize++;
             folds = new bool[itemsProperty.arraySize];
             var backupDir = serializedObject.FindProperty("backupDirectory");
@@ -46,32 +51,35 @@ namespace Arthas.Common
             EditorGUILayout.EndHorizontal();
 
             EditorGUILayout.BeginVertical();
-            for (var i = 0; i < itemsProperty.arraySize; i++)
+            if (itemsProperty != null)
             {
-                folds[i] = EditorGUILayout.Foldout(folds[i], string.Format("Item [{0}]", i));
-                if (folds[i])
+                for (var i = 0; i < itemsProperty.arraySize; i++)
                 {
-                    var item = itemsProperty.GetArrayElementAtIndex(i);
-                    DrawItemProperty(item, i);
-                    EditorGUILayout.Space();
-                    EditorGUILayout.BeginHorizontal();
-                    GUI.color = Color.green;
-                    if (GUILayout.Button("+"))
+                    folds[i] = EditorGUILayout.Foldout(folds[i], string.Format("Item [{0}]", i));
+                    if (folds[i])
                     {
-                        ArrayUtility.Insert(ref folds, i, false);
-                        itemsProperty.InsertArrayElementAtIndex(i);
+                        var item = itemsProperty.GetArrayElementAtIndex(i);
+                        DrawItemProperty(item, i);
+                        EditorGUILayout.Space();
+                        EditorGUILayout.BeginHorizontal();
+                        GUI.color = Color.green;
+                        if (GUILayout.Button("+"))
+                        {
+                            ArrayUtility.Insert(ref folds, i, false);
+                            itemsProperty.InsertArrayElementAtIndex(i);
+                        }
+                        GUI.color = Color.red;
+                        if (itemsProperty.arraySize > 1 && GUILayout.Button("-"))
+                        {
+                            itemsProperty.DeleteArrayElementAtIndex(i);
+                            ArrayUtility.RemoveAt(ref folds, i);
+                        }
+                        GUI.color = Color.white;
+                        EditorGUILayout.EndHorizontal();
+                        EditorGUILayout.Space();
                     }
-                    GUI.color = Color.red;
-                    if (itemsProperty.arraySize > 1 && GUILayout.Button("-"))
-                    {
-                        itemsProperty.DeleteArrayElementAtIndex(i);
-                        ArrayUtility.RemoveAt(ref folds, i);
-                    }
-                    GUI.color = Color.white;
-                    EditorGUILayout.EndHorizontal();
-                    EditorGUILayout.Space();
+                    serializedObject.ApplyModifiedProperties();
                 }
-                serializedObject.ApplyModifiedProperties();
             }
             EditorGUILayout.EndVertical();
             GUILayout.Space(12f);
@@ -79,7 +87,7 @@ namespace Arthas.Common
             if (importOption)
             {
                 var id = serializedObject.targetObject.GetInstanceID();
-                var name = EditorPrefs.GetString(id.ToString(), typeof(T).Name);
+                var name = EditorPrefs.GetString(id.ToString(), target.name);
                 var fileName = EditorGUILayout.TextField("FileName", name);
                 if (fileName != name) EditorPrefs.SetString(id.ToString(), fileName);
 
@@ -87,13 +95,13 @@ namespace Arthas.Common
                 if (GUILayout.Button("To JSON", EditorStyles.miniButtonLeft, GUILayout.Height(25f)))
                 {
                     var path = EditorUtility.SaveFilePanel("Save to json", "", fileName, "json");
-                    var conf = serializedObject.targetObject as ConfigurableArray<T>;
+                    var conf = serializedObject.targetObject as IJsonSerializable;
                     File.WriteAllText(path, conf.ToJson());
                 }
                 if (GUILayout.Button("From JSON", EditorStyles.miniButtonRight, GUILayout.Height(25f)))
                 {
                     var path = EditorUtility.OpenFilePanel("Overwrite from json", "", "json");
-                    var conf = serializedObject.targetObject as ConfigurableArray<T>;
+                    var conf = serializedObject.targetObject as IJsonSerializable;
                     var json = File.ReadAllText(path);
                     conf.FromJson(json);
                     serializedObject.ApplyModifiedProperties();
@@ -108,20 +116,23 @@ namespace Arthas.Common
         public virtual void DrawItemProperty(SerializedProperty property, int index)
         {
             EditorGUILayout.PropertyField(property);
-            var fields = typeof(T).GetFields();
+            var fields = Type.GetType(property.type).GetFields();
             for (var i = 0; i < fields.Length; i++)
             {
-                if (fields[i].IsNotSerialized) continue;
-                DrawPropertyWithType(property, fields[i].Name, fields[i].FieldType);
+                var field = fields[i];
+                if (field.IsNotSerialized) continue;
+                var attrs = (RenameAttribute)field.GetCustomAttributes(typeof(RenameAttribute), true).FirstOrDefault();
+                var displayName = attrs == null ? null : attrs.Name;
+                DrawPropertyField(property, fields[i].Name, displayName, fields[i].FieldType);
             }
         }
 
-        protected virtual void DrawPropertyWithType(SerializedProperty property, string name, Type type)
+        protected virtual void DrawPropertyField(SerializedProperty property, string propertyName, string displayName, Type type)
         {
-            var value = property.FindPropertyRelative(name);
+            var value = property.FindPropertyRelative(propertyName);
             if (type == typeof(string))
             {
-                value.stringValue = EditorGUILayout.TextField(name, value.stringValue);
+                value.stringValue = EditorGUILayout.TextField(displayName ?? propertyName, value.stringValue);
             }
             else if ((type == typeof(int))
                 || (type == typeof(uint))
@@ -132,43 +143,55 @@ namespace Arthas.Common
                 || (type == typeof(byte))
                 || (type == typeof(sbyte)))
             {
-                value.intValue = EditorGUILayout.IntField(name, value.intValue);
+                value.intValue = EditorGUILayout.IntField(displayName ?? propertyName, value.intValue);
             }
             else if ((type == typeof(float))
                 || (type == typeof(double)))
             {
-                value.floatValue = EditorGUILayout.FloatField(name, value.floatValue);
+                value.floatValue = EditorGUILayout.FloatField(displayName ?? propertyName, value.floatValue);
             }
             else if (type == typeof(Sprite))
             {
-                var spriteName = value.objectReferenceValue ? value.objectReferenceValue.name : string.Empty;
-                value.objectReferenceValue = EditorGUILayout.ObjectField(spriteName, value.objectReferenceValue, typeof(Sprite), true);
+                value.objectReferenceValue = EditorGUILayout.ObjectField(displayName ?? propertyName, value.objectReferenceValue, typeof(Sprite), true);
             }
             else if (type == typeof(Vector3))
             {
-                value.vector3Value = EditorGUILayout.Vector3Field(name, value.vector3Value);
+                value.vector3Value = EditorGUILayout.Vector3Field(displayName ?? propertyName, value.vector3Value);
             }
             else if (type == typeof(Vector2))
             {
-                value.vector2Value = EditorGUILayout.Vector2Field(name, value.vector3Value);
+                value.vector2Value = EditorGUILayout.Vector2Field(displayName ?? propertyName, value.vector3Value);
             }
             else if (type == typeof(GameObject))
             {
-                value.objectReferenceValue = EditorGUILayout.ObjectField(value.objectReferenceValue, typeof(GameObject), true);
+                value.objectReferenceValue = EditorGUILayout.ObjectField(displayName ?? propertyName,
+                    value.objectReferenceValue,
+                    typeof(GameObject),
+                    true);
             }
             else if (type == typeof(Color))
             {
-                value.colorValue = EditorGUILayout.ColorField(name, value.colorValue);
+                value.colorValue = EditorGUILayout.ColorField(displayName ?? propertyName, value.colorValue);
             }
             else if (type == typeof(AnimationCurve))
             {
-                value.animationCurveValue = EditorGUILayout.CurveField(name, value.animationCurveValue);
+                value.animationCurveValue = EditorGUILayout.CurveField(displayName ?? propertyName, value.animationCurveValue);
+            }
+            else
+            {
+                Debug.LogFormat("Cannot supported type <color=cyan>{0}</color> , but you can implement custom editor yourself!", type.FullName);
             }
         }
     }
 #endif
 
-    public abstract class ConfigurableArray<T> : ScriptableObject where T : new()
+    public interface IJsonSerializable
+    {
+        string ToJson();
+        void FromJson(string json);
+    }
+
+    public abstract class VisualList<T> : ScriptableObject, IJsonSerializable where T : new()
     {
         [SerializeField]
         protected bool autoBackup = true;
