@@ -82,7 +82,8 @@ namespace Arthas.Common
                 ToggleShowDebug();
         }
 #endif
-            if (Input.GetKeyDown(toggleKey)) {
+            if (Input.GetKeyDown(toggleKey))
+            {
                 showConsole = !showConsole;
             }
         }
@@ -95,16 +96,19 @@ namespace Arthas.Common
         private void OnGUI()
         {
             // measure average frames per second
-            if (showFPS) {
+            if (showFPS)
+            {
                 m_FpsAccumulator++;
-                if (Time.realtimeSinceStartup > m_FpsNextPeriod) {
+                if (Time.realtimeSinceStartup > m_FpsNextPeriod)
+                {
                     m_CurrentFps = (int)(m_FpsAccumulator / fpsMeasurePeriod);
                     m_FpsAccumulator = 0;
                     m_FpsNextPeriod += fpsMeasurePeriod;
                 }
                 GUI.Box(new Rect(10, 5, 60, 25), string.Format(display, m_CurrentFps));
             }
-            if (showConsole) {
+            if (showConsole)
+            {
                 windowRect = GUILayout.Window(123456, windowRect, ConsoleWindow, "Console");
             }
 
@@ -114,13 +118,16 @@ namespace Arthas.Common
         {
             scrollPosition = GUILayout.BeginScrollView(scrollPosition);
 
-            for (int i = 0; i < logs.Count; i++) {
+            for (int i = 0; i < logs.Count; i++)
+            {
                 var log = logs[i];
 
-                if (collapse) {
+                if (collapse)
+                {
                     var messageSameAsPrevious = i > 0 && log.message == logs[i - 1].message;
 
-                    if (messageSameAsPrevious) {
+                    if (messageSameAsPrevious)
+                    {
                         continue;
                     }
                 }

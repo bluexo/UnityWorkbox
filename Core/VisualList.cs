@@ -130,9 +130,10 @@ namespace Arthas.Common
         protected virtual void DrawPropertyField(SerializedProperty property, string propertyName, string displayName, Type type)
         {
             var value = property.FindPropertyRelative(propertyName);
+            var label = displayName ?? propertyName;
             if (type == typeof(string))
             {
-                value.stringValue = EditorGUILayout.TextField(displayName ?? propertyName, value.stringValue);
+                value.stringValue = EditorGUILayout.TextField(label, value.stringValue);
             }
             else if ((type == typeof(int))
                 || (type == typeof(uint))
@@ -143,43 +144,40 @@ namespace Arthas.Common
                 || (type == typeof(byte))
                 || (type == typeof(sbyte)))
             {
-                value.intValue = EditorGUILayout.IntField(displayName ?? propertyName, value.intValue);
+                value.intValue = EditorGUILayout.IntField(label, value.intValue);
             }
             else if ((type == typeof(float))
                 || (type == typeof(double)))
             {
-                value.floatValue = EditorGUILayout.FloatField(displayName ?? propertyName, value.floatValue);
+                value.floatValue = EditorGUILayout.FloatField(label, value.floatValue);
             }
             else if (type == typeof(Sprite))
             {
-                value.objectReferenceValue = EditorGUILayout.ObjectField(displayName ?? propertyName, value.objectReferenceValue, typeof(Sprite), true);
+                value.objectReferenceValue = EditorGUILayout.ObjectField(label, value.objectReferenceValue, typeof(Sprite), true);
             }
             else if (type == typeof(Vector3))
             {
-                value.vector3Value = EditorGUILayout.Vector3Field(displayName ?? propertyName, value.vector3Value);
+                value.vector3Value = EditorGUILayout.Vector3Field(label, value.vector3Value);
             }
             else if (type == typeof(Vector2))
             {
-                value.vector2Value = EditorGUILayout.Vector2Field(displayName ?? propertyName, value.vector3Value);
-            }
-            else if (type == typeof(GameObject))
-            {
-                value.objectReferenceValue = EditorGUILayout.ObjectField(displayName ?? propertyName,
-                    value.objectReferenceValue,
-                    typeof(GameObject),
-                    true);
+                value.vector2Value = EditorGUILayout.Vector2Field(label, value.vector3Value);
             }
             else if (type == typeof(Color))
             {
-                value.colorValue = EditorGUILayout.ColorField(displayName ?? propertyName, value.colorValue);
+                value.colorValue = EditorGUILayout.ColorField(label, value.colorValue);
             }
             else if (type == typeof(AnimationCurve))
             {
-                value.animationCurveValue = EditorGUILayout.CurveField(displayName ?? propertyName, value.animationCurveValue);
+                value.animationCurveValue = EditorGUILayout.CurveField(label, value.animationCurveValue);
+            }
+            else if (type.IsSubclassOf(typeof(UnityEngine.Object)))
+            {
+                value.objectReferenceValue = EditorGUILayout.ObjectField(label, value.objectReferenceValue, type, true);
             }
             else
             {
-                Debug.LogFormat("Cannot supported type <color=cyan>{0}</color> , but you can implement custom editor yourself!", type.FullName);
+                EditorGUILayout.PropertyField(value);
             }
         }
     }
