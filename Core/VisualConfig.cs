@@ -33,6 +33,7 @@ namespace Arthas.Common
             }
             if (itemsProperty.arraySize <= 0) itemsProperty.arraySize++;
             folds = new bool[itemsProperty.arraySize];
+            for (var i = 0; i < folds.Length; i++) folds[i] = true;
             var backupDir = serializedObject.FindProperty("backupDirectory");
             backupDir.stringValue = Application.dataPath.Replace("/Assets", "") + "/ProjectSettings";
             serializedObject.ApplyModifiedProperties();
@@ -121,63 +122,22 @@ namespace Arthas.Common
             {
                 var field = fields[i];
                 if (field.IsNotSerialized) continue;
-                var attrs = (RenameAttribute)field.GetCustomAttributes(typeof(RenameAttribute), true).FirstOrDefault();
-                var displayName = attrs == null ? null : attrs.Name;
-                DrawPropertyField(property, fields[i].Name, displayName, fields[i].FieldType);
+                DrawPropertyField(property, field.Name, field.FieldType);
             }
         }
 
-        protected virtual void DrawPropertyField(SerializedProperty property, string propertyName, string displayName, Type type)
+        protected virtual void DrawPropertyField(SerializedProperty property, string propertyName, Type type)
         {
-            var value = property.FindPropertyRelative(propertyName);
-            var label = displayName ?? propertyName;
-            if (type == typeof(string))
+            var subProperty = property.FindPropertyRelative(propertyName);
+
+            if (type == typeof(Sprite))
             {
-                value.stringValue = EditorGUILayout.TextField(label, value.stringValue);
-            }
-            else if ((type == typeof(int))
-                || (type == typeof(uint))
-                || (type == typeof(short))
-                || (type == typeof(ushort))
-                || (type == typeof(long))
-                || (type == typeof(ulong))
-                || (type == typeof(byte))
-                || (type == typeof(sbyte)))
-            {
-                value.intValue = EditorGUILayout.IntField(label, value.intValue);
-            }
-            else if ((type == typeof(float))
-                || (type == typeof(double)))
-            {
-                value.floatValue = EditorGUILayout.FloatField(label, value.floatValue);
-            }
-            else if (type == typeof(Sprite))
-            {
-                value.objectReferenceValue = EditorGUILayout.ObjectField(label, value.objectReferenceValue, typeof(Sprite), true);
-            }
-            else if (type == typeof(Vector3))
-            {
-                value.vector3Value = EditorGUILayout.Vector3Field(label, value.vector3Value);
-            }
-            else if (type == typeof(Vector2))
-            {
-                value.vector2Value = EditorGUILayout.Vector2Field(label, value.vector3Value);
-            }
-            else if (type == typeof(Color))
-            {
-                value.colorValue = EditorGUILayout.ColorField(label, value.colorValue);
-            }
-            else if (type == typeof(AnimationCurve))
-            {
-                value.animationCurveValue = EditorGUILayout.CurveField(label, value.animationCurveValue);
-            }
-            else if (type.IsSubclassOf(typeof(UnityEngine.Object)))
-            {
-                value.objectReferenceValue = EditorGUILayout.ObjectField(label, value.objectReferenceValue, type, true);
+                var name = string.Format(" [{0}] ", subProperty.objectReferenceValue ? subProperty.objectReferenceValue.name : string.Empty);
+                subProperty.objectReferenceValue = EditorGUILayout.ObjectField(propertyName + name, subProperty.objectReferenceValue, typeof(Sprite), true);
             }
             else
             {
-                EditorGUILayout.PropertyField(value);
+                EditorGUILayout.PropertyField(subProperty);
             }
         }
     }

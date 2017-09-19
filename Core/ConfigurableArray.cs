@@ -109,7 +109,7 @@ namespace Arthas.Common
     }
 #endif
 
-    [Obsolete("Use VisualList<T> instead")]
+    [Obsolete("Use VisualConfig<T> instead")]
     public abstract class ConfigurableArray<T> : ScriptableObject where T : new()
     {
         [SerializeField]
