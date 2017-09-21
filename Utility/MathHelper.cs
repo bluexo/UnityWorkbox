@@ -15,12 +15,26 @@ namespace UnityEngine
         /// <returns>array of points describing spline</returns>
         public static Vector3[] Generate(Vector3[] points, int numPoints)
         {
-            if (points.Length < 4)
-                throw new ArgumentException("CatmullRomSpline requires at least 4 points", "points");
+            const int MinPointCount = 4;
+            var first = points.First();
+            var last = points.Last();
+
+            var newArray = new Vector3[points.Length + MinPointCount];
+
+            for (var i = 0; i < newArray.Length - points.Length - 1; i++)
+            {
+                newArray[i] = first;
+            }
+
+            Array.Copy(points, 0, newArray, 3, points.Length);
+
+            newArray[newArray.Length - 1] = points.Last();
+
+            points = newArray;
 
             var splinePoints = new List<Vector3>();
 
-            for (int i = 0; i < points.Length; i++)
+            for (int i = 0; i < points.Length - 3; i++)
             {
                 for (int j = 0; j < numPoints; j++)
                 {
@@ -29,7 +43,6 @@ namespace UnityEngine
             }
 
             splinePoints.Add(points[points.Length - 2]);
-
             return splinePoints.ToArray();
         }
 
@@ -57,15 +70,16 @@ namespace UnityEngine
             float t2 = t * t;
             float t3 = t2 * t;
 
-            ret.x = 0.5f * ((2.0f * p1.x) +
-            (-p0.x + p2.x) * t +
-            (2.0f * p0.x - 5.0f * p1.x + 4 * p2.x - p3.x) * t2 +
-            (-p0.x + 3.0f * p1.x - 3.0f * p2.x + p3.x) * t3);
+            ret.x = 0.5f * ((2.0f * p1.x)
+                + (-p0.x + p2.x) * t
+                + (2.0f * p0.x - 5.0f * p1.x
+                + 4 * p2.x - p3.x) * t2
+                + (-p0.x + 3.0f * p1.x - 3.0f * p2.x + p3.x) * t3);
 
-            ret.y = 0.5f * ((2.0f * p1.y) +
-            (-p0.y + p2.y) * t +
-            (2.0f * p0.y - 5.0f * p1.y + 4 * p2.y - p3.y) * t2 +
-            (-p0.y + 3.0f * p1.y - 3.0f * p2.y + p3.y) * t3);
+            ret.y = 0.5f * ((2.0f * p1.y)
+                + (-p0.y + p2.y) * t
+                + (2.0f * p0.y - 5.0f * p1.y + 4 * p2.y - p3.y) * t2
+                + (-p0.y + 3.0f * p1.y - 3.0f * p2.y + p3.y) * t3);
 
             return ret;
         }
