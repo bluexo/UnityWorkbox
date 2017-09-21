@@ -20,7 +20,7 @@ namespace UnityEngine
 
             var splinePoints = new List<Vector3>();
 
-            for (int i = 0; i < points.Length - 3; i++)
+            for (int i = 0; i < points.Length; i++)
             {
                 for (int j = 0; j < numPoints; j++)
                 {
