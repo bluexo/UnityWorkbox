@@ -15,8 +15,12 @@ namespace UnityEngine
         /// <returns>array of points describing spline</returns>
         public static Vector3[] Generate(Vector3[] points, int numPoints)
         {
-            const int MinPointCount = 4;
+            const int MinPointCount = 2;
+
+            if (points.Length < 2) throw new ArgumentNullException("没有足够的点，无法生成曲线!");
+
             var first = points.First();
+
             var last = points.Last();
 
             var newArray = new Vector3[points.Length + MinPointCount];
@@ -26,7 +30,7 @@ namespace UnityEngine
                 newArray[i] = first;
             }
 
-            Array.Copy(points, 0, newArray, 3, points.Length);
+            Array.Copy(points, 0, newArray, 1, points.Length);
 
             newArray[newArray.Length - 1] = points.Last();
 
