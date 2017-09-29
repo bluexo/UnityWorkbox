@@ -59,20 +59,26 @@ namespace Arthas.UI
         {
             base.Awake();
             Canvas = GetComponent<Canvas>();
-            if (!Canvas) {
+            if (!Canvas)
+            {
                 Debug.LogError("[UIManager] Cannot found [Canvas] Component!");
                 return;
             }
-            if (overwriteCamera) {
+            if (overwriteCamera)
+            {
                 Camera camera = null;
                 var cameraObj = GameObject.FindGameObjectWithTag(cameraTag);
-                if (cameraObj && (camera = cameraObj.GetComponent<Camera>())) {
+                if (cameraObj && (camera = cameraObj.GetComponent<Camera>()))
+                {
                     Canvas.worldCamera = camera;
-                } else {
+                }
+                else
+                {
                     Debug.LogErrorFormat("[UIManager] Cannot found [Camera] Component with tag:<color=cyan>{0}</color>", cameraTag);
                 }
             }
-            for (var i = 0; i < preloadPanels.Length; i++) {
+            for (var i = 0; i < preloadPanels.Length; i++)
+            {
                 if (!preloadPanels[i]) continue;
                 var orgin = preloadPanels[i].RectTransform;
                 var go = Instantiate(preloadPanels[i].gameObject);
@@ -93,7 +99,8 @@ namespace Arthas.UI
 
         protected void Start()
         {
-            if (!startUI) {
+            if (!startUI)
+            {
                 Debug.LogError(@"[UIManager] initialize fail , Cannot found a <color=cyan>startUI</color> shown as first one!");
 #if UNITY_EDITOR
                 UnityEditor.Selection.activeGameObject = gameObject;
@@ -103,9 +110,25 @@ namespace Arthas.UI
             }
             startUI.Show();
             var uis = GetComponentsInChildren<BaseUI>(true);
-            for (var i = 0; i < uis.Length; i++) {
+            for (var i = 0; i < uis.Length; i++)
+            {
                 if (!uis[i].Equals(startUI)) uis[i].gameObject.SetActive(false);
             }
+        }
+
+        public void LoadUI(GameObject prefab)
+        {
+            var go = Instantiate(prefab);
+            var ui = go.GetComponent<BaseUI>();
+            if (!ui)
+            {
+                Debug.LogError("Cannot found BaseUI component from " + prefab.name);
+                return ;
+            }
+            var scriptUI = ui as ScriptableBehaviourUI;
+            if (scriptUI) scriptUI.Initialize();
+            go.transform.SetParent(transform);
+            AddUI(ui);
         }
 
         /// <summary>
@@ -125,7 +148,8 @@ namespace Arthas.UI
         /// <param name="ui"></param>
         public static void AddUI(BaseUI ui)
         {
-            if (!windows.ContainsKey(ui)) {
+            if (!windows.ContainsKey(ui))
+            {
                 var window = CreateWindowInfo(ui);
                 windows.Add(ui, window);
                 ui.UIShowEvent += OnShow;
@@ -158,12 +182,15 @@ namespace Arthas.UI
         /// <param name="name"></param>
         private static void OnShow(BaseUI ui)
         {
-            if (windows.ContainsKey(ui)) {
+            if (windows.ContainsKey(ui))
+            {
                 var window = windows[ui];
                 var windowList = window.IsFloating ? showedFloatingWindows : showedWindows;
-                if (window.IsExclusive) {
+                if (window.IsExclusive)
+                {
                     var array = windowList.ToArray();
-                    for (var i = 0; i < array.Length; i++) {
+                    for (var i = 0; i < array.Length; i++)
+                    {
                         if (window.ContainBrother(array[i].UI) || array[i].UI.Equals(ui)) continue;
                         array[i].UI.Hide();
                     }
@@ -172,16 +199,20 @@ namespace Arthas.UI
                 CurrentWindow = window;
                 var sortWindows = new List<WindowInfo>(new WindowInfo[] { CurrentWindow });
                 var brothers = CurrentWindow.UI.UIGroup;
-                for (var i = 0; i < brothers.Count; i++) {
-                    if (brothers[i] && windows.ContainsKey(brothers[i])) {
+                for (var i = 0; i < brothers.Count; i++)
+                {
+                    if (brothers[i] && windows.ContainsKey(brothers[i]))
+                    {
                         var brotherWindow = windows[brothers[i]];
                         sortWindows.Add(brotherWindow);
                     }
                 }
                 sortWindows.Sort();
-                for (var i = 0; i < sortWindows.Count; i++) {
+                for (var i = 0; i < sortWindows.Count; i++)
+                {
                     var sortWindow = sortWindows[i];
-                    if (!windowList.Contains(sortWindow)) {
+                    if (!windowList.Contains(sortWindow))
+                    {
                         windowList.Add(sortWindow);
                     }
                     sortWindow.SetOrder(showedFloatingWindows.Count, Instance.transform.childCount, i);
@@ -195,7 +226,8 @@ namespace Arthas.UI
         /// <param name="name"></param>
         private static void OnHide(BaseUI ui)
         {
-            if (windows.ContainsKey(ui)) {
+            if (windows.ContainsKey(ui))
+            {
                 var window = windows[ui];
                 var willRemoveWindows = window.IsFloating ? showedWindows : showedFloatingWindows;
                 willRemoveWindows.Remove(window);
