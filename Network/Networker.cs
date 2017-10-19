@@ -258,7 +258,7 @@ namespace Arthas.Network
             if (!pause && connector != null && !connector.IsConnected) Connect();
         }
 
-        private void OnDestroy()
+        private void OnApplicationQuit()
         {
             Close();
         }
