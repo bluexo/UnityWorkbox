@@ -180,6 +180,7 @@ namespace Arthas.Network
                 if (lengthToRead < 1 || lengthToRead > READ_BUFFER_SIZE)
                 {
                     Debug.LogError("Stream read error , network will be closed!");
+                    Close();
                     return;
                 }
                 var arr = new byte[lengthToRead];
