@@ -51,7 +51,7 @@ namespace Arthas.Network
         [SerializeField]
         private float connectTimeout = 10f, heartbeatInterval = 12f;
         [SerializeField]
-        private bool isLittleEndian = true;
+        private bool isLittleEndian = true, useSSL = false;
 
         [SerializeField, HideInInspector]
         private string connectorTypeName, messageHandlerName;
@@ -63,15 +63,18 @@ namespace Arthas.Network
         /// </summary>
         protected void ConnectInternal(string ip, int port, IConnector conn, INetworkMessageHandler handler = null)
         {
-            if (connector != null && connector.IsConnected) connector.Close();
+            if (connector != null && connector.IsConnected)
+                connector.Close();
             timeoutWaiter = new WaitForSeconds(connectCheckDuration);
             heartbeatWaitFor = new WaitForSeconds(heartbeatInterval);
             if (!string.IsNullOrEmpty(connectorTypeName))
                 connector = (IConnector)Activator.CreateInstance(Type.GetType(connectorTypeName, true, true));
             if (!string.IsNullOrEmpty(messageHandlerName))
                 messageHandler = (INetworkMessageHandler)Activator.CreateInstance(Type.GetType(messageHandlerName, true, true));
-            if (messageHandler == null) messageHandler = handler ?? new DefaultMessageHandler();
-            if (connector == null) connector = conn ?? new TCPConnector();
+            if (messageHandler == null)
+                messageHandler = handler ?? new DefaultMessageHandler();
+            if (connector == null)
+                connector = conn ?? new TCPConnector();
             connector.Connect(ip, port);
             timeoutCor = StartCoroutine(TimeoutDetectAsync());
 #if UNITY_EDITOR
@@ -126,21 +129,17 @@ namespace Arthas.Network
 
         protected IEnumerator TimeoutDetectAsync()
         {
-            while (true)
-            {
+            while (true) {
                 yield return timeoutWaiter;
-                if (connector.IsConnected)
-                {
+                if (connector.IsConnected) {
                     OnConnected();
                     StopCoroutine(timeoutCor);
                     yield break;
                 }
-                if ((currentTime += connectCheckDuration) > connectTimeout)
-                {
+                if ((currentTime += connectCheckDuration) > connectTimeout) {
                     currentTime = 0;
                     StopCoroutine(timeoutCor);
-                    if (ConnectErrorEvent != null)
-                    {
+                    if (ConnectErrorEvent != null) {
                         ConnectErrorEvent("Cannot connect to server , please check your network!");
                     }
                 }
@@ -149,20 +148,18 @@ namespace Arthas.Network
 
         protected IEnumerator HeartbeatDetectAsync()
         {
-            while (true)
-            {
-                if (connector.IsConnected) connector.Send(new byte[] { 0 });
-                yield return heartbeatWaitFor;
+            while (true) {
+                if (connector.IsConnected)
+                    //Send(0);
+                    yield return heartbeatWaitFor;
             }
         }
 
         protected IEnumerator ConnectionDetectAsync()
         {
-            while (true)
-            {
+            while (true) {
                 yield return connectPollWaiter;
-                if (!connector.IsConnected)
-                {
+                if (!connector.IsConnected) {
                     OnDisconnected();
                     StopCoroutine(connectCor);
                 }
@@ -172,25 +169,25 @@ namespace Arthas.Network
         protected void OnConnected()
         {
             connector.MessageRespondEvent += OnMessageRespond;
-            if (ConnectedEvent != null) ConnectedEvent();
+            if (ConnectedEvent != null)
+                ConnectedEvent();
             connectCor = StartCoroutine(ConnectionDetectAsync());
             heartbeatCor = StartCoroutine(HeartbeatDetectAsync());
         }
 
         protected void OnDisconnected()
         {
-            if (DisconnectedEvent != null) DisconnectedEvent();
+            if (DisconnectedEvent != null)
+                DisconnectedEvent();
             connector.MessageRespondEvent -= OnMessageRespond;
             StopCoroutine(heartbeatCor);
         }
 
         protected void OnMessageRespond(byte[] buffer)
         {
-            lock (enterLock)
-            {
+            lock (enterLock) {
                 var msgs = messageHandler.ParseMessage(buffer);
-                for (var i = 0; i < msgs.Count; i++)
-                {
+                for (var i = 0; i < msgs.Count; i++) {
                     msgQueue.Enqueue(msgs[i]);
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
                     Debug.LogFormat("<color=blue>[TCPNetwork]</color> [Receive] << CMD:{0},TIME:{1}", msgs[i].Command, DateTime.Now);
@@ -201,25 +198,19 @@ namespace Arthas.Network
 
         private void Update()
         {
-            if (msgQueue.Count > 0)
-            {
+            if (msgQueue.Count > 0) {
                 var message = msgQueue.Dequeue();
                 if (responseActions.Count > 0
-                    && responseActions.ContainsKey(message.Command))
-                {
+                    && responseActions.ContainsKey(message.Command)) {
                     var action = responseActions[message.Command];
-                    if (action != null)
-                    {
+                    if (action != null) {
                         action.Invoke(message);
                         responseActions.Remove(message.Command);
                     }
-                }
-                else if (PushEvent != null)
-                {
+                } else if (PushEvent != null) {
                     PushEvent(message);
                 }
-                if (ResponseEvent != null)
-                {
+                if (ResponseEvent != null) {
                     ResponseEvent(message);
                 }
             }
@@ -227,8 +218,7 @@ namespace Arthas.Network
 
         public static void Send(object cmd, object buf = null, Action<INetworkMessage> callback = null, params object[] parameters)
         {
-            try
-            {
+            try {
                 var message = messageHandler.PackMessage(cmd, buf, parameters);
                 var buffer = message.GetBuffer(IsLittleEndian);
                 responseActions.Replace(message.Command, callback);
@@ -237,8 +227,7 @@ namespace Arthas.Network
                 Debug.LogFormat("<color=cyan>[TCPNetwork]</color> [Send] >> CMD:{0},TIME:{1}", cmd, DateTime.Now);
 #endif
             }
-            catch (Exception ex)
-            {
+            catch (Exception ex) {
                 Debug.LogException(ex);
             }
         }
@@ -250,12 +239,14 @@ namespace Arthas.Network
 
         public static void Close()
         {
-            if (connector != null) connector.Close();
+            if (connector != null)
+                connector.Close();
         }
 
         private void OnApplicationPause(bool pause)
         {
-            if (!pause && connector != null && !connector.IsConnected) Connect();
+            if (!pause && connector != null && !connector.IsConnected)
+                Connect();
         }
 
         private void OnApplicationQuit()
