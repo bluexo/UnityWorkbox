@@ -28,7 +28,8 @@ namespace Arthas.Common
         protected virtual void OnEnable()
         {
             itemsProperty = serializedObject.FindProperty("items");
-            if (itemsProperty == null) {
+            if (itemsProperty == null)
+            {
                 Debug.LogError("Cannot found items ,you may be forgot add <color=cyan>[Serializable]</color> attribute to your item!");
                 return;
             }
@@ -58,21 +59,26 @@ namespace Arthas.Common
             EditorGUILayout.EndHorizontal();
 
             EditorGUILayout.BeginVertical();
-            if (itemsProperty != null) {
-                for (var i = 0; i < itemsProperty.arraySize; i++) {
+            if (itemsProperty != null)
+            {
+                for (var i = 0; i < itemsProperty.arraySize; i++)
+                {
                     folds[i] = EditorGUILayout.Foldout(folds[i], string.Format("Item [{0}]", i));
-                    if (folds[i]) {
+                    if (folds[i])
+                    {
                         var item = itemsProperty.GetArrayElementAtIndex(i);
                         DrawItemProperty(item, i);
                         EditorGUILayout.Space();
                         EditorGUILayout.BeginHorizontal();
                         GUI.color = Color.green;
-                        if (GUILayout.Button("+")) {
+                        if (GUILayout.Button("+"))
+                        {
                             ArrayUtility.Insert(ref folds, i, false);
                             itemsProperty.InsertArrayElementAtIndex(i);
                         }
                         GUI.color = Color.red;
-                        if (itemsProperty.arraySize > 1 && GUILayout.Button("-")) {
+                        if (itemsProperty.arraySize > 1 && GUILayout.Button("-"))
+                        {
                             itemsProperty.DeleteArrayElementAtIndex(i);
                             ArrayUtility.RemoveAt(ref folds, i);
                         }
@@ -86,7 +92,8 @@ namespace Arthas.Common
             EditorGUILayout.EndVertical();
             GUILayout.Space(12f);
             importOption = EditorGUILayout.Foldout(importOption, "Import And Export");
-            if (importOption) {
+            if (importOption)
+            {
                 var id = serializedObject.targetObject.GetInstanceID();
                 var name = EditorPrefs.GetString(id.ToString(), target.name);
                 var fileName = EditorGUILayout.TextField("FileName", name);
@@ -94,12 +101,14 @@ namespace Arthas.Common
                     EditorPrefs.SetString(id.ToString(), fileName);
 
                 var r = EditorGUILayout.BeginHorizontal();
-                if (GUILayout.Button("To JSON", EditorStyles.miniButtonLeft, GUILayout.Height(25f))) {
+                if (GUILayout.Button("To JSON", EditorStyles.miniButtonLeft, GUILayout.Height(25f)))
+                {
                     var path = EditorUtility.SaveFilePanel("Save to json", "", fileName, "json");
                     var conf = serializedObject.targetObject as IJsonSerializable;
                     File.WriteAllText(path, conf.ToJson());
                 }
-                if (GUILayout.Button("From JSON", EditorStyles.miniButtonRight, GUILayout.Height(25f))) {
+                if (GUILayout.Button("From JSON", EditorStyles.miniButtonRight, GUILayout.Height(25f)))
+                {
                     var path = EditorUtility.OpenFilePanel("Overwrite from json", "", "json");
                     var conf = serializedObject.targetObject as IJsonSerializable;
                     var json = File.ReadAllText(path);
@@ -116,15 +125,16 @@ namespace Arthas.Common
         public virtual void DrawItemProperty(SerializedProperty property, int index)
         {
             EditorGUILayout.PropertyField(property);
-            if (typesCache == null)
-                typesCache = GetType().Assembly.GetTypes();
-            var type = Array.Find(typesCache, t => t.Name.Contains(property.type));
-            if (type == null) {
+            if (typesCache == null) typesCache = GetType().Assembly.GetTypes();
+            var type = Array.Find(typesCache, t => t.Name.Equals(property.type, StringComparison.CurrentCultureIgnoreCase));
+            if (type == null)
+            {
                 Debug.LogErrorFormat("Unknow type {0} , cannot draw this property!", property.type);
                 return;
             }
             var fields = type.GetFields();
-            for (var i = 0; i < fields.Length; i++) {
+            for (var i = 0; i < fields.Length; i++)
+            {
                 var field = fields[i];
                 if (field.IsNotSerialized)
                     continue;
@@ -136,10 +146,13 @@ namespace Arthas.Common
         {
             var subProperty = property.FindPropertyRelative(propertyName);
 
-            if (type == typeof(Sprite)) {
+            if (type == typeof(Sprite))
+            {
                 var name = string.Format(" [{0}] ", subProperty.objectReferenceValue ? subProperty.objectReferenceValue.name : string.Empty);
                 subProperty.objectReferenceValue = EditorGUILayout.ObjectField(propertyName + name, subProperty.objectReferenceValue, typeof(Sprite), true);
-            } else {
+            }
+            else
+            {
                 EditorGUILayout.PropertyField(subProperty);
             }
         }
