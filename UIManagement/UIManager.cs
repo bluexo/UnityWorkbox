@@ -85,6 +85,7 @@ namespace Arthas.UI
                 go.name = orgin.name;
                 var rect = go.GetComponent<RectTransform>();
                 rect.SetParent(transform);
+                rect.localPosition = Vector3.zero;
                 rect.Overwrite(orgin);
             }
             var uis = GetComponentsInChildren<BaseUI>(true);
