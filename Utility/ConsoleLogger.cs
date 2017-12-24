@@ -5,7 +5,10 @@
  * ******************************************************/
 
 using UnityEngine;
+using UnityEngine.Profiling;
 using System.Collections.Generic;
+using System.Collections;
+using System;
 
 namespace Arthas.Common
 {
@@ -18,14 +21,6 @@ namespace Arthas.Common
             public LogType type;
         }
 
-        public KeyCode toggleKey = KeyCode.Tab;
-
-        private List<Log> logs = new List<Log>();
-        private Vector2 scrollPosition;
-        public bool showConsole, showFPS;
-        private bool collapse;
-
-
         private static readonly Dictionary<LogType, Color> logTypeColors = new Dictionary<LogType, Color>()
         {
             { LogType.Assert, Color.white },
@@ -35,54 +30,66 @@ namespace Arthas.Common
             { LogType.Warning, Color.yellow },
         };
 
-        private const int margin = 20;
+        public KeyCode toggleKey = KeyCode.Tab;
+        private List<Log> logs = new List<Log>();
+        private Vector2 scrollPosition;
+        private bool collapse;
+        public bool showConsole;
 
+
+        private static HashSet<UnityEngine.Object> sampleObjects = new HashSet<UnityEngine.Object>();
         private Rect windowRect = new Rect(margin, margin * 2, Screen.width * .9f, Screen.height - (margin * 3));
         private Rect titleBarRect = new Rect(0, 0, 10000, 45);
+        private WaitForSeconds waitForProfile = new WaitForSeconds(3f);
+        private const int margin = 20, bytesUnit = 1000000;
         private readonly GUIContent clearLabel = new GUIContent("Clear", "Clear the contents of the console."),
             collapseLabel = new GUIContent("Collapse", "Hide repeated messages."),
             closeLabel = new GUIContent("Close", "close window");
 
-        private void OnEnable()
-        {
-#if UNITY_4_6
-		    Application.RegisterLogCallback(HandleLog);
-#else
-            Application.logMessageReceived += HandleLog;
-#endif
-        }
-
-        private void OnDisable()
-        {
-#if !UNITY_4_6
-            Application.logMessageReceived -= HandleLog;
-#endif
-        }
-
-        const float fpsMeasurePeriod = 0.5f;
-        private int m_FpsAccumulator = 0;
-        private float m_FpsNextPeriod = 0, prevToggleTime;
-        private int m_CurrentFps;
-        const string display = "{0} FPS";
+        private const float fpsMeasurePeriod = 0.5f;
+        private int fpsAccumulator = 0, currentFps;
+        private float fpsNextPeriod = 0, prevToggleTime;
 
 
         private void Start()
         {
             DontDestroyOnLoad(gameObject);
-            m_FpsNextPeriod = Time.realtimeSinceStartup + fpsMeasurePeriod;
+            fpsNextPeriod = Time.realtimeSinceStartup + fpsMeasurePeriod;
+            StartCoroutine(EnableProfile());
+        }
+
+        private void OnEnable()
+        {
+            Application.logMessageReceived += HandleLog;
+        }
+
+        private void OnDisable()
+        {
+            Application.logMessageReceived -= HandleLog;
+        }
+
+        private IEnumerator EnableProfile()
+        {
+            Profiler.enabled = true;
+            while (true)
+            {
+                yield return waitForProfile;
+                Profiler.BeginSample(DateTime.Now.ToLongDateString());
+            }
         }
 
         private void Update()
         {
-            //在移动设备上通过五指同时触摸来激活
+            //在移动设备上通过四指同时触摸来激活
 #if !UNITY_STANDALONE && !UNITY_EDITOR
-        if (Input.touches.Length >= 5 
+        if (Input.touches.Length >= 4 
             && (Time.time - prevToggleTime > .5f)) {
                 prevToggleTime = Time.time;
                 ToggleShowDebug();
         }
 #endif
-            if (Input.GetKeyDown(toggleKey)) {
+            if (Input.GetKeyDown(toggleKey))
+            {
                 showConsole = !showConsole;
             }
         }
@@ -94,31 +101,58 @@ namespace Arthas.Common
 
         private void OnGUI()
         {
-            // measure average frames per second
-            if (showFPS) {
-                m_FpsAccumulator++;
-                if (Time.realtimeSinceStartup > m_FpsNextPeriod) {
-                    m_CurrentFps = (int)(m_FpsAccumulator / fpsMeasurePeriod);
-                    m_FpsAccumulator = 0;
-                    m_FpsNextPeriod += fpsMeasurePeriod;
-                }
-                GUI.Box(new Rect(10, 5, 60, 25), string.Format(display, m_CurrentFps));
+            fpsAccumulator++;
+            if (Time.realtimeSinceStartup > fpsNextPeriod)
+            {
+                currentFps = (int)(fpsAccumulator / fpsMeasurePeriod);
+                fpsAccumulator = 0;
+                fpsNextPeriod += fpsMeasurePeriod;
             }
-            if (showConsole) {
-                windowRect = GUILayout.Window(123456, windowRect, ConsoleWindow, "Console");
+            using (var scope = new GUILayout.HorizontalScope())
+            {
+                GUILayout.Box(string.Format("FPS:[{0}] ", currentFps));
+                GUILayout.Box(string.Format("UsedHeapSize:[{0}]", LongToMb(Profiler.usedHeapSizeLong)));
+                GUILayout.Box(string.Format("Reserved:[{0}]", LongToMb(Profiler.GetTotalReservedMemoryLong())));
+                GUILayout.Box(string.Format("Used:[{0}]", LongToMb(Profiler.GetTotalAllocatedMemoryLong())));
+                GUILayout.Box(string.Format("Unused:[{0}]", LongToMb(Profiler.GetTotalUnusedReservedMemoryLong())));
+                GUILayout.Box(string.Format("MonoHeapSize:[{0}]", LongToMb(Profiler.GetMonoHeapSizeLong())));
+                GUILayout.Box(string.Format("MonoUsed:[{0}]", LongToMb(Profiler.GetMonoUsedSizeLong())));
             }
 
+            if (showConsole)
+            {
+                windowRect = GUILayout.Window(123456, windowRect, ConsoleWindow, "Console");
+            }
+        }
+
+        private string LongToMb(long bytes)
+        {
+            var real = Math.Round(bytes / bytesUnit * 1f, 2);
+            return real.ToString() + "M";
+        }
+
+        public static void RegisterObjectProfile(UnityEngine.Object obj)
+        {
+            sampleObjects.Add(obj);
+        }
+
+        public static void UnregisterObjectProfile(UnityEngine.Object obj)
+        {
+            sampleObjects.Remove(obj);
         }
 
         private void ConsoleWindow(int windowID)
         {
             scrollPosition = GUILayout.BeginScrollView(scrollPosition);
-            for (int i = 0; i < logs.Count; i++) {
+            for (int i = 0; i < logs.Count; i++)
+            {
                 var log = logs[i];
-                if (collapse) {
+                if (collapse)
+                {
                     var messageSameAsPrevious = i > 0 && log.message == logs[i - 1].message;
 
-                    if (messageSameAsPrevious) {
+                    if (messageSameAsPrevious)
+                    {
                         continue;
                     }
                 }

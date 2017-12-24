@@ -14,7 +14,7 @@ namespace UnityEngine
         }
 
         [Conditional("DEVELOPMENT_BUILD")]
-        public static void Trace(this Component component, object[] args)
+        public static void Trace(this Component component, params object[] args)
         {
             var message = args.ToArrayString(' ');
             Debug.LogFormat("<color=green>[Trace] {0} : {1}.</color>", component.name, message);

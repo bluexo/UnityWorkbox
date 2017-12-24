@@ -18,7 +18,8 @@ namespace Arthas.Common
             base.OnInspectorGUI();
             var style = new GUIStyle(EditorStyles.largeLabel) { richText = true, alignment = TextAnchor.MiddleLeft };
             foreach (var i in TaskWorker.WorkItems) items.Add(i);
-            foreach (var item in items) {
+            foreach (var item in items)
+            {
                 var rect = EditorGUILayout.GetControlRect(GUILayout.ExpandWidth(true), GUILayout.Height(32));
                 EditorGUI.DrawRect(rect, (item.completed ? Color.yellow : Color.green) / 1.5f);
                 var label = string.Format("<size=15><color=white> WorkThread: </color><color=cyan>{0}</color> {1} </size>", item.threadId, item.completed ? "Completed" : "Running");
@@ -55,10 +56,12 @@ namespace Arthas.Common
         public static void AddWork(Action<TaskWorkItem> worker,
             Action<object> callback)
         {
-            lock (Instance.enterLock) {
+            lock (Instance.enterLock)
+            {
                 var item = new TaskWorkItem() { completed = false, worker = worker };
                 workItems.Add(item, callback);
-                ThreadPool.QueueUserWorkItem(o => {
+                ThreadPool.QueueUserWorkItem(o =>
+                {
                     item.threadId = Thread.CurrentThread.ManagedThreadId;
                     item.worker(item);
                     item.completed = true;
@@ -76,10 +79,12 @@ namespace Arthas.Common
             Action<object> callback,
             ThreadPriority priority = ThreadPriority.Normal)
         {
-            lock (Instance.enterLock) {
+            lock (Instance.enterLock)
+            {
                 var item = new TaskWorkItem() { completed = false, worker = worker };
                 workItems.Add(item, callback);
-                var thread = new Thread(() => {
+                var thread = new Thread(() =>
+                {
                     item.threadId = Thread.CurrentThread.ManagedThreadId;
                     item.worker(item);
                     item.completed = true;
@@ -97,10 +102,12 @@ namespace Arthas.Common
         /// <returns></returns>
         public static IEnumerator WaitWork(Action<TaskWorkItem> worker)
         {
-            lock (Instance.enterLock) {
+            lock (Instance.enterLock)
+            {
                 var item = new TaskWorkItem() { completed = false, worker = worker };
                 workItems.Add(item, null);
-                ThreadPool.QueueUserWorkItem(o => {
+                ThreadPool.QueueUserWorkItem(o =>
+                {
                     item.threadId = Thread.CurrentThread.ManagedThreadId;
                     item.worker(item);
                     item.completed = true;
@@ -113,9 +120,11 @@ namespace Arthas.Common
         {
             var items = new TaskWorkItem[workItems.Count];
             workItems.Keys.CopyTo(items, 0);
-            for (var i = 0; i < items.Length; i++) {
+            for (var i = 0; i < items.Length; i++)
+            {
                 var key = items[i];
-                if (key.completed && workItems.ContainsKey(key)) {
+                if (key.completed && workItems.ContainsKey(key))
+                {
                     var item = workItems[key];
                     if (item != null) item.Invoke(key.result);
                     workItems.Remove(key);
