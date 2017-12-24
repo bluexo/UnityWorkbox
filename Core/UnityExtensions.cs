@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -6,6 +7,19 @@ namespace UnityEngine
 {
     public static class UnityExtensions
     {
+        [Conditional("DEVELOPMENT_BUILD")]
+        public static void Trace(this Component component, string message)
+        {
+            Debug.LogFormat("<color=green>[Trace] {0} : {1}.</color>", component.name, message);
+        }
+
+        [Conditional("DEVELOPMENT_BUILD")]
+        public static void Trace(this Component component, object[] args)
+        {
+            var message = args.ToArrayString(' ');
+            Debug.LogFormat("<color=green>[Trace] {0} : {1}.</color>", component.name, message);
+        }
+
         public static Coroutine Invoke(this MonoBehaviour comp, Action action, float time = 0)
         {
             return comp.StartCoroutine(InvokeAsync(comp, action, time));
@@ -19,7 +33,8 @@ namespace UnityEngine
         private static IEnumerator InvokeAsync(MonoBehaviour comp, Action action, float time)
         {
             yield return new WaitForSeconds(time);
-            if (comp) {
+            if (comp)
+            {
                 action.Invoke();
             }
         }
@@ -28,9 +43,11 @@ namespace UnityEngine
         {
             yield return new WaitForSeconds(delay);
             var duration = new WaitForSeconds(rate);
-            while (true) {
+            while (true)
+            {
                 yield return duration;
-                if (comp) {
+                if (comp)
+                {
                     action.Invoke();
                 }
             }
