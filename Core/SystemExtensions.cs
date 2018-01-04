@@ -81,20 +81,21 @@ namespace System.Collections
 
         public static void Foreach<T>(this IEnumerable<T> arr, Action<T> action)
         {
-            foreach (var t in arr)
-            {
-                if (action != null)
-                {
-                    action(t);
-                }
-            }
+            if (action == null) return;
+            foreach (var t in arr) action(t);
+        }
+
+        public static void Foreach<T>(this IEnumerable<T> arr, Func<T, bool> action)
+        {
+            if (action == null) return;
+            foreach (var t in arr) if (!action(t)) break;
         }
 
         public static T FirstOrDefault<T>(this IEnumerable<T> arr, Predicate<T> predicate = null)
         {
             foreach (var a in arr)
             {
-                if (predicate != null) if(predicate(a)) return a;
+                if (predicate != null) if (predicate(a)) return a;
                 return a;
             }
             return default(T);
