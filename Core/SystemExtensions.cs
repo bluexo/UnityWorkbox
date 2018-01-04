@@ -42,9 +42,11 @@ namespace System.Collections
 
         public static T RandomItem<T>(this IList<T> arr)
         {
-            if (arr.Count > 0) {
+            if (arr.Count > 0)
+            {
                 return arr[random.Next(0, arr.Count)];
-            } else return default(T);
+            }
+            else return default(T);
         }
 
         public static void Replace<Tkey, TValue>(this IDictionary<Tkey, TValue> dict, Tkey k, TValue v)
@@ -68,8 +70,10 @@ namespace System.Collections
 
         public static void Foreach<Tkey, TValue>(this IDictionary<Tkey, TValue> dict, Action<Tkey, TValue> action)
         {
-            foreach (var pair in dict) {
-                if (action != null) {
+            foreach (var pair in dict)
+            {
+                if (action != null)
+                {
                     action(pair.Key, pair.Value);
                 }
             }
@@ -77,11 +81,23 @@ namespace System.Collections
 
         public static void Foreach<T>(this IEnumerable<T> arr, Action<T> action)
         {
-            foreach (var t in arr) {
-                if (action != null) {
+            foreach (var t in arr)
+            {
+                if (action != null)
+                {
                     action(t);
                 }
             }
+        }
+
+        public static T FirstOrDefault<T>(this IEnumerable<T> arr, Predicate<T> predicate = null)
+        {
+            foreach (var a in arr)
+            {
+                if (predicate != null) if(predicate(a)) return a;
+                return a;
+            }
+            return default(T);
         }
 
         public static string ToArrayString<T>(this IEnumerable<T> collection, char separator = ' ')
