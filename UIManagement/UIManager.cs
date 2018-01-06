@@ -98,6 +98,11 @@ namespace Arthas.UI
             }
         }
 
+        internal void SetCanvasMode(RenderMode screenSpaceOverlay)
+        {
+            //throw new NotImplementedException();
+        }
+
         protected void Start()
         {
             if (!startUI)

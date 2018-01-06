@@ -7,13 +7,11 @@ namespace UnityEngine
 {
     public static class UnityExtensions
     {
-        [Conditional("DEBUG")]
         public static void Trace(this Component component, string message)
         {
             Debug.LogFormat("<color=green>[Trace] {0} : {1}.</color>", component.name, message);
         }
 
-        [Conditional("DEBUG")]
         public static void Trace(this Component component, params object[] args)
         {
             var message = args.ToArrayString(' ');
