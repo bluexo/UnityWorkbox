@@ -95,8 +95,8 @@ namespace System.Collections
         {
             foreach (var a in arr)
             {
-                if (predicate != null) if (predicate(a)) return a;
-                return a;
+                if (predicate == null) return a;
+                if (predicate(a)) return a;
             }
             return default(T);
         }
