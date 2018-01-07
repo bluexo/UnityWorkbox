@@ -98,9 +98,9 @@ namespace Arthas.UI
             }
         }
 
-        internal void SetCanvasMode(RenderMode screenSpaceOverlay)
+        internal void SetCanvasMode(RenderMode renderMode)
         {
-            //throw new NotImplementedException();
+            Canvas.renderMode = renderMode;
         }
 
         protected void Start()
@@ -134,6 +134,7 @@ namespace Arthas.UI
             var scriptUI = ui as ScriptableBehaviourUI;
             if (scriptUI) scriptUI.Initialize();
             go.transform.SetParent(transform);
+            go.transform.localPosition = Vector3.zero;
             AddUI(ui);
         }
 
