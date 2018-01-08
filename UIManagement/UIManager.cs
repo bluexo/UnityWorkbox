@@ -98,11 +98,6 @@ namespace Arthas.UI
             }
         }
 
-        internal void SetCanvasMode(RenderMode renderMode)
-        {
-            Canvas.renderMode = renderMode;
-        }
-
         protected void Start()
         {
             if (!startUI)
@@ -134,7 +129,7 @@ namespace Arthas.UI
             var scriptUI = ui as ScriptableBehaviourUI;
             if (scriptUI) scriptUI.Initialize();
             go.transform.SetParent(transform);
-            go.transform.localPosition = Vector3.zero;
+            go.transform.localScale = Vector3.one;
             AddUI(ui);
         }
 
