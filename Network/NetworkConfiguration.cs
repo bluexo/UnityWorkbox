@@ -30,9 +30,8 @@ public class NetworkConfiguration : ScriptableObject
         public string ip;
         public short port;
         [Space(10), Header("Http Only")]
-        public string scheme = "http";
-        public string path;
-        public Uri Uri { get { return new Uri(scheme); } }
+        public string url;
+        public Uri Uri { get { return new Uri(url); } }
 
         #region Compare
         public static bool operator ==(NetworkAddress lhs, NetworkAddress rhs) { return lhs.ip == rhs.ip && lhs.port == rhs.port; }
@@ -68,10 +67,19 @@ public class NetworkConfiguration : ScriptableObject
     public NetworkAddress intranet;
     [Header("WAN")]
     public NetworkAddress internet;
+    [Header("Option1")]
+    public NetworkAddress option1;
+    [Header("Option2")]
+    public NetworkAddress option2;
 
 #if UNITY_EDITOR
     public const string kPath = "Assets/Resources/" + kConfigPath + "NetworkConfiguration.asset";
-    public const string kMenu = "Network/Address", kLocal = "/LOCAL", kIntranet = "/LAN", kInternet = "/WAN";
+    public const string kMenu = "Network/Address",
+        kLocal = "/LOCAL",
+        kIntranet = "/LAN",
+        kInternet = "/WAN",
+        kOp1 = "/Option1",
+        kOp2 = "/Option2";
 
     [MenuItem(kMenu + kLocal, priority = 1)]
     public static void SetLocal()
@@ -121,6 +129,41 @@ public class NetworkConfiguration : ScriptableObject
     {
         var conf = GetConfiguration();
         Menu.SetChecked(kMenu + kInternet, conf.current == conf.internet);
+        return true;
+    }
+
+
+    [MenuItem(kMenu + kOp1, priority = 1)]
+    public static void SetOp1()
+    {
+        var conf = GetConfiguration();
+        conf.current = conf.option1;
+        EditorUtility.SetDirty(conf);
+        Debug.LogFormat("<color=cyan>Current Address:[{0}:{1}]</color>", conf.current.ip, conf.current.port);
+    }
+
+    [MenuItem(kMenu + kOp1, true, priority = 1)]
+    public static bool ToggleSetOp1Validate()
+    {
+        var conf = GetConfiguration();
+        Menu.SetChecked(kMenu + kOp1, conf.current == conf.internet);
+        return true;
+    }
+
+    [MenuItem(kMenu + kOp2, priority = 1)]
+    public static void SetOp2()
+    {
+        var conf = GetConfiguration();
+        conf.current = conf.option2;
+        EditorUtility.SetDirty(conf);
+        Debug.LogFormat("<color=cyan>Current Address:[{0}:{1}]</color>", conf.current.ip, conf.current.port);
+    }
+
+    [MenuItem(kMenu + kOp2, true, priority = 1)]
+    public static bool ToggleSetOp2Validate()
+    {
+        var conf = GetConfiguration();
+        Menu.SetChecked(kMenu + kOp2, conf.current == conf.internet);
         return true;
     }
 

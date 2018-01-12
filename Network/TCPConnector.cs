@@ -174,9 +174,6 @@ namespace Arthas.Network
                 if (client == null) return;
                 var stream = client.GetStream();
                 var lengthToRead = stream.EndRead(ar);
-#if UNITY_EDITOR
-                Debug.LogFormat("Received message , bytes length: {0}", lengthToRead);
-#endif
                 if (lengthToRead < 1 || lengthToRead > READ_BUFFER_SIZE)
                 {
                     Debug.LogError("Stream read error , network will be closed!");
