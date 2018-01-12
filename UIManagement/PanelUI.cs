@@ -23,7 +23,7 @@ namespace Arthas.UI
             }
         }
 
-        private static T instance;
+        protected static T instance;
 
         public override void Show()
         {

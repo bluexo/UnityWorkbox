@@ -32,6 +32,8 @@ namespace Arthas.Network
 
         public static INetworkMessageHandler MessageHandler { get { return messageHandler; } }
 
+        public static Func<object> HeartbeatCommandGetter { get; set; }
+
         public static bool IsLittleEndian
         {
             get { return Instance.isLittleEndian; }
@@ -58,6 +60,13 @@ namespace Arthas.Network
         private static IConnector connector;
         private static INetworkMessageHandler messageHandler;
 
+        protected override void Awake()
+        {
+            base.Awake();
+            timeoutWaiter = new WaitForSeconds(connectCheckDuration);
+            heartbeatWaitFor = new WaitForSeconds(heartbeatInterval);
+        }
+
         /// <summary>
         /// 连接到服务器
         /// </summary>
@@ -65,8 +74,6 @@ namespace Arthas.Network
         {
             if (connector != null && connector.IsConnected)
                 connector.Close();
-            timeoutWaiter = new WaitForSeconds(connectCheckDuration);
-            heartbeatWaitFor = new WaitForSeconds(heartbeatInterval);
             if (!string.IsNullOrEmpty(connectorTypeName))
                 connector = (IConnector)Activator.CreateInstance(Type.GetType(connectorTypeName, true, true));
             if (!string.IsNullOrEmpty(messageHandlerName))
@@ -155,8 +162,11 @@ namespace Arthas.Network
             while (true)
             {
                 if (connector.IsConnected)
-                    //Send(0);
-                    yield return heartbeatWaitFor;
+                {
+                    if (HeartbeatCommandGetter != null) Send(HeartbeatCommandGetter());
+                    else Send(0);
+                }
+                yield return heartbeatWaitFor;
             }
         }
 
@@ -207,7 +217,7 @@ namespace Arthas.Network
 
         private void Update()
         {
-            if (msgQueue.Count > 0)
+            while (msgQueue.Count > 0)
             {
                 var message = msgQueue.Dequeue();
                 if (responseActions.Count > 0
