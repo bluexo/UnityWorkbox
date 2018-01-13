@@ -27,6 +27,7 @@ public class NetworkConfiguration : ScriptableObject
     [Serializable]
     public class NetworkAddress
     {
+        public string tag;
         public string ip;
         public short port;
         [Space(10), Header("Http: [http[s]]://{ip}:{port}/[Path]")]
