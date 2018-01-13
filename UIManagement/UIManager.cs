@@ -117,26 +117,6 @@ namespace Arthas.UI
             }
         }
 
-        public void LoadUI(GameObject prefab)
-        {
-            var go = Instantiate(prefab);
-            var ui = go.GetComponent<BaseUI>();
-            if (!ui)
-            {
-                Debug.LogError("Cannot found BaseUI component from " + prefab.name);
-                return ;
-            }
-            var scriptUI = ui as ScriptableBehaviourUI;
-            if (scriptUI) scriptUI.Initialize();
-            go.transform.SetParent(transform);
-            go.transform.localScale = Vector3.one;
-            go.transform.localPosition = Vector3.zero;
-            var rectTransform = go.GetComponent<RectTransform>();
-            rectTransform.offsetMax = Vector2.zero;
-            rectTransform.offsetMin = Vector2.zero;
-            AddUI(ui);
-        }
-
         /// <summary>
         /// 当前窗口
         /// </summary>
