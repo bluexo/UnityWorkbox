@@ -126,7 +126,7 @@ namespace Arthas.Network
             if (!string.IsNullOrEmpty(contentType)) webRequest.SetRequestHeader("Content-Type", contentType);
             if (!string.IsNullOrEmpty(cookie) && needAuthorize) webRequest.SetRequestHeader("Cookie", cookie);
             if (!string.IsNullOrEmpty(authorization) && needAuthorize) webRequest.SetRequestHeader("Authorization", authorization);
-            yield return webRequest.Send();
+            yield return webRequest.SendWebRequest();
             if (saveCookie) {
                 var responseHeaders = webRequest.GetResponseHeaders();
                 if (responseHeaders != null && responseHeaders.ContainsKey("Set-Cookie")) {

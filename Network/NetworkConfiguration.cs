@@ -29,9 +29,9 @@ public class NetworkConfiguration : ScriptableObject
     {
         public string ip;
         public short port;
-        [Space(10), Header("Http Only")]
-        public string url;
-        public Uri Uri { get { return new Uri(url); } }
+        [Space(10), Header("Http: [http[s]]://{ip}:{port}/[Path]")]
+        public string url = "http:/{0}:{1}/";
+        public Uri Uri { get { return new Uri(string.Format(url, ip, port)); } }
 
         #region Compare
         public static bool operator ==(NetworkAddress lhs, NetworkAddress rhs) { return lhs.ip == rhs.ip && lhs.port == rhs.port; }
@@ -146,7 +146,7 @@ public class NetworkConfiguration : ScriptableObject
     public static bool ToggleSetOp1Validate()
     {
         var conf = GetConfiguration();
-        Menu.SetChecked(kMenu + kOp1, conf.current == conf.internet);
+        Menu.SetChecked(kMenu + kOp1, conf.current == conf.option1);
         return true;
     }
 
@@ -163,7 +163,7 @@ public class NetworkConfiguration : ScriptableObject
     public static bool ToggleSetOp2Validate()
     {
         var conf = GetConfiguration();
-        Menu.SetChecked(kMenu + kOp2, conf.current == conf.internet);
+        Menu.SetChecked(kMenu + kOp2, conf.current == conf.option2);
         return true;
     }
 
