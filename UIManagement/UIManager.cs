@@ -130,6 +130,10 @@ namespace Arthas.UI
             if (scriptUI) scriptUI.Initialize();
             go.transform.SetParent(transform);
             go.transform.localScale = Vector3.one;
+            go.transform.localPosition = Vector3.zero;
+            var rectTransform = go.GetComponent<RectTransform>();
+            rectTransform.offsetMax = Vector2.zero;
+            rectTransform.offsetMin = Vector2.zero;
             AddUI(ui);
         }
 
