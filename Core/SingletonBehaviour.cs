@@ -47,5 +47,10 @@
                 instance = this as T;
             }
         }
+
+        protected virtual void OnDestroy()
+        {
+            instance = null;
+        }
     }
 }

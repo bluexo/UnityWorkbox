@@ -23,6 +23,11 @@ namespace UnityEngine
             return comp.StartCoroutine(InvokeAsync(comp, action, time));
         }
 
+        public static Coroutine Invoke(this MonoBehaviour comp, Action action, YieldInstruction yieldInstruction)
+        {
+            return comp.StartCoroutine(InvokeAsync(comp, action, yieldInstruction));
+        }
+
         public static Coroutine InvokeRepeating(this MonoBehaviour comp, Action action, float delay = 0, float duration = 0)
         {
             return comp.StartCoroutine(InvokeRepatingAsync(comp, action, delay, duration));
@@ -31,6 +36,15 @@ namespace UnityEngine
         private static IEnumerator InvokeAsync(MonoBehaviour comp, Action action, float time)
         {
             yield return new WaitForSeconds(time);
+            if (comp)
+            {
+                action.Invoke();
+            }
+        }
+
+        private static IEnumerator InvokeAsync(MonoBehaviour comp, Action action, YieldInstruction yieldInstruction)
+        {
+            yield return yieldInstruction;
             if (comp)
             {
                 action.Invoke();
