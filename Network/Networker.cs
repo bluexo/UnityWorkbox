@@ -48,6 +48,7 @@ namespace Arthas.Network
         private Coroutine timeoutCor, connectCor, heartbeatCor;
         private WaitForSeconds heartbeatWaitFor, timeoutWaiter, connectPollWaiter = new WaitForSeconds(.5f);
         private float currentTime, connectCheckDuration = .1f;
+        private static NetworkConfiguration.NetworkAddress address;
         private static object enterLock = new object();
 
         [SerializeField]
@@ -98,12 +99,8 @@ namespace Arthas.Network
            IConnector conn = null,
            INetworkMessageHandler handler = null)
         {
-            Connect(NetworkConfiguration.Current.ip,
-                NetworkConfiguration.Current.port,
-                callback,
-                error,
-                conn,
-                handler);
+            address = NetworkConfiguration.Current;
+            Connect(address.ip, address.port, callback, error, conn, handler);
         }
 
         /// <summary>
@@ -157,11 +154,23 @@ namespace Arthas.Network
             }
         }
 
+        private int reconnectCount = 1;
+
         protected IEnumerator HeartbeatDetectAsync()
         {
             while (true)
             {
-                if (connector.IsConnected)
+                if (!connector.IsConnected)
+                {
+                    if (reconnectCount > 3)
+                    {
+                        reconnectCount = 0;
+                        yield break;
+                    }
+                    connector.Connect(address.ip, address.port);
+                    reconnectCount++;
+                }
+                else
                 {
                     if (HeartbeatCommandGetter != null) Send(HeartbeatCommandGetter());
                     else Send(0);
