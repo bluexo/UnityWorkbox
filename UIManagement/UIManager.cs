@@ -98,11 +98,6 @@ namespace Arthas.UI
             }
         }
 
-        internal void SetCanvasMode(RenderMode screenSpaceOverlay)
-        {
-            //throw new NotImplementedException();
-        }
-
         protected void Start()
         {
             if (!startUI)
@@ -120,21 +115,6 @@ namespace Arthas.UI
             {
                 if (!uis[i].Equals(startUI)) uis[i].gameObject.SetActive(false);
             }
-        }
-
-        public void LoadUI(GameObject prefab)
-        {
-            var go = Instantiate(prefab);
-            var ui = go.GetComponent<BaseUI>();
-            if (!ui)
-            {
-                Debug.LogError("Cannot found BaseUI component from " + prefab.name);
-                return ;
-            }
-            var scriptUI = ui as ScriptableBehaviourUI;
-            if (scriptUI) scriptUI.Initialize();
-            go.transform.SetParent(transform);
-            AddUI(ui);
         }
 
         /// <summary>

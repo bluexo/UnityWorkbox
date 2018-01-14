@@ -75,5 +75,13 @@ namespace Arthas.Network
                 }
             } else Debug.LogFormat("Cannot invoke message,CmdType:{0}", msg.Command);
         }
+
+        public static void Clear()
+        {
+            foreach (var actions in messages.Values) actions.Clear();
+            messages.Clear();
+            foreach (var actions in onceMessages.Values) actions.Clear();
+            onceMessages.Clear();
+        }
     }
 }

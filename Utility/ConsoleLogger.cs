@@ -31,7 +31,7 @@ namespace Arthas.Common
         };
 
         public KeyCode toggleKey = KeyCode.Tab;
-        private List<Log> logs = new List<Log>();
+        private LinkedList<Log> logs = new LinkedList<Log>();
         private Vector2 scrollPosition;
         private bool collapse;
         public bool showConsole;
@@ -47,8 +47,9 @@ namespace Arthas.Common
             closeLabel = new GUIContent("Close", "close window");
 
         private const float fpsMeasurePeriod = 0.5f;
+        private const int MaxMessageCount = 256;
         private int fpsAccumulator = 0, currentFps;
-        private float fpsNextPeriod = 0, prevToggleTime;
+        private float fpsNextPeriod = 0 , prevToggleTime;
 
 
         private void Start()
@@ -144,21 +145,20 @@ namespace Arthas.Common
         private void ConsoleWindow(int windowID)
         {
             scrollPosition = GUILayout.BeginScrollView(scrollPosition);
-            for (int i = 0; i < logs.Count; i++)
+            var current = logs.First;
+            while (current != null)
             {
-                var log = logs[i];
+                var log = current.Value;
                 if (collapse)
                 {
-                    var messageSameAsPrevious = i > 0 && log.message == logs[i - 1].message;
-
-                    if (messageSameAsPrevious)
-                    {
-                        continue;
-                    }
+                    var messageSameAsPrevious = log.message == current.Previous.Value.message;
+                    if (messageSameAsPrevious) continue;
                 }
                 GUI.contentColor = logTypeColors[log.type];
                 GUILayout.Label(log.message);
+                current = current.Next;
             }
+
             GUILayout.EndScrollView();
 
             GUI.contentColor = Color.white;
@@ -187,7 +187,8 @@ namespace Arthas.Common
                 stackTrace = stackTrace,
                 type = type,
             };
-            logs.Add(log);
+            logs.AddFirst(log);
+            if (logs.Count > MaxMessageCount) logs.RemoveLast();
         }
     }
 }

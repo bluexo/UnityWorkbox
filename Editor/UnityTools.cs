@@ -26,7 +26,7 @@ public static class UnityEditorTools
                 if (prefab_src != null) {
                     PrefabUtility.ReplacePrefab(prefab_root, prefab_src, ReplacePrefabOptions.ConnectToPrefab);
                     if (del) Object.DestroyImmediate(prefab_root);
-                    Debug.Log("Updating prefab : " + AssetDatabase.GetAssetPath(prefab_src));
+                    Debug.Log("Updating prefab : " + AssetDatabase.GetAssetPath(prefab_src),prefab_src);
                 }
             }
         } else {

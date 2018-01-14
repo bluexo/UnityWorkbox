@@ -40,13 +40,15 @@ namespace Arthas.UI
         public void Initialize()
         {
             Invoker = GetComponent<BaseScriptableInvoker>();
-            if (Invoker) {
+            if (Invoker)
+            {
                 Invoker.Initialize();
                 Invoker.InvokeScript("Initialize", this);
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
                 Debug.LogFormat("{0} Initialized!", name);
 #endif
-            } else
+            }
+            else
                 Debug.LogErrorFormat("Cannot found LuaInvoker on UIGameobject {0}!!!", gameObject.name);
         }
 
@@ -120,6 +122,11 @@ namespace Arthas.UI
         {
             if (Invoker && (pointerEventType & PointerEventType.Scroll) != 0)
                 Invoker.InvokeScript("OnPointerEvent", eventData, PointerEventType.Scroll);
+        }
+
+        public object[] Invoke(string methodName, params object[] param)
+        {
+            return Invoker.InvokeScript(methodName, param);
         }
 
         protected override void OnDestroy()

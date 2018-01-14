@@ -20,6 +20,7 @@ namespace Arthas.Network
     {
         public string Address { get; private set; }
         public event Action<byte[]> MessageRespondEvent;
+        public event Action DisconnectedEvent;
         const int READ_BUFFER_SIZE = 8192, MSG_LEN_SIZE = 4;
         private byte[] readBuffer = new byte[READ_BUFFER_SIZE];
 
@@ -173,9 +174,6 @@ namespace Arthas.Network
                 if (client == null) return;
                 var stream = client.GetStream();
                 var lengthToRead = stream.EndRead(ar);
-#if UNITY_EDITOR
-                Debug.LogFormat("Received message , bytes length: {0}", lengthToRead);
-#endif
                 if (lengthToRead < 1 || lengthToRead > READ_BUFFER_SIZE)
                 {
                     Debug.LogError("Stream read error , network will be closed!");
@@ -198,6 +196,8 @@ namespace Arthas.Network
         public void Close()
         {
             if (client == null) return;
+            if (DisconnectedEvent != null)
+                DisconnectedEvent();
 #if WINDOWS_UWP
             client.Dispose();
 #else

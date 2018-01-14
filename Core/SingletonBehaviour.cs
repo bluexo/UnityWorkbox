@@ -7,7 +7,7 @@
     /// <typeparam name="T"></typeparam>
     public abstract class SingletonBehaviour<T> : MonoBehaviour where T : MonoBehaviour
     {
-        [SerializeField] bool dontDestroyOnLoad = true;
+        [SerializeField] bool dontDestroyOnLoad = false;
 
         public static T Instance
         {
