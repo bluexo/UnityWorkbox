@@ -31,11 +31,6 @@ namespace Arthas.Network
         event Action<byte[]> MessageRespondEvent;
 
         /// <summary>
-        /// 断开事件
-        /// </summary>
-        event Action DisconnectEvent;
-
-        /// <summary>
         /// 关闭
         /// </summary>
         void Close();

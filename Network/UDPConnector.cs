@@ -14,11 +14,10 @@ namespace Arthas.Network
         public bool IsConnected { get; private set; }
 
 #if !UNITY_WSA
-        public UdpClient clinet;
+        public UdpClient client;
 #endif
 
         public event Action<byte[]> MessageRespondEvent;
-        public event Action DisconnectEvent;
 
         public void Connect(string ip, int port)
         {

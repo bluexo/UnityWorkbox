@@ -48,7 +48,6 @@ namespace Arthas.Network
         private Coroutine timeoutCor, connectCor, heartbeatCor;
         private WaitForSeconds heartbeatWaitFor, timeoutWaiter, connectPollWaiter = new WaitForSeconds(.5f);
         private float currentTime, connectCheckDuration = .1f;
-        private static NetworkConfiguration.NetworkAddress address;
         private static object enterLock = new object();
 
         [SerializeField]
@@ -99,8 +98,12 @@ namespace Arthas.Network
            IConnector conn = null,
            INetworkMessageHandler handler = null)
         {
-            address = NetworkConfiguration.Current;
-            Connect(address.ip, address.port, callback, error, conn, handler);
+            Connect(NetworkConfiguration.Current.ip,
+                NetworkConfiguration.Current.port,
+                callback,
+                error,
+                conn,
+                handler);
         }
 
         /// <summary>
@@ -154,23 +157,11 @@ namespace Arthas.Network
             }
         }
 
-        private int reconnectCount = 1;
-
         protected IEnumerator HeartbeatDetectAsync()
         {
             while (true)
             {
-                if (!connector.IsConnected)
-                {
-                    if (reconnectCount > 3)
-                    {
-                        reconnectCount = 0;
-                        yield break;
-                    }
-                    connector.Connect(address.ip, address.port);
-                    reconnectCount++;
-                }
-                else
+                if (connector.IsConnected)
                 {
                     if (HeartbeatCommandGetter != null) Send(HeartbeatCommandGetter());
                     else Send(0);
@@ -179,20 +170,32 @@ namespace Arthas.Network
             }
         }
 
+        protected IEnumerator ConnectionDetectAsync()
+        {
+            while (true)
+            {
+                yield return connectPollWaiter;
+                if (!connector.IsConnected)
+                {
+                    OnDisconnected();
+                    StopCoroutine(connectCor);
+                }
+            }
+        }
+
         protected void OnConnected()
         {
             connector.MessageRespondEvent += OnMessageRespond;
-            connector.DisconnectEvent += OnDisconnected;
             if (ConnectedEvent != null) ConnectedEvent();
+            connectCor = StartCoroutine(ConnectionDetectAsync());
             heartbeatCor = StartCoroutine(HeartbeatDetectAsync());
         }
 
         protected void OnDisconnected()
         {
-            if (DisconnectedEvent != null) DisconnectedEvent();
-            connector.DisconnectEvent -= OnDisconnected;
             connector.MessageRespondEvent -= OnMessageRespond;
             StopCoroutine(heartbeatCor);
+            if (DisconnectedEvent != null) DisconnectedEvent();
         }
 
         protected void OnMessageRespond(byte[] buffer)
@@ -215,8 +218,7 @@ namespace Arthas.Network
             while (msgQueue.Count > 0)
             {
                 var message = msgQueue.Dequeue();
-                if (responseActions.Count > 0
-                    && responseActions.ContainsKey(message.Command))
+                if (responseActions.Count > 0 && responseActions.ContainsKey(message.Command))
                 {
                     var action = responseActions[message.Command].Dequeue();
                     if (action != null) action.Invoke(message);
