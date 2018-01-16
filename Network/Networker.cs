@@ -175,7 +175,8 @@ namespace Arthas.Network
             while (true)
             {
                 yield return connectPollWaiter;
-                if (!connector.IsConnected)
+                if (Application.internetReachability == NetworkReachability.NotReachable
+                    || !connector.IsConnected)
                 {
                     OnDisconnected();
                     StopCoroutine(connectCor);
