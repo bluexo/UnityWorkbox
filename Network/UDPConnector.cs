@@ -18,6 +18,7 @@ namespace Arthas.Network
 #endif
 
         public event Action<byte[]> MessageRespondEvent;
+        public event Action DisconnectEvent;
 
         public void Connect(string ip, int port)
         {

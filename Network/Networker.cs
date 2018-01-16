@@ -170,32 +170,18 @@ namespace Arthas.Network
             }
         }
 
-        protected IEnumerator ConnectionDetectAsync()
-        {
-            while (true)
-            {
-                yield return connectPollWaiter;
-                if (!connector.IsConnected)
-                {
-                    OnDisconnected();
-                    StopCoroutine(connectCor);
-                }
-            }
-        }
-
         protected void OnConnected()
         {
             connector.MessageRespondEvent += OnMessageRespond;
-            if (ConnectedEvent != null)
-                ConnectedEvent();
-            connectCor = StartCoroutine(ConnectionDetectAsync());
+            connector.DisconnectEvent += OnDisconnected;
+            if (ConnectedEvent != null) ConnectedEvent();
             heartbeatCor = StartCoroutine(HeartbeatDetectAsync());
         }
 
         protected void OnDisconnected()
         {
-            if (DisconnectedEvent != null)
-                DisconnectedEvent();
+            if (DisconnectedEvent != null) DisconnectedEvent();
+            connector.DisconnectEvent -= OnDisconnected;
             connector.MessageRespondEvent -= OnMessageRespond;
             StopCoroutine(heartbeatCor);
         }

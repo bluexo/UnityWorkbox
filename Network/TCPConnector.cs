@@ -20,7 +20,7 @@ namespace Arthas.Network
     {
         public string Address { get; private set; }
         public event Action<byte[]> MessageRespondEvent;
-        public event Action DisconnectedEvent;
+        public event Action DisconnectEvent;
         const int READ_BUFFER_SIZE = 8192, MSG_LEN_SIZE = 4;
         private byte[] readBuffer = new byte[READ_BUFFER_SIZE];
 
@@ -196,8 +196,7 @@ namespace Arthas.Network
         public void Close()
         {
             if (client == null) return;
-            if (DisconnectedEvent != null)
-                DisconnectedEvent();
+            if (DisconnectEvent != null) DisconnectEvent();
 #if WINDOWS_UWP
             client.Dispose();
 #else
