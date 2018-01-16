@@ -11,7 +11,7 @@ namespace Arthas.UI
             get
             {
                 if (!instance) {
-                    var uiName = typeof(T).Name;
+                    var uiName = typeof(T).Name;                                    
                     var child = UIManager.Instance.transform.Find(uiName);
                     if (child) {
                         var ui = child.GetComponent<T>();
@@ -36,6 +36,11 @@ namespace Arthas.UI
             if (UIManager.PrevWindow.UI) {
                 UIManager.PrevWindow.UI.Show();
             }
+        }
+
+        protected override void OnDestroy()
+        {
+            instance = null;
         }
     }
 }
