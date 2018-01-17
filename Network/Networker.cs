@@ -49,7 +49,7 @@ namespace Arthas.Network
         private WaitForSeconds heartbeatWaitFor, timeoutWaiter, connectPollWaiter = new WaitForSeconds(.5f);
         private float currentTime, connectCheckDuration = .1f;
         private static object enterLock = new object();
-        private bool pause = false;
+        private bool isPaused = false;
 
         [SerializeField]
         private float connectTimeout = 10f, heartbeatInterval = 12f;
@@ -202,7 +202,7 @@ namespace Arthas.Network
 
         protected void OnMessageRespond(byte[] buffer)
         {
-            if (pause) return;
+            if (isPaused) return;
             lock (enterLock)
             {
                 var msgs = messageHandler.ParseMessage(buffer);
@@ -269,9 +269,14 @@ namespace Arthas.Network
                 connector.Close();
         }
 
-        private void OnApplicationPause(bool pause)
+        void OnApplicationFocus(bool hasFocus)
         {
-            this.pause = pause;
+            isPaused = !hasFocus;
+        }
+
+        void OnApplicationPause(bool pause)
+        {
+            isPaused = pause;
             if (!pause && connector != null && !connector.IsConnected)
                 Connect();
         }
