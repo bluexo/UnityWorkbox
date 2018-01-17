@@ -271,7 +271,9 @@ namespace Arthas.Network
 
         void OnApplicationFocus(bool hasFocus)
         {
+#if !UNITY_EDITOR
             isPaused = !hasFocus;
+#endif
         }
 
         void OnApplicationPause(bool pause)
