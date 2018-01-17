@@ -49,6 +49,7 @@ namespace Arthas.Network
         private WaitForSeconds heartbeatWaitFor, timeoutWaiter, connectPollWaiter = new WaitForSeconds(.5f);
         private float currentTime, connectCheckDuration = .1f;
         private static object enterLock = new object();
+        private bool pause = false;
 
         [SerializeField]
         private float connectTimeout = 10f, heartbeatInterval = 12f;
@@ -201,12 +202,14 @@ namespace Arthas.Network
 
         protected void OnMessageRespond(byte[] buffer)
         {
+            if (pause) return;
             lock (enterLock)
             {
                 var msgs = messageHandler.ParseMessage(buffer);
                 for (var i = 0; i < msgs.Count; i++)
                 {
                     msgQueue.Enqueue(msgs[i]);
+                    if (msgQueue.Count > byte.MaxValue) msgQueue.Dequeue();
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
                     Debug.LogFormat("<color=blue>[TCPNetwork]</color> [Receive] << CMD:{0},TIME:{1}", msgs[i].Command, DateTime.Now);
 #endif
@@ -268,6 +271,7 @@ namespace Arthas.Network
 
         private void OnApplicationPause(bool pause)
         {
+            this.pause = pause;
             if (!pause && connector != null && !connector.IsConnected)
                 Connect();
         }
