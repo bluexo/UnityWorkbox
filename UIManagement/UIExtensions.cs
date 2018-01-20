@@ -5,15 +5,21 @@ using UnityEngine.EventSystems;
 
 public static class UIExtensions
 {
-    public static T GetComponentFromChild<T>(this Component @this, string name) where T : Component
+    public static T GetComponentFromChild<T>(this Component current, string name) where T : Component
     {
         T component = null;
-        var go = @this.transform.Find(name);
+        var go = current.transform.Find(name);
         if (go) component = go.GetComponent<T>();
         else Debug.LogErrorFormat("Cannot found <color=cyan>[{0}]</color> child <color=cyan>[{1}]</color> or childs component <color=cyan>[{2}]</color>",
-            @this.name, name, typeof(T).ToString());
+            current.name, name, typeof(T).ToString());
         return component;
     }
+
+    public static T GetComponentFromChild<T>(this GameObject obj, string name) where T : Component
+    {
+        return obj.transform.GetComponentFromChild<T>(name);
+    }
+
 
     public static RectTransform RectTransform(this UIBehaviour comp)
     {
