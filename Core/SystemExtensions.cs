@@ -101,6 +101,15 @@ namespace System.Collections
             return default(T);
         }
 
+        public static IEnumerable<T> FindAll<T>(this IEnumerable<T> arr, Predicate<T> predicate = null)
+        {
+            foreach (var a in arr)
+            {
+                if (!predicate(a)) continue;
+                yield return a;
+            }
+        }
+
         public static string ToArrayString<T>(this IEnumerable<T> collection, char separator = ' ')
         {
             var str = string.Empty;

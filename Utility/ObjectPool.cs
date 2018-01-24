@@ -52,7 +52,7 @@ namespace Arthas.Common
                     while (pair.Value.Count > maxOverload)
                     {
                         var comp = pair.Value.Dequeue();
-                        if (comp && !comp.gameObject.activeSelf)
+                        if (comp && comp.IsCollected && !comp.gameObject.activeSelf)
                             Destroy(comp.gameObject);
                         yield return waitForEnd;
                     }
