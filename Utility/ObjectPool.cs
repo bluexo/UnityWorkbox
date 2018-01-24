@@ -20,7 +20,7 @@ namespace Arthas.Common
         public IDictionary<int, Queue<TComponent>> ObjectQueue { get { return objectQueue; } }
         private readonly Dictionary<int, Queue<TComponent>> objectQueue = new Dictionary<int, Queue<TComponent>>();
         private readonly WaitForEndOfFrame waitForEnd = new WaitForEndOfFrame();
-        private readonly WaitForSeconds waitForCollect = new WaitForSeconds(10f);
+        private readonly WaitForSeconds waitForCollect = new WaitForSeconds(30f);
 
         [SerializeField] protected PoolObjectConfig objectArray;
         [SerializeField, Range(1, 20)] protected int initCount = 10;
@@ -49,7 +49,7 @@ namespace Arthas.Common
                 foreach (var pair in objectQueue)
                 {
                     if (pair.Value.Count == 0) continue;
-                    while (pair.Value.Count > maxOverload)
+                    while (pair.Value.Count > pair.Value.Count / 2 + maxOverload)
                     {
                         var comp = pair.Value.Dequeue();
                         if (comp && comp.IsCollected && !comp.gameObject.activeSelf)
@@ -112,13 +112,15 @@ namespace Arthas.Common
         {
             if (!objectQueue.ContainsKey(id))
                 objectQueue.Add(id, new Queue<TComponent>());
-            if (objectQueue[id].Count < initCount)
+            var queue = objectQueue[id];
+            if (queue.Count < initCount)
             {
                 var item = objectArray.Items.FirstOrDefault(o => o.id == id);
                 if (item != null) StartCoroutine(Spawn(item));
             }
-            var obj = objectQueue[id].Dequeue();
-            if (active && obj && obj.gameObject) obj.gameObject.SetActive(true);
+            TComponent obj = null;
+            while (!obj && queue.Count > 0) obj = queue.Dequeue();
+            obj.gameObject.SetActive(true);
             return obj;
         }
 
