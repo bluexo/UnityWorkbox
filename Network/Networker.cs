@@ -2,6 +2,12 @@
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using System.Net.Sockets;
+using System.Diagnostics;
+using Debug = UnityEngine.Debug;
+using Arthas.Common;
+using System.Threading;
+using System.Net;
 
 namespace Arthas.Network
 {
@@ -41,6 +47,7 @@ namespace Arthas.Network
         }
 
         public static bool IsConnected { get { return connector != null && connector.IsConnected; } }
+        public static long DelayTime { get; private set; }
 
         private readonly static Queue<INetworkMessage> msgQueue = new Queue<INetworkMessage>();
         private readonly static Dictionary<object, Queue<Action<INetworkMessage>>> responseActions = new Dictionary<object, Queue<Action<INetworkMessage>>>();
@@ -60,6 +67,8 @@ namespace Arthas.Network
         private string connectorTypeName, messageHandlerName;
         private static IConnector connector;
         private static INetworkMessageHandler messageHandler;
+        private string ip;
+        private int port;
 
         protected override void Awake()
         {
@@ -84,6 +93,8 @@ namespace Arthas.Network
             if (connector == null)
                 connector = conn ?? new TCPConnector();
             connector.Connect(ip, port);
+            this.ip = ip;
+            this.port = port;
             timeoutCor = StartCoroutine(TimeoutDetectAsync());
 #if UNITY_EDITOR
             Debug.LogFormat("Connect to server , <color=cyan>Addr:[{0}:{1}] ,connector:{2} ,wrapper:{3}.</color>", ip, port, connector.GetType(), messageHandler.GetType());
@@ -158,17 +169,29 @@ namespace Arthas.Network
             }
         }
 
+        private readonly Socket pingSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+        private readonly Stopwatch stopWatch = new Stopwatch();
         protected IEnumerator HeartbeatDetectAsync()
         {
             while (true)
             {
+                yield return heartbeatWaitFor;
                 if (connector.IsConnected)
                 {
+                    ThreadPool.QueueUserWorkItem(Ping);
                     if (HeartbeatCommandGetter != null) Send(HeartbeatCommandGetter());
                     else Send(0);
                 }
-                yield return heartbeatWaitFor;
             }
+        }
+
+        protected void Ping(object state)
+        {
+            stopWatch.Reset();
+            stopWatch.Start();
+            pingSocket.Connect(ip, port);
+            stopWatch.Stop();
+            DelayTime = stopWatch.ElapsedMilliseconds;
         }
 
         protected IEnumerator ConnectionDetectAsync()

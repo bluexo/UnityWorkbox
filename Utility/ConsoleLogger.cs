@@ -49,7 +49,7 @@ namespace Arthas.Common
         private const float fpsMeasurePeriod = 0.5f;
         private const int MaxMessageCount = 256;
         private int fpsAccumulator = 0, currentFps;
-        private float fpsNextPeriod = 0 , prevToggleTime;
+        private float fpsNextPeriod = 0, prevToggleTime;
 
 
         private void Start()
@@ -112,6 +112,8 @@ namespace Arthas.Common
             using (var scope = new GUILayout.HorizontalScope())
             {
                 GUILayout.Box(string.Format("FPS:[{0}] ", currentFps));
+                if (Network.Networker.IsConnected)
+                    GUILayout.Box(string.Format("Delay:[{0}]ms ", Network.Networker.DelayTime));
                 GUILayout.Box(string.Format("UsedHeapSize:[{0}]", LongToMb(Profiler.usedHeapSizeLong)));
                 GUILayout.Box(string.Format("Reserved:[{0}]", LongToMb(Profiler.GetTotalReservedMemoryLong())));
                 GUILayout.Box(string.Format("Used:[{0}]", LongToMb(Profiler.GetTotalAllocatedMemoryLong())));

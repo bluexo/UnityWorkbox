@@ -96,9 +96,10 @@ namespace Arthas.Common
 
         public void Put(int id, TComponent comp, bool disable = true)
         {
+            if (!comp || !comp.gameObject) return;
             if (!objectQueue.ContainsKey(id))
                 objectQueue.Add(id, new Queue<TComponent>());
-            if (disable && comp && comp.gameObject) comp.gameObject.SetActive(false);
+            if (disable) comp.gameObject.SetActive(false);
             comp.ResetObject();
             objectQueue[id].Enqueue(comp);
         }
