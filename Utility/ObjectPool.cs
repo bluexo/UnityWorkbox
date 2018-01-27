@@ -20,14 +20,17 @@ namespace Arthas.Common
         public IDictionary<int, Queue<TComponent>> ObjectQueue { get { return objectQueue; } }
         private readonly Dictionary<int, Queue<TComponent>> objectQueue = new Dictionary<int, Queue<TComponent>>();
         private readonly WaitForEndOfFrame waitForEnd = new WaitForEndOfFrame();
-        private readonly WaitForSeconds waitForCollect = new WaitForSeconds(30f);
+        private WaitForSeconds waitForCollect;
 
         [SerializeField] protected PoolObjectConfig objectArray;
         [SerializeField, Range(1, 20)] protected int initCount = 10;
         [SerializeField, Range(1, 100)] protected int maxOverload = 16;
+        [SerializeField] private float collectInterval = .2f;
+        [SerializeField] private bool isCollected = false;
 
         protected IEnumerator Start()
         {
+            waitForCollect = new WaitForSeconds(collectInterval);
             if (objectArray == null || objectArray.Items == null)
             {
                 Debug.LogError("Cannot found prefab");
@@ -38,7 +41,7 @@ namespace Arthas.Common
                 var item = objectArray.Items[i];
                 yield return Spawn(item);
             }
-            StartCoroutine(CollectPollingAsync());
+            if (isCollected) StartCoroutine(CollectPollingAsync());
         }
 
         protected IEnumerator CollectPollingAsync()
@@ -48,14 +51,10 @@ namespace Arthas.Common
                 yield return waitForCollect;
                 foreach (var pair in objectQueue)
                 {
-                    if (pair.Value.Count == 0) continue;
-                    while (pair.Value.Count > pair.Value.Count / 2 + maxOverload)
-                    {
-                        var comp = pair.Value.Dequeue();
-                        if (comp && comp.IsCollected && !comp.gameObject.activeSelf)
-                            Destroy(comp.gameObject);
-                        yield return waitForEnd;
-                    }
+                    if (pair.Value.Count < maxOverload) continue;
+                    var comp = pair.Value.Dequeue();
+                    if (comp && comp.IsCollected && !comp.gameObject.activeSelf)
+                        Destroy(comp.gameObject);
                 }
             }
         }
@@ -66,8 +65,7 @@ namespace Arthas.Common
             if (!objectQueue.ContainsKey(item.id)) objectQueue.Add(item.id, new Queue<TComponent>());
             for (var j = 0; j < initCount; j++)
             {
-                var prefab = objectArray.Items[item.id].prefab;
-                var comp = Instantiate(prefab).GetComponent<TComponent>();
+                var comp = Instantiate(item.prefab).GetComponent<TComponent>();
                 if (!comp)
                 {
                     Debug.LogErrorFormat("Cannot found [{0}] from object pool!", typeof(TComponent));
@@ -120,7 +118,7 @@ namespace Arthas.Common
                 if (item != null) StartCoroutine(Spawn(item));
             }
             TComponent obj = null;
-            while (!obj && queue.Count > 0) obj = queue.Dequeue();
+            while ((!obj || obj.gameObject) && queue.Count > 0) obj = queue.Dequeue();
             obj.gameObject.SetActive(true);
             return obj;
         }
