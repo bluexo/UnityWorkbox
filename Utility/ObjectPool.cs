@@ -109,6 +109,9 @@ namespace Arthas.Common
 
         public TComponent Get(int id, bool active = true)
         {
+#if UNITY_EDITOR
+            Debug.LogFormat("Get {0} , Id:{1} from ObjectPool", typeof(TComponent), id);
+#endif
             if (!objectQueue.ContainsKey(id))
                 objectQueue.Add(id, new Queue<TComponent>());
             var queue = objectQueue[id];
@@ -118,8 +121,8 @@ namespace Arthas.Common
                 if (item != null) StartCoroutine(Spawn(item));
             }
             TComponent obj = null;
-            while ((!obj || obj.gameObject) && queue.Count > 0) obj = queue.Dequeue();
-            obj.gameObject.SetActive(true);
+            while ((!obj || !obj.gameObject) && queue.Count > 0) obj = queue.Dequeue();
+            obj.gameObject.SetActive(active);
             return obj;
         }
 
