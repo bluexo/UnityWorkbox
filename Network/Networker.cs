@@ -49,8 +49,8 @@ namespace Arthas.Network
         public static bool IsConnected { get { return connector != null && connector.IsConnected; } }
         public static long DelayTime { get; private set; }
 
-        private readonly static LinkedList<INetworkMessage> msgQueue = new LinkedList<INetworkMessage>();
-        private readonly static Dictionary<object, LinkedList<Action<INetworkMessage>>> responseActions = new Dictionary<object, LinkedList<Action<INetworkMessage>>>();
+        private readonly static Queue<INetworkMessage> msgQueue = new Queue<INetworkMessage>();
+        private readonly static Dictionary<object, Queue<Action<INetworkMessage>>> responseActions = new Dictionary<object, Queue<Action<INetworkMessage>>>();
 
         private Coroutine timeoutCor, connectCor, heartbeatCor;
         private WaitForSeconds heartbeatWaitFor, timeoutWaiter, connectPollWaiter = new WaitForSeconds(.5f);
@@ -231,8 +231,8 @@ namespace Arthas.Network
                 var msgs = messageHandler.ParseMessage(buffer);
                 for (var i = 0; i < msgs.Count; i++)
                 {
-                    msgQueue.AddFirst(msgs[i]);
-                    if (msgQueue.Count > byte.MaxValue) msgQueue.RemoveLast();
+                    msgQueue.Enqueue(msgs[i]);
+                    if (msgQueue.Count > byte.MaxValue) msgQueue.Dequeue();
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
                     Debug.LogFormat("<color=blue>[TCPNetwork]</color> [Receive] << CMD:{0},TIME:{1}", msgs[i].Command, DateTime.Now);
 #endif
@@ -242,19 +242,13 @@ namespace Arthas.Network
 
         private void Update()
         {
-            var current = msgQueue.First;
-            while (current != null)
+            while (msgQueue.Count > 0)
             {
-                var message = current.Value;
+                var message = msgQueue.Dequeue();
                 if (responseActions.Count > 0 && responseActions.ContainsKey(message.Command))
                 {
-                    var actions = responseActions[message.Command];
-                    var action = actions.First;
-                    if (action != null)
-                    {
-                        action.Value.Invoke(message);
-                        actions.RemoveFirst();
-                    }
+                    var action = responseActions[message.Command].Dequeue();
+                    if (action != null) action.Invoke(message);
                 }
                 else if (PushEvent != null)
                 {
@@ -264,7 +258,6 @@ namespace Arthas.Network
                 {
                     ResponseEvent(message);
                 }
-                current = current.Next;
             }
         }
 
@@ -275,8 +268,8 @@ namespace Arthas.Network
                 var message = messageHandler.PackMessage(cmd, buf, parameters);
                 var buffer = message.GetBuffer(IsLittleEndian);
                 if (!responseActions.ContainsKey(message.Command))
-                    responseActions.Add(message.Command, new LinkedList<Action<INetworkMessage>>());
-                responseActions[message.Command].AddFirst(callback);
+                    responseActions.Add(message.Command, new Queue<Action<INetworkMessage>>());
+                responseActions[message.Command].Enqueue(callback);
                 connector.Send(buffer);
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
                 Debug.LogFormat("<color=cyan>[TCPNetwork]</color> [Send] >> CMD:{0},TIME:{1}", cmd, DateTime.Now);
