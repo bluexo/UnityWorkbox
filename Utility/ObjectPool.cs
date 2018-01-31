@@ -39,7 +39,7 @@ namespace Arthas.Common
             for (var i = 0; i < objectArray.Items.Length; i++)
             {
                 var item = objectArray.Items[i];
-                yield return Spawn(item);
+                yield return SpawnAsync(item);
             }
             if (isCollected) StartCoroutine(CollectPollingAsync());
         }
@@ -59,7 +59,7 @@ namespace Arthas.Common
             }
         }
 
-        protected IEnumerator Spawn(PoolObjectInfo item)
+        protected IEnumerator SpawnAsync(PoolObjectInfo item)
         {
             if (item == null) yield break;
             if (!objectQueue.ContainsKey(item.id)) objectQueue.Add(item.id, new Queue<TComponent>());
@@ -75,6 +75,23 @@ namespace Arthas.Common
                 comp.gameObject.SetActive(false);
                 objectQueue[item.id].Enqueue(comp);
                 yield return waitForEnd;
+            }
+        }
+
+        protected void Spawn(PoolObjectInfo item)
+        {
+            if (!objectQueue.ContainsKey(item.id)) objectQueue.Add(item.id, new Queue<TComponent>());
+            for (var j = 0; j < initCount; j++)
+            {
+                var comp = Instantiate(item.prefab).GetComponent<TComponent>();
+                if (!comp)
+                {
+                    Debug.LogErrorFormat("Cannot found [{0}] from object pool!", typeof(TComponent));
+                    continue;
+                }
+                comp.transform.SetParent(transform);
+                comp.gameObject.SetActive(false);
+                objectQueue[item.id].Enqueue(comp);
             }
         }
 
@@ -118,10 +135,14 @@ namespace Arthas.Common
             if (queue.Count < initCount)
             {
                 var item = objectArray.Items.FirstOrDefault(o => o.id == id);
-                if (item != null) StartCoroutine(Spawn(item));
+                if (item == null)
+                {
+                    Debug.LogErrorFormat("Cannot found Item : {0} ,Type:{1}", id, typeof(TComponent));
+                    return default(TComponent);
+                }
+                StartCoroutine(SpawnAsync(item));
             }
-            TComponent obj = null;
-            while ((!obj || !obj.gameObject) && queue.Count > 0) obj = queue.Dequeue();
+            TComponent obj = queue.Dequeue();
             obj.gameObject.SetActive(active);
             return obj;
         }
