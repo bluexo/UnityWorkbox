@@ -53,8 +53,11 @@ namespace Arthas.Common
                 {
                     if (pair.Value.Count < maxOverload) continue;
                     var comp = pair.Value.Dequeue();
-                    if (comp && comp.IsCollected && !comp.gameObject.activeSelf)
+                    if (comp && !comp.gameObject.activeSelf)
+                    {
+                        comp.ResetObject();
                         Destroy(comp.gameObject);
+                    }
                 }
             }
         }
@@ -112,10 +115,9 @@ namespace Arthas.Common
         public void Put(int id, TComponent comp, bool disable = true)
         {
             if (!comp || !comp.gameObject) return;
-            if (!objectQueue.ContainsKey(id))
-                objectQueue.Add(id, new Queue<TComponent>());
-            if (disable) comp.gameObject.SetActive(false);
             comp.ResetObject();
+            if (!objectQueue.ContainsKey(id)) objectQueue.Add(id, new Queue<TComponent>());
+            if (disable) comp.gameObject.SetActive(false);
             objectQueue[id].Enqueue(comp);
         }
 
