@@ -23,7 +23,8 @@ namespace Arthas.Network
         /// <param name="invoker"></param>
         public static void RegisterMessage(object cmd, Action<INetworkMessage> invoker)
         {
-            if (!messages.ContainsKey(cmd)) {
+            if (!messages.ContainsKey(cmd))
+            {
                 var actions = new List<Action<INetworkMessage>>();
                 messages.Add(cmd, actions);
             }
@@ -37,7 +38,8 @@ namespace Arthas.Network
         /// <param name="invoker"></param>
         public static void Once(object cmd, Action<INetworkMessage> invoker)
         {
-            if (!onceMessages.ContainsKey(cmd)) {
+            if (!onceMessages.ContainsKey(cmd))
+            {
                 var actions = new List<Action<INetworkMessage>>();
                 onceMessages.Add(cmd, actions);
             }
@@ -50,54 +52,40 @@ namespace Arthas.Network
         /// <param name="cmd"></param>
         public static void UnregisterMessage(object cmd, Action<INetworkMessage> invoker)
         {
-            if (messages.ContainsKey(cmd)) {
+            if (messages.ContainsKey(cmd))
+            {
                 var msgs = messages[cmd];
                 msgs.Remove(invoker);
             }
         }
 
 
-        static  int tempBulletId = 0;
+        static int tempBulletId = 0;
         /// <summary>
         /// 发起
         /// </summary>
         /// <param name="msg"></param>
         private static void Invoke(INetworkMessage msg)
         {
-            //if ((short)msg.Command != Commands.ShootNotify)
+            if (onceMessages.ContainsKey(msg.Command))
             {
-                if (onceMessages.ContainsKey(msg.Command))
-                {
-                    Debug.LogError("onceMessages:   "+ msg.Command);
-                    var msgs = onceMessages[msg.Command];
-                    for (var i = 0; i < msgs.Count; i++)
-                    {
-                        msgs[i].Invoke(msg);
-                    }
-                    msgs.Clear();
-                    return;
-                }
-            }
-            
-            if (messages.ContainsKey(msg.Command)) {
-                var msgs = messages[msg.Command];
+                Debug.LogError("onceMessages:   " + msg.Command);
+                var msgs = onceMessages[msg.Command];
                 for (var i = 0; i < msgs.Count; i++)
                 {
-                    //if ((short)msg.Command == Commands.ShootNotify)
-                    //{
-                    //    var data = MessagePackSerializer.Deserialize<ShootResponseMessage>(msg.Body as byte[]);
-                    //    if (tempBulletId == data.BulletId)
-                    //    {
-                    //        Debug.LogError("Invoke:      bulletId:" + data.BulletId + "    UserId:" + data.UserId + "   GunId:" + data.GunId);
-                    //    }
-                    //    else
-                    //    {
-                    //        tempBulletId = data.BulletId;
-                    //    }
-                    //}
                     msgs[i].Invoke(msg);
                 }
-            } else Debug.LogFormat("Cannot invoke message,CmdType:{0}", msg.Command);
+                msgs.Clear();
+                return;
+            }
+
+            if (messages.ContainsKey(msg.Command))
+            {
+                var msgs = messages[msg.Command];
+                for (var i = 0; i < msgs.Count; i++)
+                    msgs[i].Invoke(msg);
+            }
+            else Debug.LogFormat("Cannot invoke message,CmdType:{0}", msg.Command);
         }
 
         public static void Clear()
