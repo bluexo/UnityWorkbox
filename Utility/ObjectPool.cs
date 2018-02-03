@@ -1,6 +1,7 @@
 ﻿using Arthas.Common;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace Arthas.Common
@@ -151,10 +152,14 @@ namespace Arthas.Common
 
         public void Clear()
         {
-            foreach (var array in objectQueue.Values)
+            var valuesArray = objectQueue.Values.ToArray();
+            for (var j = 0; j < valuesArray.Length; j++)
             {
-                foreach (var obj in array)
-                    if (obj) Destroy(obj.gameObject);
+                var arr = valuesArray[j].ToArray();
+                for (var i = 0; i < arr.Length; i++)
+                {
+                    if (arr[i]) Destroy(arr[i].gameObject);
+                }
             }
             objectQueue.Clear();
             StopAllCoroutines();

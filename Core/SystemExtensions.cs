@@ -91,7 +91,7 @@ namespace System.Collections
             foreach (var t in arr) if (!action(t)) break;
         }
 
-        public static T FirstOrDefault<T>(this IEnumerable<T> arr, Predicate<T> predicate = null)
+        public static T FindFirstOrDefault<T>(this IEnumerable<T> arr, Predicate<T> predicate = null)
         {
             foreach (var a in arr)
             {
