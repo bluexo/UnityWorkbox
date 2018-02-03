@@ -19,6 +19,19 @@ namespace Arthas.Network
 
         public event Action<byte[]> MessageRespondEvent;
 
+        event Action IConnector.MessageRespondEvent
+        {
+            add
+            {
+                throw new NotImplementedException();
+            }
+
+            remove
+            {
+                throw new NotImplementedException();
+            }
+        }
+
         public void Connect(string ip, int port)
         {
             throw new NotImplementedException();

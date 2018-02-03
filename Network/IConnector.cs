@@ -28,7 +28,7 @@ namespace Arthas.Network
         /// <summary>
         /// 消息接收事件
         /// </summary>
-        event Action<byte[]> MessageRespondEvent;
+        event Action MessageRespondEvent;
 
         /// <summary>
         /// 关闭

@@ -57,5 +57,7 @@ namespace Arthas.Network
         /// <param name="buffer">需要解析的数据</param>
         /// <returns></returns>
         IList<INetworkMessage> ParseMessage(byte[] buffer);
+
+        IList<INetworkMessage> ParseMessage(ByteBuf buffer);
     }
 }

@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using MessagePack;
+using PlayCity;
 using UnityEngine;
 namespace Arthas.Network
 {
@@ -54,23 +56,45 @@ namespace Arthas.Network
             }
         }
 
+
+        static  int tempBulletId = 0;
         /// <summary>
         /// 发起
         /// </summary>
         /// <param name="msg"></param>
         private static void Invoke(INetworkMessage msg)
         {
-            if (onceMessages.ContainsKey(msg.Command)) {
-                var msgs = onceMessages[msg.Command];
-                for (var i = 0; i < msgs.Count; i++) {
-                    msgs[i].Invoke(msg);
+            //if ((short)msg.Command != Commands.ShootNotify)
+            {
+                if (onceMessages.ContainsKey(msg.Command))
+                {
+                    Debug.LogError("onceMessages:   "+ msg.Command);
+                    var msgs = onceMessages[msg.Command];
+                    for (var i = 0; i < msgs.Count; i++)
+                    {
+                        msgs[i].Invoke(msg);
+                    }
+                    msgs.Clear();
+                    return;
                 }
-                msgs.Clear();
-                return;
             }
+            
             if (messages.ContainsKey(msg.Command)) {
                 var msgs = messages[msg.Command];
-                for (var i = 0; i < msgs.Count; i++) {
+                for (var i = 0; i < msgs.Count; i++)
+                {
+                    //if ((short)msg.Command == Commands.ShootNotify)
+                    //{
+                    //    var data = MessagePackSerializer.Deserialize<ShootResponseMessage>(msg.Body as byte[]);
+                    //    if (tempBulletId == data.BulletId)
+                    //    {
+                    //        Debug.LogError("Invoke:      bulletId:" + data.BulletId + "    UserId:" + data.UserId + "   GunId:" + data.GunId);
+                    //    }
+                    //    else
+                    //    {
+                    //        tempBulletId = data.BulletId;
+                    //    }
+                    //}
                     msgs[i].Invoke(msg);
                 }
             } else Debug.LogFormat("Cannot invoke message,CmdType:{0}", msg.Command);

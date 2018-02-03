@@ -19,7 +19,7 @@ namespace Arthas.Network
     public class TCPConnector : IConnector
     {
         public string Address { get; private set; }
-        public event Action<byte[]> MessageRespondEvent;
+        public event Action MessageRespondEvent;
         public event Action DisconnectEvent;
         const int READ_BUFFER_SIZE = 8192, MSG_LEN_SIZE = 4;
         private byte[] readBuffer = new byte[READ_BUFFER_SIZE];
@@ -182,16 +182,13 @@ namespace Arthas.Network
                 }
                 var arr = new byte[lengthToRead];
                 Buffer.BlockCopy(readBuffer, 0, arr, 0, lengthToRead);
-                if (MessageRespondEvent != null) MessageRespondEvent(arr);
+                Networker.buf.WriteBytes(arr);
+                if (MessageRespondEvent != null) MessageRespondEvent();
                 stream.BeginRead(readBuffer, 0, READ_BUFFER_SIZE, Read, null);
             }
-            catch (IOException exc1)
+            catch (Exception ex)
             {
-                Debug.LogErrorFormat("Server Disconnected, Detail:{0},\n{1}", exc1.Message, exc1.StackTrace);
-            }
-            catch (Exception exc2)
-            {
-                Debug.LogErrorFormat("Server Disconnected, Detail:{0},\n{1}", exc2.Message, exc2.StackTrace);
+                Debug.LogErrorFormat("Server Disconnected, Detail:{0},\n{1}", ex.Message, ex.StackTrace);
                 Close();
             }
         }

@@ -40,6 +40,8 @@ namespace Arthas.Network
 
         public static Func<object> HeartbeatCommandGetter { get; set; }
 
+        public static ByteBuf buf = new ByteBuf(1024);
+
         public static bool IsLittleEndian
         {
             get { return Instance.isLittleEndian; }
@@ -178,7 +180,7 @@ namespace Arthas.Network
                 yield return heartbeatWaitFor;
                 if (connector.IsConnected)
                 {
-                    //ThreadPool.QueueUserWorkItem(Ping);
+                    ThreadPool.QueueUserWorkItem(Ping);
                     if (HeartbeatCommandGetter != null) Send(HeartbeatCommandGetter());
                     else Send(0);
                 }
@@ -223,12 +225,12 @@ namespace Arthas.Network
             if (DisconnectedEvent != null) DisconnectedEvent();
         }
 
-        protected void OnMessageRespond(byte[] buffer)
+        protected void OnMessageRespond()
         {
             if (isPaused) return;
             lock (enterLock)
             {
-                var msgs = messageHandler.ParseMessage(buffer);
+                var msgs = messageHandler.ParseMessage(buf);
                 for (var i = 0; i < msgs.Count; i++)
                 {
                     msgQueue.Enqueue(msgs[i]);

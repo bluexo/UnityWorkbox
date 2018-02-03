@@ -1,14 +1,14 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.Runtime.InteropServices;
+using PlayCity;
 using UnityEngine;
 
 namespace Arthas.Network
 {
-    public class MessageInvalidException : Exception { }
-
     /// <summary>
     /// 默认消息
     /// </summary>
@@ -87,7 +87,6 @@ namespace Arthas.Network
             {
                 while (reader.BaseStream.Position < buffer.Length)
                 {
-                    if (reader.BaseStream.Length < sizeof(int)) throw new MessageInvalidException();
                     var len = reader.ReadInt16();
                     var cmd = reader.ReadInt16();
                     var content = reader.ReadBytes(len - sizeof(short));
@@ -96,6 +95,62 @@ namespace Arthas.Network
                 }
                 return messages;
             }
+        }
+
+        public IList<INetworkMessage> ParseMessage(ByteBuf buffer)
+        {
+            var messages = new List<INetworkMessage>();
+            doDecode(buffer, messages);
+            return messages;
+        }
+
+        private void doDecode(ByteBuf input, IList<INetworkMessage> output) {
+            if (input.ReadableBytes() < 6)
+            {//不够包头长度
+                return;
+            }
+
+            
+            short length = BitConverter.ToInt16(input.GetRaw(), input.ReaderIndex());
+            input.SkipBytes(2);
+            if (input.ReadableBytes() + 4 < length)
+            {//包体长度不够
+                input.ResetReaderIndex();
+                return;
+            }
+
+            short command = BitConverter.ToInt16(input.GetRaw(), input.ReaderIndex());
+            input.SkipBytes(2);
+            short responseCode = BitConverter.ToInt16(input.GetRaw(), input.ReaderIndex()); ;
+            input.SkipBytes(2);
+            int dataSize = length - 4;//减掉command部分
+            
+            if (dataSize > input.ReadableBytes())
+            {
+                input.ResetReaderIndex();
+                return;
+            }
+            
+
+            byte[] data = new byte[dataSize];
+            if (dataSize > 0)
+            {
+                input.ReadBytes(data, 0, data.Length);//拿到数据
+                input.MarkReaderIndex();
+            }
+            if (command != Commands.Heartbeat)
+            {
+                var msg = new PlayCityMessage(command, data, true, responseCode);
+                output.Add(msg);
+            }
+
+            /*var len = reader.ReadInt16();
+            var cmd = reader.ReadInt16();
+            var code = reader.ReadInt16();
+            var content = reader.ReadBytes(len - sizeof(int));
+            var msg = new PlayCityMessage(cmd, content, true, code);*/
+
+            doDecode(input, output);
         }
     }
 }
