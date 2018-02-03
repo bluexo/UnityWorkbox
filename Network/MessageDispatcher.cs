@@ -12,7 +12,6 @@ namespace Arthas.Network
 
         static MessageDispatcher()
         {
-            Networker.PushEvent += Invoke;
             Networker.ResponseEvent += Invoke;
         }
 
