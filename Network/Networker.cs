@@ -98,6 +98,7 @@ namespace Arthas.Network
             this.ip = ip;
             this.port = port;
             timeoutCor = StartCoroutine(TimeoutDetectAsync());
+            buf = new ByteBuf(1024);
 #if UNITY_EDITOR
             Debug.LogFormat("Connect to server , <color=cyan>Addr:[{0}:{1}] ,connector:{2} ,wrapper:{3}.</color>", ip, port, connector.GetType(), messageHandler.GetType());
 #endif

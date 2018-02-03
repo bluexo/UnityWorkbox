@@ -144,11 +144,11 @@ namespace Arthas.Network
                 output.Add(msg);
             }
 
-            /*var len = reader.ReadInt16();
-            var cmd = reader.ReadInt16();
-            var code = reader.ReadInt16();
-            var content = reader.ReadBytes(len - sizeof(int));
-            var msg = new PlayCityMessage(cmd, content, true, code);*/
+            if (input.ReadableBytes() == 0)
+            {
+                input.Clear();
+                return;
+            }
 
             doDecode(input, output);
         }

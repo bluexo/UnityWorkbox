@@ -46,13 +46,16 @@ public class ByteBuf {
 		*/
     public ByteBuf Capacity(int nc)
     {
-        if (nc > data.Length)
+        lock (this)
         {
-            byte[] newData = new byte[data.Length + nc];
-            Array.Copy(data, 0, newData, 0, data.Length);
-            data = newData;
+            if (nc > data.Length)
+            {
+                byte[] newData = new byte[data.Length + nc];
+                Array.Copy(data, 0, newData, 0, data.Length);
+                data = newData;
+            }
+            return this;
         }
-        return this;
     }
 
     /**
@@ -388,9 +391,9 @@ public class ByteBuf {
     public ByteBuf WriteBytes(ByteBuf src)
     {
         int sum = src.writerIndex - src.readerIndex;
-        Capacity(writerIndex + sum);
         if (sum > 0)
         {
+            Capacity(writerIndex + sum);
             Array.Copy(src.data, src.readerIndex, data, writerIndex, sum);
             writerIndex += sum;
             src.readerIndex += sum;
