@@ -178,7 +178,7 @@ namespace Arthas.Network
                 yield return heartbeatWaitFor;
                 if (connector.IsConnected)
                 {
-                    ThreadPool.QueueUserWorkItem(Ping);
+                    //ThreadPool.QueueUserWorkItem(Ping);
                     if (HeartbeatCommandGetter != null) Send(HeartbeatCommandGetter());
                     else Send(0);
                 }

@@ -7,6 +7,8 @@ using UnityEngine;
 
 namespace Arthas.Network
 {
+    public class MessageInvalidException : Exception { }
+
     /// <summary>
     /// 默认消息
     /// </summary>
@@ -85,6 +87,7 @@ namespace Arthas.Network
             {
                 while (reader.BaseStream.Position < buffer.Length)
                 {
+                    if (reader.BaseStream.Length < sizeof(int)) throw new MessageInvalidException();
                     var len = reader.ReadInt16();
                     var cmd = reader.ReadInt16();
                     var content = reader.ReadBytes(len - sizeof(short));

@@ -185,9 +185,13 @@ namespace Arthas.Network
                 if (MessageRespondEvent != null) MessageRespondEvent(arr);
                 stream.BeginRead(readBuffer, 0, READ_BUFFER_SIZE, Read, null);
             }
-            catch (Exception ex)
+            catch (IOException exc1)
             {
-                Debug.LogErrorFormat("Server Disconnected, Detail:{0},\n{1}", ex.Message, ex.StackTrace);
+                Debug.LogErrorFormat("Server Disconnected, Detail:{0},\n{1}", exc1.Message, exc1.StackTrace);
+            }
+            catch (Exception exc2)
+            {
+                Debug.LogErrorFormat("Server Disconnected, Detail:{0},\n{1}", exc2.Message, exc2.StackTrace);
                 Close();
             }
         }
