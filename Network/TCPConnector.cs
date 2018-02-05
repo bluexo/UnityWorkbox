@@ -34,6 +34,7 @@ namespace Arthas.Network
         public bool IsConnected { get; private set; }
 #else
         private TcpClient client;
+
         public bool IsConnected { get { return client != null && client.Connected; } }
 #endif
 
@@ -61,6 +62,12 @@ namespace Arthas.Network
             }
         }
 #else
+
+        private void EnsureConnect()
+        {
+
+        }
+
         /// <summary>
         /// 使用 <see cref="TcpClient"/> 建立连接并异步接收数据
         /// </summary>
