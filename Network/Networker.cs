@@ -291,8 +291,7 @@ namespace Arthas.Network
 
         public static void Close()
         {
-            if (connector != null)
-                connector.Close();
+            if (connector != null) connector.Close();
         }
 
         void OnApplicationFocus(bool hasFocus)
@@ -305,8 +304,8 @@ namespace Arthas.Network
         void OnApplicationPause(bool pause)
         {
             isPaused = pause;
-            if (!pause && connector != null && !connector.IsConnected)
-                Connect();
+            //if (!pause && connector != null && !connector.IsConnected)
+            //    Connect();
         }
 
         private void OnApplicationQuit()
