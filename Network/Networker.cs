@@ -11,6 +11,14 @@ using System.Net;
 
 namespace Arthas.Network
 {
+    public enum NetworkStatus
+    {
+        Connected = 1,
+        Disconnected = 2,
+        Reconnecting = 3,
+        NetworkNotReachbility = 4,
+    }
+
     /// <summary>
     /// 网络
     /// </summary>
@@ -32,9 +40,14 @@ namespace Arthas.Network
         public static event Action DisconnectedEvent;
 
         /// <summary>
+        /// Socket错误事件
+        /// </summary>
+        public static event Action<SocketError> SocketErrorEvent;
+
+        /// <summary>
         /// 错误回调
         /// </summary>
-        private static event Action<string> ConnectErrorEvent;
+        public static event Action<string> ConnectErrorEvent;
 
         public static INetworkMessageHandler MessageHandler { get { return messageHandler; } }
 
