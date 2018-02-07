@@ -103,8 +103,7 @@ namespace Arthas.Network
         /// </summary>
         protected void ConnectInternal(string ip, short port, IConnector conn, INetworkMessageHandler handler = null)
         {
-            if (connector != null && connector.IsConnected)
-  connector.Close();
+            if (connector != null && connector.IsConnected)  connector.Close();
             if (!string.IsNullOrEmpty(connectorTypeName))
                 connector = (IConnector)Activator.CreateInstance(Type.GetType(connectorTypeName, true, true));
             if (!string.IsNullOrEmpty(messageHandlerName))
