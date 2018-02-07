@@ -93,8 +93,7 @@ namespace Arthas.Network
 
         private void ConnectCallback(IAsyncResult ar)
         {
-            if (connectCallback != null && client.Connected) connectCallback(true);
-            else connectCallback(false);
+            if (connectCallback != null) connectCallback(client.Connected);
             try
             {
                 var stream = client.GetStream();
