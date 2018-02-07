@@ -167,6 +167,7 @@ namespace Arthas.Network
 
         protected void Connect()
         {
+            if (isConnecting) return;
             isConnecting = true;
             prevConnectTime = Time.time;
             buf = new ByteBuf(1024);
@@ -237,6 +238,7 @@ namespace Arthas.Network
         protected void OnConnected()
         {
             retryCount = 0;
+            isConnecting = false;
             if (connector != null) connector.MessageRespondEvent += OnMessageRespond;
             if (ConnectedEvent != null) ConnectedEvent();
             InvokeStatusEvent(NetworkStatus.Connected);
@@ -247,6 +249,7 @@ namespace Arthas.Network
         protected void OnDisconnected(bool retry = true)
         {
             connector.MessageRespondEvent -= OnMessageRespond;
+            isConnecting = false;
             if (connector.IsConnected) return;
             if (retryCount == maxRetryCount)
             {
