@@ -59,7 +59,6 @@ namespace Arthas.Network
         }
 
 
-        static int tempBulletId = 0;
         /// <summary>
         /// 发起
         /// </summary>
@@ -68,7 +67,6 @@ namespace Arthas.Network
         {
             if (onceMessages.ContainsKey(msg.Command))
             {
-                Debug.LogError("onceMessages:   " + msg.Command);
                 var msgs = onceMessages[msg.Command];
                 for (var i = 0; i < msgs.Count; i++)
                 {
@@ -84,7 +82,9 @@ namespace Arthas.Network
                 for (var i = 0; i < msgs.Count; i++)
                     msgs[i].Invoke(msg);
             }
+#if UNITY_EDITOR
             else Debug.LogFormat("Cannot invoke message,CmdType:{0}", msg.Command);
+#endif
         }
 
         public static void Clear()
