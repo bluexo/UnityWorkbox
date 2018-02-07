@@ -36,7 +36,7 @@ namespace Arthas.Network
 #else
         private TcpClient client;
 
-        public bool IsConnected { get { return client != null && client.Connected; } }
+        public bool IsConnected { get; private set; }
 #endif
 
 #if WINDOWS_UWP
@@ -64,11 +64,6 @@ namespace Arthas.Network
         }
 #else
 
-        private void EnsureConnect()
-        {
-
-        }
-
         /// <summary>
         /// 使用 <see cref="TcpClient"/> 建立连接并异步接收数据
         /// </summary>
@@ -80,6 +75,7 @@ namespace Arthas.Network
             else connectCallback = callback;
             try
             {
+                IsConnected = false;
                 client = new TcpClient();
                 Address = string.Format("{0}:{1}", ip, port);
                 client.BeginConnect(ip, port, new AsyncCallback(ConnectCallback), client);
@@ -96,6 +92,7 @@ namespace Arthas.Network
             if (connectCallback != null) connectCallback(client.Connected);
             try
             {
+                IsConnected = client.Connected;
                 var stream = client.GetStream();
                 stream.BeginRead(readBuffer, 0, READ_BUFFER_SIZE, Read, null);
             }
@@ -201,6 +198,7 @@ namespace Arthas.Network
 
         public void Close()
         {
+            IsConnected = false;
             if (client == null) return;
             if (DisconnectEvent != null) DisconnectEvent();
 #if WINDOWS_UWP
