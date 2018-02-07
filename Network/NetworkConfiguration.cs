@@ -12,15 +12,6 @@ using UnityEditor;
 using System.IO;
 #endif
 
-
-/// <summary>
-/// 网络配置
-/// </summary>
-[CreateAssetMenu(fileName = "NetworkConfiguration", menuName = "Configs/NetworkConfiguration")]
-public class NetworkConfiguration : ScriptableObject
-{
-    public const string kConfigPath = "Configs/";
-
     /// <summary>
     /// 网络地址
     /// </summary>
@@ -42,6 +33,14 @@ public class NetworkConfiguration : ScriptableObject
         public override string ToString() { return string.Format("{0}:{1}", ip, port); }
         #endregion
     }
+
+/// <summary>
+/// 网络配置
+/// </summary>
+[CreateAssetMenu(fileName = "NetworkConfiguration", menuName = "Configs/NetworkConfiguration")]
+public class NetworkConfiguration : ScriptableObject
+{
+    public const string kConfigPath = "Configs/";
 
     public static NetworkAddress Current
     {

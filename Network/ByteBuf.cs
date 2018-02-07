@@ -21,6 +21,7 @@ public class ByteBuf {
         markReader = 0;
         markWriter = 0;
     }
+
     public ByteBuf(byte[] content)
     {
         this.data = content;
@@ -29,6 +30,7 @@ public class ByteBuf {
         markReader = 0;
         markWriter = 0;
     }
+
     private ByteBuf()
     {
 

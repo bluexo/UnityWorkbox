@@ -21,8 +21,9 @@ namespace Arthas.Network
         public string Address { get; private set; }
         public event Action MessageRespondEvent;
         public event Action DisconnectEvent;
-        const int READ_BUFFER_SIZE = 8192, MSG_LEN_SIZE = 4;
+        private const int READ_BUFFER_SIZE = 8192, MSG_LEN_SIZE = 4;
         private byte[] readBuffer = new byte[READ_BUFFER_SIZE];
+        private Action<bool> connectCallback;
 
         /// <summary>
         /// TCP客户端
@@ -46,7 +47,7 @@ namespace Arthas.Network
         /// </summary>
         /// <param name="ip"></param>
         /// <param name="port"></param>
-        public async void Connect(string ip, int port)
+        public async void Connect(string ip, int port , Action<bool> callback = null)
         {
             try {
                 var serverHost = new HostName(ip);
@@ -73,8 +74,10 @@ namespace Arthas.Network
         /// </summary>
         /// <param name="ip"></param>
         /// <param name="port"></param>
-        public void Connect(string ip, int port)
+        public void Connect(string ip, int port, Action<bool> callback = null)
         {
+            if (connectCallback != null) return;
+            else connectCallback = callback;
             try
             {
                 client = new TcpClient();
@@ -90,21 +93,17 @@ namespace Arthas.Network
 
         private void ConnectCallback(IAsyncResult ar)
         {
-            if (client.Connected)
+            if (connectCallback != null && client.Connected) connectCallback(true);
+            else connectCallback(false);
+            try
             {
-                try
-                {
-                    var stream = client.GetStream();
-                    stream.BeginRead(readBuffer, 0, READ_BUFFER_SIZE, Read, null);
-                }
-                catch (Exception ex)
-                {
-                    Debug.LogException(ex);
-                }
+                var stream = client.GetStream();
+                stream.BeginRead(readBuffer, 0, READ_BUFFER_SIZE, Read, null);
             }
-            else
+            catch (Exception ex)
             {
-                Debug.LogErrorFormat("Cannot connect to server {0}!", Address);
+                if (connectCallback != null) connectCallback(false);
+                Debug.LogException(ex);
             }
         }
 #endif

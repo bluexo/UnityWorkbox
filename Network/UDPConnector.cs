@@ -32,7 +32,7 @@ namespace Arthas.Network
             }
         }
 
-        public void Connect(string ip, int port)
+        public void Connect(string ip, int port, Action<bool> action = null)
         {
             throw new NotImplementedException();
         }

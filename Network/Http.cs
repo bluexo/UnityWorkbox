@@ -26,7 +26,7 @@ namespace Arthas.Network
         private string cookie = string.Empty;
         private static Http current;
         [SerializeField]
-        private NetworkConfiguration.NetworkAddress Address;
+        private NetworkAddress Address;
         [SerializeField]
         private bool keepAlive = false;
 
