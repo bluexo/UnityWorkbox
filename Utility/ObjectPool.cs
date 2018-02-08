@@ -116,6 +116,7 @@ namespace Arthas.Common
         public void Put(int id, TComponent comp, bool disable = true)
         {
             if (!comp || !comp.gameObject) return;
+            if (comp.IsCollected) return;
             comp.ResetObject();
             if (!objectQueue.ContainsKey(id)) objectQueue.Add(id, new Queue<TComponent>());
             if (disable) comp.gameObject.SetActive(false);
@@ -132,8 +133,7 @@ namespace Arthas.Common
 #if UNITY_EDITOR
             Debug.LogFormat("Get {0} , Id:{1} from ObjectPool", typeof(TComponent), id);
 #endif
-            if (!objectQueue.ContainsKey(id))
-                objectQueue.Add(id, new Queue<TComponent>());
+            if (!objectQueue.ContainsKey(id)) objectQueue.Add(id, new Queue<TComponent>());
             var queue = objectQueue[id];
             if (queue.Count < initCount)
             {
