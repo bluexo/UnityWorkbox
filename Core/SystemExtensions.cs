@@ -116,5 +116,12 @@ namespace System.Collections
             foreach (var item in collection) str += item.ToString() + separator;
             return str;
         }
+
+        public static string ToArrayString<T>(this IEnumerable<T> collection, Func<T, string> toString, char separator = ' ')
+        {
+            var str = string.Empty;
+            foreach (var item in collection) str += toString(item) + separator;
+            return str;
+        }
     }
 }

@@ -79,6 +79,7 @@ namespace Arthas.Network
                 return new DefaultMessage(command, stream.ToArray(), false, parameters);
             }
         }
+
         public virtual IList<INetworkMessage> ParseMessage(byte[] buffer)
         {
             var messages = new List<INetworkMessage>();
@@ -104,13 +105,13 @@ namespace Arthas.Network
             return messages;
         }
 
-        private void doDecode(ByteBuf input, IList<INetworkMessage> output) {
+        private void doDecode(ByteBuf input, IList<INetworkMessage> output)
+        {
             if (input.ReadableBytes() < 6)
             {//不够包头长度
                 return;
             }
 
-            
             short length = BitConverter.ToInt16(input.GetRaw(), input.ReaderIndex());
             input.SkipBytes(2);
             if (input.ReadableBytes() + 4 < length)
@@ -121,24 +122,23 @@ namespace Arthas.Network
 
             short command = BitConverter.ToInt16(input.GetRaw(), input.ReaderIndex());
             input.SkipBytes(2);
-            short responseCode = BitConverter.ToInt16(input.GetRaw(), input.ReaderIndex()); ;
+            short responseCode = BitConverter.ToInt16(input.GetRaw(), input.ReaderIndex());
             input.SkipBytes(2);
-            int dataSize = length - 4;//减掉command部分
-            
+            int dataSize = length - 4;  //减掉command部分
+
             if (dataSize > input.ReadableBytes())
             {
                 input.ResetReaderIndex();
                 return;
             }
-            
 
             byte[] data = new byte[dataSize];
             if (dataSize > 0)
             {
-                input.ReadBytes(data, 0, data.Length);//拿到数据
+                input.ReadBytes(data, 0, data.Length);  //拿到数据
                 input.MarkReaderIndex();
             }
-            if (command != Commands.Heartbeat)
+            if (command != Networker.HeartbeatCommand)
             {
                 var msg = new PlayCityMessage(command, data, true, responseCode);
                 output.Add(msg);

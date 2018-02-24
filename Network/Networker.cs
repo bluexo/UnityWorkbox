@@ -25,7 +25,6 @@ namespace Arthas.Network
     /// </summary>
     public class Networker : SingletonBehaviour<Networker>
     {
-
         /// <summary>
         /// 推送和响应事件
         /// </summary>
@@ -57,6 +56,7 @@ namespace Arthas.Network
         public static Func<object> HeartbeatCommandGetter { get; set; }
 
         public static ByteBuf buf = new ByteBuf(1024);
+        public const short HeartbeatCommand = 0;
 
         public static bool IsLittleEndian
         {
@@ -103,7 +103,7 @@ namespace Arthas.Network
         /// </summary>
         protected void ConnectInternal(string ip, short port, IConnector conn, INetworkMessageHandler handler = null)
         {
-            if (connector != null && connector.IsConnected)  connector.Close();
+            if (connector != null && connector.IsConnected) connector.Close();
             if (!string.IsNullOrEmpty(connectorTypeName))
                 connector = (IConnector)Activator.CreateInstance(Type.GetType(connectorTypeName, true, true));
             if (!string.IsNullOrEmpty(messageHandlerName))
@@ -238,7 +238,11 @@ namespace Arthas.Network
         {
             retryCount = 0;
             isConnecting = false;
-            if (connector != null) connector.MessageRespondEvent += OnMessageRespond;
+            if (connector != null)
+            {
+                connector.MessageRespondEvent -= OnMessageRespond;
+                connector.MessageRespondEvent += OnMessageRespond;
+            }
             if (ConnectedEvent != null) ConnectedEvent();
             InvokeStatusEvent(NetworkStatus.Connected);
             connectCor = StartCoroutine(ConnectionDetectAsync());
