@@ -12,27 +12,27 @@ using UnityEditor;
 using System.IO;
 #endif
 
-    /// <summary>
-    /// 网络地址
-    /// </summary>
-    [Serializable]
-    public class NetworkAddress
-    {
-        public string tag;
-        public string ip;
-        public short port;
-        [Space(10), Header("Http: [http[s]]://{ip}:{port}/[Path]")]
-        public string url = "http:/{0}:{1}/";
-        public Uri Uri { get { return new Uri(string.Format(url, ip, port)); } }
+/// <summary>
+/// 网络地址
+/// </summary>
+[Serializable]
+public class NetworkAddress
+{
+    public string tag;
+    public string ip;
+    public short port;
+    [Space(10), Header("Http: [http[s]]://{ip}:{port}/[Path]")]
+    public string url = "http:/{0}:{1}/";
+    public Uri Uri { get { return new Uri(string.Format(url, ip, port)); } }
 
-        #region Compare
-        public static bool operator ==(NetworkAddress lhs, NetworkAddress rhs) { return lhs.ip == rhs.ip && lhs.port == rhs.port; }
-        public static bool operator !=(NetworkAddress lhs, NetworkAddress rhs) { return lhs.ip != rhs.ip || lhs.port != rhs.port; }
-        public override bool Equals(object obj) { return base.Equals(obj); }
-        public override int GetHashCode() { return base.GetHashCode(); }
-        public override string ToString() { return string.Format("{0}:{1}", ip, port); }
-        #endregion
-    }
+    #region Compare
+    public static bool operator ==(NetworkAddress lhs, NetworkAddress rhs) { return lhs.ip == rhs.ip && lhs.port == rhs.port; }
+    public static bool operator !=(NetworkAddress lhs, NetworkAddress rhs) { return lhs.ip != rhs.ip || lhs.port != rhs.port; }
+    public override bool Equals(object obj) { return base.Equals(obj); }
+    public override int GetHashCode() { return base.GetHashCode(); }
+    public override string ToString() { return string.Format("{0}:{1}", ip, port); }
+    #endregion
+}
 
 /// <summary>
 /// 网络配置
@@ -87,7 +87,7 @@ public class NetworkConfiguration : ScriptableObject
         var conf = GetConfiguration();
         conf.current = conf.local;
         EditorUtility.SetDirty(conf);
-        Debug.LogFormat("<color=cyan>Current Address:[{0}:{1}]</color>", conf.current.ip, conf.current.port);
+        Debug.LogFormat("<color=cyan>Current Address:[{2}][{0}:{1}]</color>", conf.current.ip, conf.current.port, conf.current.tag);
     }
 
     [MenuItem(kMenu + kLocal, true, priority = 1)]
@@ -104,7 +104,7 @@ public class NetworkConfiguration : ScriptableObject
         var conf = GetConfiguration();
         conf.current = conf.intranet;
         EditorUtility.SetDirty(conf);
-        Debug.LogFormat("<color=cyan>Current Address:[{0}:{1}]</color>", conf.current.ip, conf.current.port);
+        Debug.LogFormat("<color=cyan>Current Address:[{2}][{0}:{1}]</color>", conf.current.ip, conf.current.port, conf.current.tag);
     }
 
     [MenuItem(kMenu + kIntranet, true, priority = 1)]
@@ -121,7 +121,7 @@ public class NetworkConfiguration : ScriptableObject
         var conf = GetConfiguration();
         conf.current = conf.internet;
         EditorUtility.SetDirty(conf);
-        Debug.LogFormat("<color=cyan>Current Address:[{0}:{1}]</color>", conf.current.ip, conf.current.port);
+        Debug.LogFormat("<color=cyan>Current Address:[{2}][{0}:{1}]</color>", conf.current.ip, conf.current.port, conf.current.tag);
     }
 
     [MenuItem(kMenu + kInternet, true, priority = 1)]
@@ -139,7 +139,7 @@ public class NetworkConfiguration : ScriptableObject
         var conf = GetConfiguration();
         conf.current = conf.option1;
         EditorUtility.SetDirty(conf);
-        Debug.LogFormat("<color=cyan>Current Address:[{0}:{1}]</color>", conf.current.ip, conf.current.port);
+        Debug.LogFormat("<color=cyan>Current Address:[{2}][{0}:{1}]</color>", conf.current.ip, conf.current.port, conf.current.tag);
     }
 
     [MenuItem(kMenu + kOp1, true, priority = 1)]
@@ -156,7 +156,7 @@ public class NetworkConfiguration : ScriptableObject
         var conf = GetConfiguration();
         conf.current = conf.option2;
         EditorUtility.SetDirty(conf);
-        Debug.LogFormat("<color=cyan>Current Address:[{0}:{1}]</color>", conf.current.ip, conf.current.port);
+        Debug.LogFormat("<color=cyan>Current Address:[{2}][{0}:{1}]</color>", conf.current.ip, conf.current.port, conf.current.tag);
     }
 
     [MenuItem(kMenu + kOp2, true, priority = 1)]
