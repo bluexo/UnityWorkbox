@@ -249,7 +249,7 @@ namespace Arthas.Network
             heartbeatCor = StartCoroutine(HeartbeatDetectAsync());
         }
 
-        protected void OnDisconnected(bool retry = true)
+        protected void OnDisconnected()
         {
             connector.MessageRespondEvent -= OnMessageRespond;
             isConnecting = false;
@@ -313,7 +313,11 @@ namespace Arthas.Network
 
         public static void Send(object cmd, object buf = null, Action<INetworkMessage> callback = null, params object[] parameters)
         {
-            if (!connector.IsConnected) instance.Connect();
+            if (!connector.IsConnected)
+            {
+                instance.Connect();
+                return;
+            }
             try
             {
                 var message = messageHandler.PackMessage(cmd, buf, parameters);
