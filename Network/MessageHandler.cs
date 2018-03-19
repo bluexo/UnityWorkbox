@@ -24,6 +24,8 @@ namespace Arthas.Network
 
         public object Command { get; private set; }
 
+        public short ResponseCode { get; protected set; }
+
         /// <summary>
         /// 默认消息构造
         /// </summary>

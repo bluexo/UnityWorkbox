@@ -79,8 +79,7 @@ namespace Arthas.Network
             if (messages.ContainsKey(msg.Command))
             {
                 var msgs = messages[msg.Command];
-                for (var i = 0; i < msgs.Count; i++)
-                    msgs[i].Invoke(msg);
+                for (var i = 0; i < msgs.Count; i++) msgs[i].Invoke(msg);
             }
 #if UNITY_EDITOR
             else Debug.LogFormat("Cannot invoke message,CmdType:{0}", msg.Command);

@@ -8,6 +8,8 @@ namespace Arthas.Network
     /// </summary>
     public interface INetworkMessage
     {
+        short ResponseCode { get; }
+
         /// <summary>
         /// 命令
         /// </summary>
