@@ -33,12 +33,12 @@ namespace Arthas.Network
         /// <summary>
         /// 网络连接事件
         /// </summary>
-        public static event Action ConnectedEvent;
+        [Obsolete] public static event Action ConnectedEvent;
 
         /// <summary>
         /// 网络断开事件
         /// </summary>
-        public static event Action DisconnectedEvent;
+        [Obsolete] public static event Action DisconnectedEvent;
 
         /// <summary>
         /// 网络状态事件
@@ -50,8 +50,6 @@ namespace Arthas.Network
         /// </summary>
         public static event Action<string> ConnectErrorEvent;
 
-        public static INetworkMessageHandler MessageHandler { get { return messageHandler; } }
-        public static IConnector CurrentConnector { get { return connector; } }
         public static NetworkStatus NetworkStatus { get; private set; }
         public static Func<object> HeartbeatCommandGetter { get; set; }
 
@@ -64,7 +62,7 @@ namespace Arthas.Network
             set { Instance.isLittleEndian = value; }
         }
         public static bool IsConnected { get { return connector != null && connector.IsConnected; } }
-        public static long DelayTime { get; private set; }
+        public static Ping Ping { get; private set; }
 
         private readonly static Queue<INetworkMessage> msgQueue = new Queue<INetworkMessage>();
         private readonly static Dictionary<object, Queue<Action<INetworkMessage>>> responseActions = new Dictionary<object, Queue<Action<INetworkMessage>>>();
@@ -77,7 +75,7 @@ namespace Arthas.Network
         private int retryCount = 0;
 
         [SerializeField]
-        private float connectTimeout = 10f, heartbeatInterval = 12f;
+        private float connectTimeout = 10f, heartbeatInterval = 12f, pingInterval = 3f;
         [SerializeField]
         private bool isLittleEndian = true, useSSL = false;
         [SerializeField]
@@ -88,7 +86,7 @@ namespace Arthas.Network
         private static IConnector connector;
         private static INetworkMessageHandler messageHandler;
         public NetworkAddress NetworkAddress { get; private set; }
-        private static float prevSendTime = 0;
+        private static float prevSendTime = 0, prevPingTime = 0;
         private static bool isConnecting = false;
 
         protected override void Awake()
@@ -113,6 +111,7 @@ namespace Arthas.Network
             if (connector == null)
                 connector = conn ?? new TCPConnector();
             NetworkAddress = new NetworkAddress { ip = ip, port = port };
+            Ping = new Ping(ip);
             Connect();
 #if UNITY_EDITOR
             Debug.LogFormat("Connect to server , <color=cyan>Addr:[{0}:{1}] ,connector:{2} ,wrapper:{3}.</color>", ip, port, connector.GetType(), messageHandler.GetType());
@@ -207,6 +206,7 @@ namespace Arthas.Network
             while (true)
             {
                 yield return heartbeatWaitFor;
+
                 if (connector.IsConnected)
                 {
                     if (HeartbeatCommandGetter != null) Send(HeartbeatCommandGetter());
@@ -308,6 +308,13 @@ namespace Arthas.Network
                 {
                     ResponseEvent(message);
                 }
+            }
+
+            if (Time.time - prevPingTime > pingInterval && Ping.isDone)
+            {
+                Ping.DestroyPing();
+                prevPingTime = Time.time;
+                Ping = new Ping(NetworkAddress.ip);
             }
         }
 

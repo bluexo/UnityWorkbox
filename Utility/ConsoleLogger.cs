@@ -9,6 +9,7 @@ using UnityEngine.Profiling;
 using System.Collections.Generic;
 using System.Collections;
 using System;
+using Arthas.Network;
 
 namespace Arthas.Common
 {
@@ -112,7 +113,7 @@ namespace Arthas.Common
             using (var scope = new GUILayout.HorizontalScope())
             {
                 GUILayout.Box(string.Format("FPS:[{0}] ", currentFps));
-                if (Network.Networker.IsConnected) GUILayout.Box(string.Format("Delay:[{0}]ms ", Network.Networker.DelayTime));
+                if (Networker.IsConnected) GUILayout.Box(string.Format("Delay:[{0}]ms ", Networker.Ping.time));
                 GUILayout.Box(string.Format("UsedHeapSize:[{0}]", LongToMb(Profiler.usedHeapSizeLong)));
                 GUILayout.Box(string.Format("Reserved:[{0}]", LongToMb(Profiler.GetTotalReservedMemoryLong())));
                 GUILayout.Box(string.Format("Used:[{0}]", LongToMb(Profiler.GetTotalAllocatedMemoryLong())));
