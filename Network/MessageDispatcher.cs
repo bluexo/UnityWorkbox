@@ -20,13 +20,14 @@ namespace Arthas.Network
         /// </summary>
         /// <param name="cmd"></param>
         /// <param name="invoker"></param>
-        public static void RegisterMessage(object cmd, Action<INetworkMessage> invoker)
+        public static void RegisterMessage(object cmd, Action<INetworkMessage> invoker, bool allowMultiple = true)
         {
             if (!messages.ContainsKey(cmd))
             {
                 var actions = new List<Action<INetworkMessage>>();
                 messages.Add(cmd, actions);
             }
+            if (!allowMultiple && messages[cmd].Count > 0) return;
             messages[cmd].Add(invoker);
         }
 
@@ -57,7 +58,6 @@ namespace Arthas.Network
                 msgs.Remove(invoker);
             }
         }
-
 
         /// <summary>
         /// 发起
@@ -92,6 +92,11 @@ namespace Arthas.Network
             messages.Clear();
             foreach (var actions in onceMessages.Values) actions.Clear();
             onceMessages.Clear();
+        }
+
+        internal static void RegisterMessage(object p)
+        {
+            throw new NotImplementedException();
         }
     }
 }
