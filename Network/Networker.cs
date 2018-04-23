@@ -310,7 +310,9 @@ namespace Arthas.Network
                 }
             }
 
-            if (Time.time - prevPingTime > pingInterval && Ping.isDone)
+            if (Time.time - prevPingTime > pingInterval 
+                && Ping != null 
+                && Ping.isDone)
             {
                 Ping.DestroyPing();
                 prevPingTime = Time.time;
