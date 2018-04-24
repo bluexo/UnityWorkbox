@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
 namespace Arthas.Common
 {
@@ -8,10 +9,12 @@ namespace Arthas.Common
     /// </summary>
     public class Glocor : SingletonBehaviour<Glocor>
     {
+        private static HashSet<Coroutine> coroutines = new HashSet<Coroutine>();
+
         /// <summary>
         /// 当前运行的全局协程数量
         /// </summary>
-        public static int Count { get; private set; }
+        public static int Count { get { return coroutines.Count; } }
 
         /// <summary>
         /// 运行一个协程
@@ -20,24 +23,25 @@ namespace Arthas.Common
         /// <returns></returns>
         public static Coroutine Run(IEnumerator collection)
         {
-            Count++;
+            var cor = Instance.StartCoroutine(collection);
+            coroutines.Add(cor);
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
             Debug.LogFormat("<color=cyan>Start a global coroutine , count = <size=14>{0}</size></color> ", Count);
 #endif
-            return Instance.StartCoroutine(collection);
+            return cor;
         }
 
         /// <summary>
         /// 终止一个协程
         /// </summary>
-        /// <param name="collection"></param>
-        public static void Stop(IEnumerator collection)
+        /// <param name="cor"></param>
+        public static void Stop(Coroutine cor)
         {
-            Count--;
+            coroutines.Remove(cor);
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
             Debug.LogFormat("<color=cyan>Stop a global coroutine , count = <size=14>{0}</size></color> ", Count);
 #endif
-            Instance.StopCoroutine(collection);
+            Instance.StopCoroutine(cor);
         }
 
         /// <summary>
@@ -46,12 +50,14 @@ namespace Arthas.Common
         /// <param name="cors"></param>
         public static void Stop(params Coroutine[] cors)
         {
-            for (var i = 0; i < cors.Length; i++) {
+            for (var i = 0; i < cors.Length; i++)
+            {
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
                 Debug.LogFormat("<color=cyan>Stop a global coroutine , count = <size=14>{0}</size></color> ", Count);
 #endif
-                if (cors[i] != null) {
-                    Count--;
+                if (cors[i] != null)
+                {
+                    coroutines.Remove(cors[i]);
                     Instance.StopCoroutine(cors[i]);
                 }
             }
@@ -62,7 +68,7 @@ namespace Arthas.Common
         /// </summary>
         public static void StopAll()
         {
-            Count = 0;
+            coroutines.Clear();
             Instance.StopAllCoroutines();
         }
     }
