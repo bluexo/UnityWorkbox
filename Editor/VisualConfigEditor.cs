@@ -53,7 +53,6 @@ namespace Arthas.Common
             WriteToFile(path);
         }
 
-
         private void WriteToFile(string path)
         {
             var conf = serializedObject.targetObject as IJsonSerializable;
@@ -78,7 +77,7 @@ namespace Arthas.Common
                 for (var i = 0; i < folds.Length; i++) { folds[i] = false; }
             if (GUILayout.Button("∨", EditorStyles.miniButtonRight, GUILayout.Height(25f)))
                 for (var i = 0; i < folds.Length; i++) { folds[i] = true; }
-            GUI.color = Color.green / 2;
+            GUI.color = Color.white;
             if (GUILayout.Button("Recovery", EditorStyles.miniButton, GUILayout.Width(60), GUILayout.Height(25)))
             {
                 if (string.IsNullOrEmpty(backupDirProperty.stringValue)
@@ -93,9 +92,9 @@ namespace Arthas.Common
                     Debug.LogErrorFormat("Backup file [{0}] not exists !", path);
                     return;
                 }
-                ReadFromFile(path);
+                if (EditorUtility.DisplayDialog("Warning", "This operation will be overwrite current config!!!", "√"))
+                    ReadFromFile(path);
             }
-            GUI.color = Color.white;
             EditorGUILayout.EndHorizontal();
             EditorGUILayout.BeginVertical();
             if (itemsProperty != null)
