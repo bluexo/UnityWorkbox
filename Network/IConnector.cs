@@ -17,7 +17,7 @@ namespace Arthas.Network
         /// </summary>
         /// <param name="ip"></param>
         /// <param name="port"></param>
-        void Connect(string ip, int port, Action<bool> callback = null);
+        void Connect(string ip, int port, Action<object> callback = null);
 
         /// <summary>
         /// 发送
