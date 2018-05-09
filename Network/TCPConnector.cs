@@ -23,7 +23,7 @@ namespace Arthas.Network
         public event Action DisconnectEvent;
         private const int READ_BUFFER_SIZE = 8192, MSG_LEN_SIZE = 4;
         private byte[] readBuffer = new byte[READ_BUFFER_SIZE];
-        private Action<bool> connectCallback;
+        private Action<object> connectCallback;
 
         /// <summary>
         /// TCP客户端
@@ -69,7 +69,7 @@ namespace Arthas.Network
         /// </summary>
         /// <param name="ip"></param>
         /// <param name="port"></param>
-        public void Connect(string ip, int port, Action<bool> callback = null)
+        public void Connect(string ip, int port, Action<object> callback = null)
         {
             if (connectCallback != null) return;
             else connectCallback = callback;
@@ -89,7 +89,7 @@ namespace Arthas.Network
 
         private void ConnectCallback(IAsyncResult ar)
         {
-            if (connectCallback != null) connectCallback(client.Connected);
+            if (connectCallback != null) connectCallback(this);
             try
             {
                 IsConnected = client.Connected;

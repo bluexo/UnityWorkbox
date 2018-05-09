@@ -15,24 +15,11 @@ namespace Arthas.Network
 
 #if !UNITY_WSA
         public UdpClient client;
+
+        public event Action MessageRespondEvent;
 #endif
 
-        public event Action<byte[]> MessageRespondEvent;
-
-        event Action IConnector.MessageRespondEvent
-        {
-            add
-            {
-                throw new NotImplementedException();
-            }
-
-            remove
-            {
-                throw new NotImplementedException();
-            }
-        }
-
-        public void Connect(string ip, int port, Action<bool> action = null)
+        public void Connect(string ip, int port, Action<object> action = null)
         {
             throw new NotImplementedException();
         }
