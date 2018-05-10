@@ -72,10 +72,17 @@ namespace System.Collections
         {
             foreach (var pair in dict)
             {
-                if (action != null)
-                {
-                    action(pair.Key, pair.Value);
-                }
+                if (action == null) return;
+                action(pair.Key, pair.Value);
+            }
+        }
+
+        public static void Foreach<Tkey, TValue>(this IDictionary<Tkey, TValue> dict, Func<KeyValuePair<Tkey, TValue>, bool> action)
+        {
+            foreach (var pair in dict)
+            {
+                if (action == null) return;
+                if (!action(pair)) break;
             }
         }
 
