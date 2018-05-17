@@ -19,7 +19,7 @@ namespace Arthas.Network
     public class TCPConnector : IConnector
     {
         public string Address { get; private set; }
-        public event Action MessageRespondEvent;
+        public event Action<byte[]> MessageRespondEvent;
         public event Action DisconnectEvent;
         private const int READ_BUFFER_SIZE = 8192, MSG_LEN_SIZE = 4;
         private byte[] readBuffer = new byte[READ_BUFFER_SIZE];
@@ -184,8 +184,7 @@ namespace Arthas.Network
                 }
                 var arr = new byte[lengthToRead];
                 Buffer.BlockCopy(readBuffer, 0, arr, 0, lengthToRead);
-                Networker.buf.WriteBytes(arr);
-                if (MessageRespondEvent != null) MessageRespondEvent();
+                if (MessageRespondEvent != null) MessageRespondEvent(arr);
                 stream.BeginRead(readBuffer, 0, READ_BUFFER_SIZE, Read, null);
             }
             catch (Exception ex)
