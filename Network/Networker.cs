@@ -53,8 +53,8 @@ namespace Arthas.Network
         public static NetworkStatus NetworkStatus { get; private set; }
         public static Func<object> HeartbeatCommandGetter { get; set; }
 
-        public static ByteBuf buf = new ByteBuf(1024);
-        public const short HeartbeatCommand = 0;
+        public ByteBuf buf;
+        public const short HeartbeatCommand = 0, MaxBuffSize = 4096;
 
         public static bool IsLittleEndian
         {
@@ -77,7 +77,10 @@ namespace Arthas.Network
         [SerializeField]
         private float connectTimeout = 10f, heartbeatInterval = 12f, pingInterval = 3f;
         [SerializeField]
-        private bool isLittleEndian = true, useSSL = false;
+        private bool isLittleEndian = true,
+            useSSL = false,
+            enableLogging = true,
+            enableHeartbeat = true;
         [SerializeField]
         private int maxRetryCount = 3;
 
@@ -165,10 +168,10 @@ namespace Arthas.Network
 
         protected void Connect()
         {
-            if (isConnecting) return;
+            if (isConnecting || IsConnected) return;
             isConnecting = true;
+            buf = new ByteBuf(MaxBuffSize);
             prevConnectTime = Time.time;
-            buf = new ByteBuf(1024);
             if (connector != null) connector.Connect(NetworkAddress.ip, NetworkAddress.port);
             InvokeStatusEvent(NetworkStatus.Connecting);
             timeoutCor = StartCoroutine(TimeoutDetectAsync());
@@ -207,7 +210,7 @@ namespace Arthas.Network
             {
                 yield return heartbeatWaitFor;
 
-                if (connector.IsConnected)
+                if (enableHeartbeat && connector.IsConnected)
                 {
                     if (HeartbeatCommandGetter != null) Send(HeartbeatCommandGetter());
                     else Send(0);
@@ -263,28 +266,24 @@ namespace Arthas.Network
             else
             {
                 retryCount++;
-                StartCoroutine(RetryConnect());
+                this.Invoke(Connect, 1f);
             }
         }
 
-        protected IEnumerator RetryConnect()
-        {
-            yield return new WaitForSeconds(1f);
-            Connect();
-        }
-
-        protected void OnMessageRespond()
+        protected void OnMessageRespond(byte[] buffer)
         {
             if (isPaused) return;
             lock (enterLock)
             {
+                buf.WriteBytes(buffer);
                 var msgs = messageHandler.ParseMessage(buf);
                 for (var i = 0; i < msgs.Count; i++)
                 {
                     msgQueue.Enqueue(msgs[i]);
                     if (msgQueue.Count > byte.MaxValue) msgQueue.Dequeue();
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
-                    Debug.LogFormat("<color=blue>[TCPNetwork]</color> [Receive] << CMD:{0},TIME:{1}", msgs[i].Command, DateTime.Now);
+                    if (Instance.enableLogging)
+                        Debug.LogFormat("<color=blue>[TCPNetwork]</color> [Receive] << CMD:{0},TIME:{1}", msgs[i].Command, DateTime.Now);
 #endif
                 }
             }
@@ -310,8 +309,8 @@ namespace Arthas.Network
                 }
             }
 
-            if (Time.time - prevPingTime > pingInterval 
-                && Ping != null 
+            if (Time.time - prevPingTime > pingInterval
+                && Ping != null
                 && Ping.isDone)
             {
                 Ping.DestroyPing();
@@ -337,7 +336,8 @@ namespace Arthas.Network
                 connector.Send(buffer);
                 prevSendTime = Time.time;
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
-                Debug.LogFormat("<color=cyan>[TCPNetwork]</color> [Send] >> CMD:{0},TIME:{1}", cmd, DateTime.Now);
+                if (Instance.enableLogging)
+                    Debug.LogFormat("<color=cyan>[TCPNetwork]</color> [Send] >> CMD:{0},TIME:{1}", cmd, DateTime.Now);
 #endif
             }
             catch (Exception ex)
@@ -366,8 +366,6 @@ namespace Arthas.Network
         void OnApplicationPause(bool pause)
         {
             isPaused = pause;
-            //if (!pause && connector != null && !connector.IsConnected)
-            //    Connect();
         }
 
         private void OnApplicationQuit()
