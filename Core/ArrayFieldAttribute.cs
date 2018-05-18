@@ -14,7 +14,7 @@ namespace Arthas.Common
             EditorGUI.PropertyField(position, property, true);
             var parent = property.serializedObject.FindProperty(property.propertyPath.Split('.')[0]);
             if (SerializedProperty.EqualContents(parent.GetArrayElementAtIndex(parent.arraySize - 1), property)) {
-                if (Event.current.type == EventType.dragPerform) return;
+                if (Event.current.type == EventType.DragPerform) return;
                 EditorGUILayout.BeginHorizontal();
                 GUI.color = Color.green;
                 if (GUILayout.Button("+")) parent.arraySize++;
