@@ -20,7 +20,6 @@
                     {
                         var go = new GameObject(typeof(T).FullName);
                         instance = go.AddComponent<T>();
-                        DontDestroyOnLoad(go);
                     }
                 }
                 return instance;
