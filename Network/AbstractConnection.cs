@@ -20,9 +20,13 @@ namespace Arthas.Network
         /// <summary>
         /// 是否使用SSL加密
         /// </summary>
-        protected abstract bool UseSSL { get; }
+        protected virtual bool UseSSL { get; set; }
+        public bool IsConnected { get; protected set; }
 
         protected readonly Socket Socket;
+        protected readonly SocketAsyncEventArgs ConnectArgs = new SocketAsyncEventArgs(),
+            SendArgs = new SocketAsyncEventArgs(),
+            ReceiveArgs = new SocketAsyncEventArgs();
 
         public Connection() :
             this(new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp))
@@ -30,9 +34,17 @@ namespace Arthas.Network
 
         }
 
-        public Connection(Socket socket)
+        protected Connection(Socket socket)
         {
             Socket = socket;
+            ConnectArgs.Completed += OnConnectedCompleted;
+            SendArgs.Completed += OnSendCompleted;
+            ReceiveArgs.Completed += OnMessageReceived;
+        }
+
+        private void OnSendCompleted(object sender, SocketAsyncEventArgs e)
+        {
+            throw new NotImplementedException();
         }
 
         public virtual void Connect(IPAddress iPAddress, int port)
@@ -52,15 +64,35 @@ namespace Arthas.Network
         {
             try
             {
-                Socket.ConnectAsync(new SocketAsyncEventArgs
-                {
-
-                });
+                ConnectArgs.RemoteEndPoint = endPoint;
+                Socket.ConnectAsync(ConnectArgs);
             }
-            catch
+            catch (Exception exc)
             {
-
+                Debug.LogError(exc.Message);
             }
+        }
+
+        public virtual void Send(byte[] buffer)
+        {
+            SendArgs.SetBuffer(buffer, 0, buffer.Length);
+            Socket.SendAsync(SendArgs);
+        }
+
+        private void OnMessageReceived(object sender, SocketAsyncEventArgs e)
+        {
+            throw new NotImplementedException();
+        }
+
+        private void OnConnectedCompleted(object sender, SocketAsyncEventArgs args)
+        {
+            if (args.SocketError != SocketError.Success)
+            {
+                IsConnected = false;
+                Debug.LogError(args.SocketError.ToString());
+                return;
+            }
+            IsConnected = true;
         }
     }
 }
