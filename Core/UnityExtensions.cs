@@ -64,5 +64,16 @@ namespace UnityEngine
                 }
             }
         }
+
+        public static void Reset(this Transform transform)
+        {
+            transform.localPosition = Vector3.zero;
+            transform.localRotation = Quaternion.identity;
+        }
+
+        public static void DestroyObject(this MonoBehaviour comp)
+        {
+            if (comp) Object.Destroy(comp.gameObject);
+        }
     }
 }
