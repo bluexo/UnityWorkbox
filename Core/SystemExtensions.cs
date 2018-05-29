@@ -130,5 +130,10 @@ namespace System.Collections
             foreach (var item in collection) str += toString(item) + separator;
             return str;
         }
+
+        public static int Int(this Enum value)
+        {
+            return (int)Enum.ToObject(value.GetType(), value);
+        }
     }
 }
