@@ -136,6 +136,13 @@ namespace System.Collections
             return (int)Enum.ToObject(value.GetType(), value);
         }
 
+        public static bool Eq(this Enum left, Enum right)
+        {
+            var lv = left.Int();
+            var rv = right.Int();
+            return (lv | rv) == rv;
+        }
+
         public static TEnum ToEnum<TEnum>(this int value)
         {
             return (TEnum)Enum.ToObject(typeof(TEnum), value);

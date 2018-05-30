@@ -16,6 +16,7 @@ namespace Arthas.Common
         public override void OnInspectorGUI()
         {
             base.OnInspectorGUI();
+            if (GUILayout.Button("CLEAR", GUILayout.Height(50f))) items.Clear();
             var style = new GUIStyle(EditorStyles.largeLabel) { richText = true, alignment = TextAnchor.MiddleLeft };
             foreach (var i in TaskWorker.WorkItems) items.Add(i);
             foreach (var item in items)
@@ -35,6 +36,7 @@ namespace Arthas.Common
         public volatile bool completed;
         public int threadId;
         public object result;
+        public float completeTime;
         public Action<TaskWorkItem> worker;
     }
 
