@@ -24,7 +24,7 @@ namespace System.Collections
 {
     using Generic;
 
-    public static class CollectionExtentions
+    public static class CollectionExtensions
     {
         private readonly static Random random = new Random();
 
@@ -43,13 +43,19 @@ namespace System.Collections
         public static T RandomItem<T>(this IList<T> arr)
         {
             if (arr.Count > 0)
-            {
                 return arr[random.Next(0, arr.Count)];
-            }
             else return default(T);
         }
 
         public static void Replace<Tkey, TValue>(this IDictionary<Tkey, TValue> dict, Tkey k, TValue v)
+        {
+            if (dict.ContainsKey(k))
+            {
+                dict.Remove(k);
+                dict.Add(k, v);
+            }
+        }
+        public static void AddOrReplace<Tkey, TValue>(this IDictionary<Tkey, TValue> dict, Tkey k, TValue v)
         {
             if (dict.ContainsKey(k)) dict.Remove(k);
             dict.Add(k, v);
@@ -131,6 +137,14 @@ namespace System.Collections
             return str;
         }
 
+    }
+
+}
+
+namespace System
+{
+    public static class EnumExtensions
+    {
         public static int Int(this Enum value)
         {
             return (int)Enum.ToObject(value.GetType(), value);
