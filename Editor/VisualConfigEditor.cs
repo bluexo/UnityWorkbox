@@ -28,7 +28,7 @@ namespace Arthas.Common
             itemsProperty = serializedObject.FindProperty("items");
             if (itemsProperty == null)
             {
-                Debug.LogError("Cannot found items ,you may be forgot add <color=cyan>[Serializable]</color> attribute to your item!");
+                Debug.LogError("Cannot found items ,you may be forgot add <color=cyan>[Serializable]</color> attribute to your item!", target);
                 return;
             }
             if (typesCache == null)
