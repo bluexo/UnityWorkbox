@@ -154,7 +154,7 @@ namespace System
         {
             var lv = left.Int();
             var rv = right.Int();
-            return (lv | rv) == rv;
+            return (lv & rv) == rv;
         }
 
         public static TEnum ToEnum<TEnum>(this int value)

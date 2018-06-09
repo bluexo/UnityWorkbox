@@ -17,11 +17,10 @@ namespace Arthas.Common
     {
         protected SerializedProperty itemsProperty, backupDirProperty, backupTagProperty;
 
-        protected bool[] folds;
-
+        protected const string RuntimeObjRefNamePrefix = "PPtr";
         protected bool importOption;
-
         protected Type[] typesCache;
+        protected bool[] folds;
 
         protected virtual void OnEnable()
         {
@@ -162,27 +161,48 @@ namespace Arthas.Common
         public virtual void DrawItemProperty(SerializedProperty property, int index)
         {
             EditorGUILayout.PropertyField(property);
-            if (typesCache == null) typesCache = GetType().Assembly.GetTypes();
-            var type = Array.Find(typesCache, t => t.Name.Equals(property.type, StringComparison.CurrentCultureIgnoreCase));
-            if (type == null)
+            if (property.type.Contains(RuntimeObjRefNamePrefix))
             {
-                Debug.LogErrorFormat("Unknow type {0} , cannot draw this property!", property.type);
+                if (!property.objectReferenceValue) return;
+                var so = new SerializedObject(property.objectReferenceValue);
+                var fields = property
+                    .objectReferenceValue
+                    .GetType()
+                    .GetRuntimeFields()
+                    .ToArray();
+                for (var i = 0; i < fields.Length; i++)
+                {
+                    var fieldProperty = so.FindProperty(fields[i].Name);
+                    if (fieldProperty == null) continue;
+                    EditorGUILayout.PropertyField(fieldProperty);
+                }
+                so.ApplyModifiedProperties();
                 return;
             }
-            var fields = type.GetFields();
-            for (var i = 0; i < fields.Length; i++)
+            else
             {
-                var field = fields[i];
-                if (field.IsNotSerialized)
-                    continue;
-                DrawPropertyField(property, field.Name, field.FieldType);
+                if (typesCache == null) typesCache = GetType().Assembly.GetTypes();
+                var type = Array.Find(typesCache, t => t.Name.Equals(property.type, StringComparison.CurrentCultureIgnoreCase));
+                if (type == null)
+                {
+                    Debug.LogErrorFormat("Unknow type {0},{1}, cannot draw this property!", property.type);
+                    return;
+                }
+                var fields = type.GetFields();
+                if (fields.Length == 0) return;
+                for (var i = 0; i < fields.Length; i++)
+                {
+                    var field = fields[i];
+                    if (field.IsNotSerialized) continue;
+                    DrawPropertyField(property, field.Name, field.FieldType);
+                }
             }
         }
 
         protected virtual void DrawPropertyField(SerializedProperty property, string propertyName, Type type)
         {
             var subProperty = property.FindPropertyRelative(propertyName);
-
+            if (subProperty == null) return;
             if (type == typeof(Sprite))
             {
                 var name = string.Format(" [{0}] ", subProperty.objectReferenceValue ? subProperty.objectReferenceValue.name : string.Empty);
