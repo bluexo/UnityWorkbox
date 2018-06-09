@@ -11,7 +11,7 @@ namespace Arthas.UI
     public class UIManagerEditor : Editor
     {
         private static UIManagerEditor instance;
-        int tagIndex = 0, sortingLayerIndex = 0, renderMode = 0;
+        private int tagIndex = 0, sortingLayerIndex = 0, renderMode = 0;
 
         private void OnEnable()
         {
@@ -24,43 +24,44 @@ namespace Arthas.UI
         {
             base.OnInspectorGUI();
             var overwrite = serializedObject.FindProperty("overwriteCamera");
-            if (overwrite.boolValue) {
+            if (overwrite.boolValue)
+            {
                 var tag = serializedObject.FindProperty("cameraTag");
                 tagIndex = Array.IndexOf(InternalEditorUtility.tags, tag.stringValue);
                 tagIndex = EditorGUILayout.Popup("Camera Tag", tagIndex, InternalEditorUtility.tags);
                 tag.stringValue = InternalEditorUtility.tags[tagIndex];
             }
             var ui = serializedObject.FindProperty("startUI");
-            if (!ui.objectReferenceValue) {
+            if (!ui.objectReferenceValue)
+            {
                 var prompt = "UIManager initialize fail , you must appoint a StartUI component and show it as first one ,";
                 prompt += " You can select it from [Hierarchy] or click below [Create StartUI] button to create it!";
                 EditorGUILayout.HelpBox(prompt, MessageType.Error);
                 var create = GUILayout.Button("Create StartUI");
-                if (create) CreateChildStartUI();
+                var uiComps = Assembly.GetAssembly(typeof(BaseUI)).GetTypes();
+                var uiType = Array.Find(uiComps, u => u.IsSubclassOf(typeof(BaseUI)) && u.IsDefined(typeof(UIStartAttribute), true));
+                if (create && uiType == null) BaseUIEditor.CreateUIPanel(true);
+                if (uiType != null && !EditorApplication.isCompiling)
+                    CreateChildStartUI(uiType);
             }
             serializedObject.ApplyModifiedProperties();
         }
 
-        private void CreateChildStartUI()
+        private void CreateChildStartUI(Type type)
         {
-            var uiComps = Assembly.GetAssembly(typeof(BaseUI)).GetTypes();
-            var type = Array.Find(uiComps, ui => ui.IsSubclassOf(typeof(BaseUI)) && ui.IsDefined(typeof(UIStartAttribute), true));
-            if (type != null) {
-                var canvasObject = (target as UIManager).gameObject;
-                Transform child = canvasObject.transform.Find(type.Name);
-                if (!child) {
-                    var obj = new GameObject(type.Name);
-                    child = obj.transform;
-                    child.transform.SetParent(canvasObject.transform);
-                }
-                var comp = child.GetComponent(type);
-                if (!comp)
-                    comp = child.gameObject.AddComponent(type);
-                var ui = serializedObject.FindProperty("startUI");
-                ui.objectReferenceValue = comp;
-            } else {
-                BaseUIEditor.CreateUIPanel(true);
+            var canvasObject = (target as UIManager).gameObject;
+            Transform child = canvasObject.transform.Find(type.Name);
+            if (!child)
+            {
+                var obj = new GameObject(type.Name);
+                child = obj.transform;
+                child.transform.SetParent(canvasObject.transform);
             }
+            var comp = child.GetComponent(type);
+            if (!comp)
+                comp = child.gameObject.AddComponent(type);
+            var ui = serializedObject.FindProperty("startUI");
+            ui.objectReferenceValue = comp;
         }
     }
 }
