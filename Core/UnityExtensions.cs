@@ -75,5 +75,15 @@ namespace UnityEngine
         {
             if (comp) Object.Destroy(comp.gameObject);
         }
+
+        public static void SetEnum(this Animator animator, string name, Enum value)
+        {
+            animator.SetInteger(name, value.Int());
+        }
+
+        public static void SetEnum(this Animator animator, int id, Enum value)
+        {
+            animator.SetInteger(id, value.Int());
+        }
     }
 }

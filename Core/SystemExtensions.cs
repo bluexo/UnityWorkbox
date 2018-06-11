@@ -20,9 +20,10 @@ namespace System
     public delegate TResult Func<T1, T2, T3, T4, T5, T6, T7, T8, TResult>(T1 t1, T2 t2, T3 t3, T4 t4, T5 t5, T6 t6, T7 t7, T8 t8);
 }
 
-namespace System.Collections
+namespace System
 {
-    using Generic;
+    using System.Collections.Generic;
+    using System.Text.RegularExpressions;
 
     public static class CollectionExtensions
     {
@@ -137,8 +138,16 @@ namespace System.Collections
             return str;
         }
 
-    }
+        readonly static Regex varNameRegex = new Regex("[^\\w]");
 
+        public static string ToCodeSymbol(this string name)
+        {
+            var varName = varNameRegex.Replace(name, "");
+            return Regex.IsMatch(name, "^[0-9]")
+                ? "_" + varName
+                : varName;
+        }
+    }
 }
 
 namespace System
@@ -154,7 +163,7 @@ namespace System
         {
             var lv = left.Int();
             var rv = right.Int();
-            return (lv | rv) == rv;
+            return (lv & rv) == rv;
         }
 
         public static TEnum ToEnum<TEnum>(this int value)
