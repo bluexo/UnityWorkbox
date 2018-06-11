@@ -98,7 +98,7 @@ public static class UnityEditorTools
             for (var i = 0; i < sceneInfos.Length; i++)
             {
                 var name = sceneInfos[i].name;
-                if (string.IsNullOrWhiteSpace(name)) continue;
+                if (string.IsNullOrEmpty(name)) continue;
                 outfile.WriteLine("         {2} \"{0}\",\"{1}\" {3},", name.ToCodeSymbol(), sceneInfos[i].path, "{", "}");
             }
             outfile.WriteLine("    };");
@@ -106,7 +106,7 @@ public static class UnityEditorTools
             for (var i = 0; i < sceneInfos.Length; i++)
             {
                 var name = sceneInfos[i].name;
-                if (string.IsNullOrWhiteSpace(name)) continue;
+                if (string.IsNullOrEmpty(name)) continue;
                 outfile.WriteLine("    public const string {0} = \"{1}\";", name.ToCodeSymbol(), sceneInfos[i].name);
             }
             outfile.WriteLine("}");
@@ -163,7 +163,7 @@ public static class UnityEditorTools
             outfile.WriteLine("{");
             foreach (var name in paramaterNames)
             {
-                if (string.IsNullOrWhiteSpace(name)) continue;
+                if (string.IsNullOrEmpty(name)) continue;
                 outfile.WriteLine("     public static readonly int {0} = Animator.StringToHash(\"{1}\");", name.ToCodeSymbol(), name);
             }
             outfile.WriteLine("}");

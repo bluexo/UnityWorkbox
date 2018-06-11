@@ -168,7 +168,7 @@ namespace Arthas.Common
                 var fields = property
                     .objectReferenceValue
                     .GetType()
-                    .GetRuntimeFields()
+                    .GetFields()
                     .ToArray();
                 for (var i = 0; i < fields.Length; i++)
                 {
