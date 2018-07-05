@@ -23,8 +23,8 @@ namespace Arthas
         public static string ToAssetsPath(this string orgin)
         {
             var newPath = orgin.ToString();
-            newPath.Replace(ProjectPath, "");
-            newPath.TrimStart('\\').TrimStart('/');
+            newPath = newPath.Replace(ProjectPath, "");
+            newPath = newPath.TrimStart('\\').TrimStart('/');
             return newPath;
         }
     }

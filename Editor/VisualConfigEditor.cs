@@ -9,7 +9,7 @@ namespace Arthas.Common
 {
     /// <summary>
     /// 可配置的列表编辑器
-    /// 包含折叠的和展开列表，以及导出为Json数据或者从Json导入数据
+    /// 包含折叠的和展开列表，自动备份以及作为Json数据导入和导出
     /// </summary>
     /// <typeparam name="T"></typeparam>
     [CustomEditor(typeof(VisualConfig<>), true, isFallback = true)]
@@ -185,7 +185,7 @@ namespace Arthas.Common
                 var type = Array.Find(typesCache, t => t.Name.Equals(property.type, StringComparison.CurrentCultureIgnoreCase));
                 if (type == null)
                 {
-                    Debug.LogErrorFormat("Unknow type {0},{1}, cannot draw this property!", property.type);
+                    Debug.LogErrorFormat("Unknow type {0}, cannot draw this property!", property.type);
                     return;
                 }
                 var fields = type.GetFields();

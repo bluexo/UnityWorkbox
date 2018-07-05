@@ -38,7 +38,7 @@ namespace Arthas.UI
                 prompt += " You can select it from [Hierarchy] or click below [Create StartUI] button to create it!";
                 EditorGUILayout.HelpBox(prompt, MessageType.Error);
                 var create = GUILayout.Button("Create StartUI");
-                var uiComps = Assembly.GetAssembly(typeof(BaseUI)).GetTypes();
+                var uiComps = ReflectionExtensions.GetAllTypes();
                 var uiType = Array.Find(uiComps, u => u.IsSubclassOf(typeof(BaseUI)) && u.IsDefined(typeof(UIStartAttribute), true));
                 if (create && uiType == null) BaseUIEditor.CreateUIPanel(true);
                 if (uiType != null && !EditorApplication.isCompiling)
