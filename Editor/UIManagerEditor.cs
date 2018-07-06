@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Reflection;
 using UnityEngine;
 using UnityEditor;
@@ -38,8 +39,10 @@ namespace Arthas.UI
                 prompt += " You can select it from [Hierarchy] or click below [Create StartUI] button to create it!";
                 EditorGUILayout.HelpBox(prompt, MessageType.Error);
                 var create = GUILayout.Button("Create StartUI");
-                var uiComps = ReflectionExtensions.GetAllTypes();
-                var uiType = Array.Find(uiComps, u => u.IsSubclassOf(typeof(BaseUI)) && u.IsDefined(typeof(UIStartAttribute), true));
+                var uiType = ReflectionExtensions
+                    .GetAllRuntimeTypes()
+                    .Where(u => u.IsSubclassOf(typeof(BaseUI)) && u.IsDefined(typeof(UIStartAttribute), true))
+                    .FirstOrDefault();
                 if (create && uiType == null) BaseUIEditor.CreateUIPanel(true);
                 if (uiType != null && !EditorApplication.isCompiling)
                     CreateChildStartUI(uiType);

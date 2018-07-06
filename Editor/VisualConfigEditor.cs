@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -19,7 +20,6 @@ namespace Arthas.Common
 
         protected const string RuntimeObjRefNamePrefix = "PPtr";
         protected bool importOption;
-        protected Type[] typesCache;
         protected bool[] folds;
 
         protected virtual void OnEnable()
@@ -30,8 +30,6 @@ namespace Arthas.Common
                 Debug.LogError("Cannot found items ,you may be forgot add <color=cyan>[Serializable]</color> attribute to your item!", target);
                 return;
             }
-            if (typesCache == null)
-                typesCache = typeof(VisualConfig<>).Assembly.GetTypes();
             if (itemsProperty.arraySize <= 0)
                 itemsProperty.arraySize++;
             folds = new bool[itemsProperty.arraySize];
@@ -101,30 +99,28 @@ namespace Arthas.Common
                 for (var i = 0; i < itemsProperty.arraySize; i++)
                 {
                     folds[i] = EditorGUILayout.Foldout(folds[i], string.Format("Item [{0}]", i));
-                    if (folds[i])
+                    if (!folds[i]) continue;
+                    var item = itemsProperty.GetArrayElementAtIndex(i);
+                    DrawItemProperty(item, i);
+                    EditorGUILayout.Space();
+                    EditorGUILayout.BeginHorizontal();
+                    GUI.color = Color.green;
+                    if (GUILayout.Button("+"))
                     {
-                        var item = itemsProperty.GetArrayElementAtIndex(i);
-                        DrawItemProperty(item, i);
-                        EditorGUILayout.Space();
-                        EditorGUILayout.BeginHorizontal();
-                        GUI.color = Color.green;
-                        if (GUILayout.Button("+"))
-                        {
-                            ArrayUtility.Insert(ref folds, i, false);
-                            itemsProperty.InsertArrayElementAtIndex(i);
-                        }
-                        GUI.color = Color.red;
-                        if (itemsProperty.arraySize > 1 && GUILayout.Button("-"))
-                        {
-                            itemsProperty.DeleteArrayElementAtIndex(i);
-                            ArrayUtility.RemoveAt(ref folds, i);
-                        }
-                        GUI.color = Color.white;
-                        EditorGUILayout.EndHorizontal();
-                        EditorGUILayout.Space();
+                        ArrayUtility.Insert(ref folds, i, false);
+                        itemsProperty.InsertArrayElementAtIndex(i);
                     }
-                    serializedObject.ApplyModifiedProperties();
+                    GUI.color = Color.red;
+                    if (itemsProperty.arraySize > 1 && GUILayout.Button("-"))
+                    {
+                        itemsProperty.DeleteArrayElementAtIndex(i);
+                        ArrayUtility.RemoveAt(ref folds, i);
+                    }
+                    GUI.color = Color.white;
+                    EditorGUILayout.EndHorizontal();
+                    EditorGUILayout.Space();
                 }
+                serializedObject.ApplyModifiedProperties();
             }
             EditorGUILayout.EndVertical();
             GUILayout.Space(12f);
@@ -181,8 +177,7 @@ namespace Arthas.Common
             }
             else
             {
-                if (typesCache == null) typesCache = GetType().Assembly.GetTypes();
-                var type = Array.Find(typesCache, t => t.Name.Equals(property.type, StringComparison.CurrentCultureIgnoreCase));
+                var type = target.GetType().BaseType.GetGenericArguments().LastOrDefault();
                 if (type == null)
                 {
                     Debug.LogErrorFormat("Unknow type {0}, cannot draw this property!", property.type);
@@ -205,8 +200,12 @@ namespace Arthas.Common
             if (subProperty == null) return;
             if (type == typeof(Sprite))
             {
-                var name = string.Format(" [{0}] ", subProperty.objectReferenceValue ? subProperty.objectReferenceValue.name : string.Empty);
-                subProperty.objectReferenceValue = EditorGUILayout.ObjectField(propertyName + name, subProperty.objectReferenceValue, typeof(Sprite), true);
+                var name = subProperty.objectReferenceValue ? subProperty.objectReferenceValue.name : string.Empty;
+                var sprite = subProperty.objectReferenceValue as Sprite;
+                subProperty.objectReferenceValue = EditorGUILayout.ObjectField(propertyName + name,
+                    sprite,
+                    typeof(Sprite),
+                    true);
             }
             else
             {

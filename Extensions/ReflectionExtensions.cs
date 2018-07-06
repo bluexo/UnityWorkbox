@@ -7,7 +7,7 @@ namespace Arthas
 {
     public static class ReflectionExtensions
     {
-        public static Type[] GetAllTypes()
+        public static Type[] GetAllRuntimeTypes()
         {
             var uiTypes = new List<Type>();
 #if UNITY_2017_3_OR_NEWER && UNITY_EDITOR

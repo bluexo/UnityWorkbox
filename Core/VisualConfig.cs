@@ -1,5 +1,8 @@
 ﻿using System;
 using UnityEngine;
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 
 namespace Arthas.Common
 {
@@ -33,4 +36,34 @@ namespace Arthas.Common
             items = jArray.Value.ToArray();
         }
     }
+
+#if UNITY_EDITOR
+    public abstract class SingletonVisualConfig<TConfig, TItem> : VisualConfig<TItem>
+        where TConfig : VisualConfig<TItem>
+        where TItem : new()
+    {
+        public static TConfig Instance { get { return instance ?? (instance = LoadOrCreate()); } }
+
+        private static TConfig instance;
+
+        public static TConfig LoadOrCreate()
+        {
+            var assets = AssetDatabase.FindAssets(string.Format("t:{0}", typeof(TConfig).Name));
+            if (assets == null || assets.Length == 0)
+            {
+                var obj = CreateInstance<TConfig>();
+                var path = EditorUtility.SaveFilePanel("Save", Application.dataPath, typeof(TConfig).Name, "asset");
+                if (string.IsNullOrEmpty(path)) return null;
+                AssetDatabase.CreateAsset(obj, PathUtility.ToAssetsPath(path));
+                AssetDatabase.Refresh();
+                return LoadOrCreate();
+            }
+            else
+            {
+                var assetPath = AssetDatabase.GUIDToAssetPath(assets[0]);
+                return AssetDatabase.LoadAssetAtPath<TConfig>(assetPath);
+            }
+        }
+    }
+#endif
 }
