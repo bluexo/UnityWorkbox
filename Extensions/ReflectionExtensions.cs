@@ -11,7 +11,7 @@ namespace Arthas
         {
             var uiTypes = new List<Type>();
 #if UNITY_2017_3_OR_NEWER && UNITY_EDITOR
-            var uasms = CompilationPipeline.GetAssemblies();
+            var uasms = UnityEditor.Compilation.CompilationPipeline.GetAssemblies();
             foreach (var uasm in uasms)
             {
                 var dllPath = uasm.outputPath.ToSystemPath();
