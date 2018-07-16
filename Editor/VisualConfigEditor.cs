@@ -50,6 +50,9 @@ namespace Arthas.Common
             WriteToFile(path);
         }
 
+        protected virtual void DrawBeforeBody(SerializedProperty serializedProperty) { }
+        protected virtual void DrawAfterBody(SerializedProperty serializedProperty) { }
+
         private void WriteToFile(string path)
         {
             var conf = serializedObject.targetObject as IJsonSerializable;
@@ -96,6 +99,7 @@ namespace Arthas.Common
             EditorGUILayout.BeginVertical();
             if (itemsProperty != null)
             {
+                DrawBeforeBody(itemsProperty);
                 for (var i = 0; i < itemsProperty.arraySize; i++)
                 {
                     folds[i] = EditorGUILayout.Foldout(folds[i], string.Format("Item [{0}]", i));
@@ -120,6 +124,7 @@ namespace Arthas.Common
                     EditorGUILayout.EndHorizontal();
                     EditorGUILayout.Space();
                 }
+                DrawAfterBody(itemsProperty);
                 serializedObject.ApplyModifiedProperties();
             }
             EditorGUILayout.EndVertical();
@@ -189,12 +194,12 @@ namespace Arthas.Common
                 {
                     var field = fields[i];
                     if (field.IsNotSerialized) continue;
-                    DrawPropertyField(property, field.Name, field.FieldType);
+                    DrawFieldProperty(property, field.Name, field.FieldType);
                 }
             }
         }
 
-        protected virtual void DrawPropertyField(SerializedProperty property, string propertyName, Type type)
+        protected virtual void DrawFieldProperty(SerializedProperty property, string propertyName, Type type)
         {
             var subProperty = property.FindPropertyRelative(propertyName);
             if (subProperty == null) return;
