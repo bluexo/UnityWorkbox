@@ -72,7 +72,8 @@ namespace UnityEngine
         public void OnAfterDeserialize()
         {
             value = new Dictionary<TKey, TValue>();
-            for (var i = 0; i < Math.Min(keyList.Count, valueList.Count); i++) {
+            for (var i = 0; i < Math.Min(keyList.Count, valueList.Count); i++)
+            {
                 value.Add(keyList[i], valueList[i]);
             }
         }
@@ -102,7 +103,7 @@ namespace UnityEngine
 
         public static implicit operator Dictionary<TKey, TValue>(JsonDict<TKey, TValue> jsonDict)
         {
-            return jsonDict.value;
+            return jsonDict != null ? jsonDict.value : null;
         }
     }
 }

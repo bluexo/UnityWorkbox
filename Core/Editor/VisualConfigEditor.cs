@@ -56,6 +56,7 @@ namespace Arthas.Common
         private void WriteToFile(string path)
         {
             var conf = serializedObject.targetObject as IJsonSerializable;
+            if (conf == null) return;
             var json = conf.ToJson();
             File.WriteAllText(path, json);
         }
@@ -63,6 +64,7 @@ namespace Arthas.Common
         private void ReadFromFile(string path)
         {
             var conf = serializedObject.targetObject as IJsonSerializable;
+            if (conf == null) return;
             var json = File.ReadAllText(path);
             conf.FromJson(json);
         }
@@ -113,6 +115,7 @@ namespace Arthas.Common
                     {
                         ArrayUtility.Insert(ref folds, i, false);
                         itemsProperty.InsertArrayElementAtIndex(i);
+                        continue;
                     }
                     GUI.color = Color.red;
                     if (itemsProperty.arraySize > 1 && GUILayout.Button("-"))
