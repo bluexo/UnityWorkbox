@@ -4,14 +4,15 @@ using UnityEngine;
 using UnityEditor;
 using System;
 using System.Linq;
-using System.Linq.Expressions;
+
+#if USE_JSON_NET
 
 namespace Arthas.Common
 {
     public delegate T Draw<T>(string label, T value, params GUILayoutOption[] layoutOptions);
 
     [CustomEditor(typeof(GeneralVisualConfig), isFallback = true)]
-    public class JsonVisualConfigEditor : VisualConfigEditor
+    public class GeneralVisualConfigEditor : VisualConfigEditor
     {
         private int currentFieldIndex = 0;
         private object currentObject = null;
@@ -216,3 +217,4 @@ namespace Arthas.Common
         }
     }
 }
+#endif

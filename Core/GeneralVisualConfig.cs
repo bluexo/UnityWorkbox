@@ -11,6 +11,7 @@ using Newtonsoft.Json.Linq;
 namespace Arthas
 {
     using Arthas.Common;
+
     [Serializable]
     public class GeneralItem : ISerializationCallbackReceiver
     {
@@ -54,15 +55,14 @@ namespace Arthas
             }
             foreach (var field in Fields.Values)
             {
-                if (!field.IsUnityObject) continue;
-                if (!field.unityObjRef) continue;
+                if (!field.IsUnityObject || !field.unityObjRef) continue;
                 if (serializedObjects.TrueForAll(o => o.GetInstanceID() != field.unityObjRef.GetInstanceID()))
                     serializedObjects.Add(field.unityObjRef);
             }
         }
     }
 
-    [CreateAssetMenu(menuName = "Configs/CreateJsonVisualConfig")]
+    [CreateAssetMenu(menuName = "Configs/Create GeneralConfig")]
     public class GeneralVisualConfig : VisualConfig<GeneralItem> { }
 
     [Serializable]
@@ -229,6 +229,5 @@ namespace Arthas
             writer.WriteEndObject();
         }
     }
-#endif
-
 }
+#endif
