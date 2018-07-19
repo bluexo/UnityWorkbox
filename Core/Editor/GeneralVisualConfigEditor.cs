@@ -27,7 +27,7 @@ namespace Arthas.Common
             {typeof(double), new Draw<double>(EditorGUILayout.DoubleField)},
             {typeof(bool), new Draw<bool>(EditorGUILayout.Toggle)},
             {typeof(string), new Draw<string>(EditorGUILayout.TextField)},
-            {typeof(Enum), new Draw<Enum>(EditorGUILayout.EnumMaskField)},
+            {typeof(Enum), new Func<string, object, GUILayoutOption[],int>(DrawEnumType)},
 
             {typeof(Vector2), new Draw<Vector2>(EditorGUILayout.Vector2Field)},
             {typeof(Vector2Int), new Draw<Vector2Int>(EditorGUILayout.Vector2IntField)},
@@ -41,8 +41,7 @@ namespace Arthas.Common
 
             {typeof(Bounds), new Draw<Bounds>(EditorGUILayout.BoundsField)},
             {typeof(BoundsInt), new Draw<BoundsInt>(EditorGUILayout.BoundsIntField)},
-            {typeof(UnityEngine.Object), null},
-            {typeof(object), new Action<SerializedProperty>(DrawCustomType) }
+            {typeof(UnityEngine.Object), new Func<UnityEngine.Object,Type,bool,UnityEngine.Object>(DrawObjectField)},
         };
         private Dictionary<string, ObjectWrapper> templete = new Dictionary<string, ObjectWrapper>();
         private GeneralVisualConfig Config { get { return target as GeneralVisualConfig; } }
@@ -204,9 +203,29 @@ namespace Arthas.Common
                     Convert.ChangeType(wrapper.objRef, type),
                     new GUILayoutOption[] { });
             else
-                wrapper.unityObjRef = EditorGUILayout.ObjectField(wrapper.unityObjRef,
+                wrapper.unityObjRef = (UnityEngine.Object)invoker.DynamicInvoke(wrapper.unityObjRef = wrapper.unityObjRef ?? new UnityEngine.Object(),
                     wrapper.unityObjRef.GetType(),
                     true);
+        }
+
+        public static UnityEngine.Object DrawObjectField(UnityEngine.Object obj, Type type, bool sceneObject = true)
+        {
+            var realType = obj.GetType();
+            if (realType == typeof(Sprite))
+            {
+                var sprite = obj as Sprite;
+                return EditorGUILayout.ObjectField(obj.name,
+                    sprite,
+                    typeof(Sprite),
+                    true);
+            }
+            return EditorGUILayout.ObjectField(obj, realType, sceneObject);
+        }
+
+        public static int DrawEnumType(string label, object value, params GUILayoutOption[] layoutOptions)
+        {
+            var intValue = Convert.ChangeType(value, typeof(int));
+            return 1;
         }
 
         public static void DrawCustomType(SerializedProperty property)

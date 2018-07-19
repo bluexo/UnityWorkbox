@@ -11,6 +11,7 @@ using Newtonsoft.Json.Linq;
 namespace Arthas
 {
     using Arthas.Common;
+    using System.Reflection;
 
     [Serializable]
     public class GeneralItem : ISerializationCallbackReceiver
@@ -28,7 +29,7 @@ namespace Arthas
             dictionaryConverter = new DictionaryConverter(serializedObjects, wrapperConverter);
         }
 
-        public void OnAfterDeserialize()
+        public virtual void OnAfterDeserialize()
         {
             try
             {
@@ -41,7 +42,7 @@ namespace Arthas
             }
         }
 
-        public void OnBeforeSerialize()
+        public virtual void OnBeforeSerialize()
         {
             try
             {
@@ -60,11 +61,40 @@ namespace Arthas
             }
         }
 
+        public virtual T Get<T>() where T : new()
+        {
+            var t = new T();
+            foreach (var field in fields)
+            {
+                var member = typeof(T).GetField(field.Key);
+                if (member == null)
+                {
+                    Debug.Log("Cannot found field :" + field.Key);
+                    continue;
+                }
+                try { member.SetValue(t, field.Value.GetObject()); }
+                catch { continue; }
+            }
+            return t;
+        }
+
         public string GetJsonString() { return json; }
     }
 
     [CreateAssetMenu(menuName = "Configs/Create GeneralConfig")]
-    public class GeneralVisualConfig : VisualConfig<GeneralItem> { }
+    public class GeneralVisualConfig : VisualConfig<GeneralItem>
+    {
+        public List<T> GetItems<T>() where T : new()
+        {
+            var array = new List<T>();
+            for (var i = 0; i < items.Length; i++)
+            {
+                var t = items[i].Get<T>();
+                array.Add(t);
+            }
+            return array;
+        }
+    }
 
     [Serializable]
     public struct ObjectWrapper
@@ -78,10 +108,8 @@ namespace Arthas
             objRef = null;
             unityObjRef = null;
             typeName = string.Format("{0},{1}", obj.GetType().FullName, obj.GetType().Assembly.FullName);
-            if (IsUnityObject)
-                unityObjRef = obj as UObject;
-            else
-                objRef = obj;
+            if (IsUnityObject) unityObjRef = obj as UObject;
+            else objRef = obj;
         }
 
         public bool IsUnityObject
@@ -93,13 +121,14 @@ namespace Arthas
             }
         }
 
-        public Type Type
+        public object GetObject()
         {
-            get
-            {
-                return Type.GetType(typeName);
-            }
+            if (objRef != null) return objRef;
+            else if (IsUnityObject) return unityObjRef;
+            else return null;
         }
+
+        public Type Type { get { return Type.GetType(typeName); } }
     }
 
     /// <summary>
@@ -182,6 +211,7 @@ namespace Arthas
                 else if (prevProperty == ObjRef)
                 {
                     target.objRef = reader.Value;
+                    target.unityObjRef = null;
                     prevProperty = null;
                 }
                 else if (prevProperty == InstanceId)
@@ -192,7 +222,11 @@ namespace Arthas
                         if (SerializedObjects != null)
                         {
                             var obj = SerializedObjects.Find(i => i != null && i.GetInstanceID() == id);
-                            if (obj) target.unityObjRef = obj;
+                            if (obj)
+                            {
+                                target.objRef = null;
+                                target.unityObjRef = obj;
+                            }
                         }
                     }
                     prevProperty = null;
@@ -224,7 +258,9 @@ namespace Arthas
 
             writer.WriteStartObject();
             writer.WritePropertyName("instanceID");
-            writer.WriteValue(wrapper.IsUnityObject ? wrapper.unityObjRef.GetInstanceID() : 0);
+            var id = 0;
+            try { id = wrapper.unityObjRef.GetInstanceID(); } catch { }
+            writer.WriteValue(id);
             writer.WriteEndObject();
 
             writer.WriteEndObject();
