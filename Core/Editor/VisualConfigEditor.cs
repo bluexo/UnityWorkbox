@@ -114,10 +114,9 @@ namespace Arthas.Common
                     GUI.color = Color.green;
                     if (GUILayout.Button("+"))
                     {
-                        ArrayUtility.Insert(ref folds, i, false);
                         BeforeInsertItem(i);
                         itemsProperty.InsertArrayElementAtIndex(i);
-                        continue;
+                        ArrayUtility.Insert(ref folds, i, false);
                     }
                     GUI.color = Color.red;
                     if (itemsProperty.arraySize > 1 && GUILayout.Button("-"))
@@ -130,19 +129,18 @@ namespace Arthas.Common
                     EditorGUILayout.EndHorizontal();
                     EditorGUILayout.Space();
                 }
-                DrawAfterBody(itemsProperty);
                 serializedObject.ApplyModifiedProperties();
+                DrawAfterBody(itemsProperty);
             }
             EditorGUILayout.EndVertical();
             GUILayout.Space(12f);
             importOption = EditorGUILayout.Foldout(importOption, "Import And Export");
             if (importOption)
             {
-                var id = serializedObject.targetObject.GetInstanceID();
-                var name = EditorPrefs.GetString(id.ToString(), target.name);
+                var id = Mathf.Abs(serializedObject.targetObject.GetInstanceID());
+                var name = EditorPrefs.GetString(id.ToString(), target.name + "_" + id.ToString());
                 var fileName = EditorGUILayout.TextField("FileName", name);
-                if (fileName != name)
-                    EditorPrefs.SetString(id.ToString(), fileName);
+                if (fileName != name) EditorPrefs.SetString(id.ToString(), fileName);
 
                 var r = EditorGUILayout.BeginHorizontal();
                 if (GUILayout.Button("To JSON", EditorStyles.miniButtonLeft, GUILayout.Height(25f)))

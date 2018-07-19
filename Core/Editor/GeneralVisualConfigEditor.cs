@@ -45,7 +45,7 @@ namespace Arthas.Common
             {typeof(object), new Action<SerializedProperty>(DrawCustomType) }
         };
         private Dictionary<string, ObjectWrapper> templete = new Dictionary<string, ObjectWrapper>();
-        private GeneralVisualConfig TargetConfig { get { return target as GeneralVisualConfig; } }
+        private GeneralVisualConfig Config { get { return target as GeneralVisualConfig; } }
 
         protected override void OnEnable()
         {
@@ -59,8 +59,8 @@ namespace Arthas.Common
             var config = target as GeneralVisualConfig;
             if (config.Items.Length <= 0) return;
             var item = config.Items.FirstOrDefault();
-            if (item.Fields == null) return;
-            foreach (var field in item.Fields) templete.Add(field.Key, field.Value);
+            if (item.fields == null) return;
+            foreach (var field in item.fields) templete.Add(field.Key, field.Value);
         }
 
         private void ApplyChanges()
@@ -68,9 +68,9 @@ namespace Arthas.Common
             var config = target as GeneralVisualConfig;
             foreach (var item in config.Items)
             {
-                if (item.Fields == null)
-                    item.Fields = new Dictionary<string, ObjectWrapper>();
-                var value = item.Fields;
+                if (item.fields == null) item.fields = new Dictionary<string, ObjectWrapper>();
+                var value = item.fields;
+                if (value == null) continue;
                 foreach (var field in templete)
                 {
                     if (!value.ContainsKey(field.Key)) value.Add(field.Key, field.Value);
@@ -138,7 +138,7 @@ namespace Arthas.Common
             }
             else if (remove)
             {
-                if (templete.Count != TargetConfig.Items.Length) ResetTemplete();
+                if (templete.Count != Config.Items.Length) ResetTemplete();
                 var keys = templete.Keys.ToArray();
                 for (var i = 0; i < keys.Length; i++)
                 {
@@ -177,27 +177,17 @@ namespace Arthas.Common
 
         public override void DrawItemProperty(SerializedProperty itemProperty, int index)
         {
-            var config = target as GeneralVisualConfig;
-            if (index >= config.Items.Length) return;
-            var item = config.Items[index];
-            if (item.Fields == null) return;
-            var keys = new List<string>(item.Fields.Keys);
+            if (index >= Config.Items.Length) return;
+            var item = Config.Items[index];
+            if (item.fields == null) return;
+            var keys = new List<string>(item.fields.Keys);
             for (var i = 0; i < keys.Count; i++)
             {
                 GUILayout.BeginHorizontal();
                 var key = keys[i];
-                var value = item.Fields[key];
-                try
-                {
-                    DrawElement(key, ref value);
-                }
-                catch (Exception ex)
-                {
-                    Debug.LogErrorFormat("FieleName: {0} | FieldType:{1} | FieldValue: {2}]", key, value.Type.FullName, value.objRef ?? value.unityObjRef);
-                    Debug.LogError("JSON:" + config.ToJson());
-                    Debug.LogErrorFormat("{0}\n{1}", ex.Message, ex.StackTrace);
-                }
-                item.Fields[key] = value;
+                var value = item.fields[key];
+                DrawElement(key, ref value);
+                item.fields[key] = value;
                 GUILayout.EndHorizontal();
             }
             serializedObject.ApplyModifiedProperties();
@@ -211,7 +201,7 @@ namespace Arthas.Common
             var invoker = TypeDrawDelegateMap[type];
             if (wrapper.objRef != null)
                 wrapper.objRef = invoker.DynamicInvoke("",
-                    wrapper.objRef,
+                    Convert.ChangeType(wrapper.objRef, type),
                     new GUILayoutOption[] { });
             else
                 wrapper.unityObjRef = EditorGUILayout.ObjectField(wrapper.unityObjRef,

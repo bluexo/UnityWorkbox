@@ -15,9 +15,8 @@ namespace Arthas
     [Serializable]
     public class GeneralItem : ISerializationCallbackReceiver
     {
-        public Dictionary<string, ObjectWrapper> Fields = new Dictionary<string, ObjectWrapper>();
-
-        [SerializeField] private string Json = string.Empty;
+        public Dictionary<string, ObjectWrapper> fields = new Dictionary<string, ObjectWrapper>();
+        [SerializeField] private string json = string.Empty;
         [SerializeField] private List<UObject> serializedObjects = new List<UObject>();
 
         private readonly DictionaryConverter dictionaryConverter;
@@ -34,11 +33,11 @@ namespace Arthas
             try
             {
                 var converter = new DictionaryConverter(serializedObjects, wrapperConverter);
-                Fields = JsonConvert.DeserializeObject<Dictionary<string, ObjectWrapper>>(Json, dictionaryConverter);
+                fields = JsonConvert.DeserializeObject<Dictionary<string, ObjectWrapper>>(json, dictionaryConverter);
             }
             catch (Exception ex)
             {
-                Debug.LogErrorFormat("Json:{0},Error:{1},Detail:{2}", Json, ex.Message, ex.StackTrace);
+                Debug.LogErrorFormat("Json:{0},Error:{1},Detail:{2}", json, ex.Message, ex.StackTrace);
             }
         }
 
@@ -46,26 +45,26 @@ namespace Arthas
         {
             try
             {
-                if (Fields == null || Fields.Count <= 0) return;
-                Json = JsonConvert.SerializeObject(Fields, dictionaryConverter, wrapperConverter);
+                if (fields == null) return;
+                json = JsonConvert.SerializeObject(fields, dictionaryConverter, wrapperConverter);
             }
             catch (Exception ex)
             {
-                Debug.LogErrorFormat("Json:{0},Error:{1},Detail:{2}", Json, ex.Message, ex.StackTrace);
+                Debug.LogErrorFormat("Json:{0},Error:{1},Detail:{2}", json, ex.Message, ex.StackTrace);
             }
-            foreach (var field in Fields.Values)
+            foreach (var field in fields.Values)
             {
                 if (!field.IsUnityObject || !field.unityObjRef) continue;
                 if (serializedObjects.TrueForAll(o => o.GetInstanceID() != field.unityObjRef.GetInstanceID()))
                     serializedObjects.Add(field.unityObjRef);
             }
         }
+
+        public string GetJsonString() { return json; }
     }
 
     [CreateAssetMenu(menuName = "Configs/Create GeneralConfig")]
-    public class GeneralVisualConfig : VisualConfig<GeneralItem>
-    {
-    }
+    public class GeneralVisualConfig : VisualConfig<GeneralItem> { }
 
     [Serializable]
     public struct ObjectWrapper
