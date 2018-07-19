@@ -45,6 +45,7 @@ namespace Arthas.Common
             {typeof(object), new Action<SerializedProperty>(DrawCustomType) }
         };
         private Dictionary<string, ObjectWrapper> templete = new Dictionary<string, ObjectWrapper>();
+        private GeneralVisualConfig TargetConfig { get { return target as GeneralVisualConfig; } }
 
         protected override void OnEnable()
         {
@@ -58,10 +59,8 @@ namespace Arthas.Common
             var config = target as GeneralVisualConfig;
             if (config.Items.Length <= 0) return;
             var item = config.Items.FirstOrDefault();
-            if (item.Fields == null)
-                return;
-            foreach (var field in item.Fields)
-                templete.Add(field.Key, field.Value);
+            if (item.Fields == null) return;
+            foreach (var field in item.Fields) templete.Add(field.Key, field.Value);
         }
 
         private void ApplyChanges()
@@ -74,8 +73,7 @@ namespace Arthas.Common
                 var value = item.Fields;
                 foreach (var field in templete)
                 {
-                    if (!value.ContainsKey(field.Key))
-                        value.Add(field.Key, field.Value);
+                    if (!value.ContainsKey(field.Key)) value.Add(field.Key, field.Value);
                 }
                 var removeList = new List<string>();
                 foreach (var field in value)
@@ -140,6 +138,7 @@ namespace Arthas.Common
             }
             else if (remove)
             {
+                if (templete.Count != TargetConfig.Items.Length) ResetTemplete();
                 var keys = templete.Keys.ToArray();
                 for (var i = 0; i < keys.Length; i++)
                 {
@@ -150,7 +149,7 @@ namespace Arthas.Common
                         var remove = GUILayout.Button("X", GUILayout.Width(45f));
                         GUI.color = Color.white;
                         GUILayout.Label(key);
-                        GUILayout.Label(templete[key].typeName);
+                        GUILayout.Label(templete[key].Type.FullName);
                         if (remove)
                         {
                             templete.Remove(key);
@@ -185,10 +184,19 @@ namespace Arthas.Common
             var keys = new List<string>(item.Fields.Keys);
             for (var i = 0; i < keys.Count; i++)
             {
+                GUILayout.BeginHorizontal();
                 var key = keys[i];
                 var value = item.Fields[key];
-                GUILayout.BeginHorizontal();
-                DrawElement(key, ref value);
+                try
+                {
+                    DrawElement(key, ref value);
+                }
+                catch (Exception ex)
+                {
+                    Debug.LogErrorFormat("FieleName: {0} | FieldType:{1} | FieldValue: {2}]", key, value.Type.FullName, value.objRef ?? value.unityObjRef);
+                    Debug.LogError("JSON:" + config.ToJson());
+                    Debug.LogErrorFormat("{0}\n{1}", ex.Message, ex.StackTrace);
+                }
                 item.Fields[key] = value;
                 GUILayout.EndHorizontal();
             }

@@ -63,7 +63,9 @@ namespace Arthas
     }
 
     [CreateAssetMenu(menuName = "Configs/Create GeneralConfig")]
-    public class GeneralVisualConfig : VisualConfig<GeneralItem> { }
+    public class GeneralVisualConfig : VisualConfig<GeneralItem>
+    {
+    }
 
     [Serializable]
     public struct ObjectWrapper

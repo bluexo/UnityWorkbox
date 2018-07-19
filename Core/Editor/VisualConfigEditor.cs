@@ -17,7 +17,6 @@ namespace Arthas.Common
     public class VisualConfigEditor : Editor
     {
         protected SerializedProperty itemsProperty, backupDirProperty, backupTagProperty;
-
         protected const string RuntimeObjRefNamePrefix = "PPtr";
         protected bool importOption;
         protected bool[] folds;
@@ -52,6 +51,8 @@ namespace Arthas.Common
 
         protected virtual void DrawBeforeBody(SerializedProperty serializedProperty) { }
         protected virtual void DrawAfterBody(SerializedProperty serializedProperty) { }
+        protected virtual void BeforeInsertItem(int index) { }
+        protected virtual void BeforeDeleteItem(int index) { }
 
         private void WriteToFile(string path)
         {
@@ -114,12 +115,14 @@ namespace Arthas.Common
                     if (GUILayout.Button("+"))
                     {
                         ArrayUtility.Insert(ref folds, i, false);
+                        BeforeInsertItem(i);
                         itemsProperty.InsertArrayElementAtIndex(i);
                         continue;
                     }
                     GUI.color = Color.red;
                     if (itemsProperty.arraySize > 1 && GUILayout.Button("-"))
                     {
+                        BeforeDeleteItem(i);
                         itemsProperty.DeleteArrayElementAtIndex(i);
                         ArrayUtility.RemoveAt(ref folds, i);
                     }
