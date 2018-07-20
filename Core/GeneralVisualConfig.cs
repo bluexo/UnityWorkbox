@@ -216,6 +216,9 @@ namespace Arthas
         }
     }
 
+    /// <summary>
+    /// 对象包装装唤起
+    /// </summary>
     public class ObjectWrapperConverter : JsonConverter
     {
         const string TypeName = "typeName",

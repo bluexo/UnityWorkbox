@@ -83,7 +83,7 @@ namespace Arthas.Common
                     value.Remove(key);
                 }
             }
-            serializedObject.ApplyModifiedProperties();
+            EditorUtility.SetDirty(Config);
             ResetTemplete();
         }
 
@@ -199,7 +199,6 @@ namespace Arthas.Common
                 item.fields[key] = value;
                 GUILayout.EndHorizontal();
             }
-            serializedObject.ApplyModifiedProperties();
         }
 
         private void DrawElement(string name, ref ObjectWrapper wrapper)
@@ -221,6 +220,7 @@ namespace Arthas.Common
                     wrapper.unityObjRef.GetType(),
                     true);
             }
+            EditorUtility.SetDirty(Config);
         }
 
         public static UnityEngine.Object DrawObjectField(UnityEngine.Object obj, Type type, bool sceneObject = true)
