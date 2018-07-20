@@ -84,15 +84,9 @@ namespace Arthas
     [CreateAssetMenu(menuName = "Configs/Create GeneralConfig")]
     public class GeneralVisualConfig : VisualConfig<GeneralItem>
     {
-        public List<T> GetItems<T>() where T : new()
+        public T[] GetItems<T>() where T : new()
         {
-            var array = new List<T>();
-            for (var i = 0; i < items.Length; i++)
-            {
-                var t = items[i].Get<T>();
-                array.Add(t);
-            }
-            return array;
+            return Array.ConvertAll(items, c => c.Get<T>());
         }
     }
 
@@ -164,10 +158,20 @@ namespace Arthas
                 else if (currentKey != null)
                 {
                     var jObject = JObject.Load(reader);
-                    var id = jObject["unityObjRef"]["instanceID"].Value<int>();
-                    var obj = Target.Find(u => u.GetInstanceID() == id);
-                    var wrapper = jObject.ToObject<ObjectWrapper>();
-                    if (obj != null) wrapper.unityObjRef = obj;
+                    var instanceId = jObject["unityObjRef"]["instanceID"].Value<int>();
+                    var unityObject = Target.Find(u => u.GetInstanceID() == instanceId);
+                    if (!serializer.Converters.Contains(WrapperConverter))
+                        serializer.Converters.Add(WrapperConverter);
+                    var wrapper = jObject.ToObject<ObjectWrapper>(serializer);
+                    if (unityObject == null && !wrapper.IsUnityObject)
+                    {
+                        var propertyType = wrapper.Type;
+                        wrapper.objRef = jObject["objRef"].ToObject(propertyType);
+                    }
+                    else
+                    {
+                        wrapper.unityObjRef = unityObject;
+                    }
                     dict.Add(currentKey, wrapper);
                     currentKey = null;
                 }
@@ -210,25 +214,38 @@ namespace Arthas
                 }
                 else if (prevProperty == ObjRef)
                 {
-                    target.objRef = reader.Value;
+                    //var propertyType = target.Type;
+                    //var value = reader.Value ?? Activator.CreateInstance(propertyType);
+                    //if (propertyType.IsPrimitive
+                    //    || propertyType == typeof(string)
+                    //    || reader.Value == null)
+                    //{
+                    //    target.objRef = value;
+                    //}
+                    //else 
+                    //{
+                    //    var json = value.ToString();
+                    //    target.objRef = JsonUtility.FromJson(json, propertyType);
+                    //}
                     target.unityObjRef = null;
                     prevProperty = null;
                 }
                 else if (prevProperty == InstanceId)
                 {
-                    if (reader.Value != null)
-                    {
-                        var id = Convert.ToInt32(reader.Value);
-                        if (SerializedObjects != null)
-                        {
-                            var obj = SerializedObjects.Find(i => i != null && i.GetInstanceID() == id);
-                            if (obj)
-                            {
-                                target.objRef = null;
-                                target.unityObjRef = obj;
-                            }
-                        }
-                    }
+                    //if (reader.Value != null)
+                    //{
+                    //    var id = Convert.ToInt32(reader.Value);
+                    //    if (SerializedObjects != null)
+                    //    {
+                    //        var obj = SerializedObjects.Find(i => i != null && i.GetInstanceID() == id);
+                    //        if (obj)
+                    //        {
+                    //            target.objRef = null;
+                    //            target.unityObjRef = obj;
+                    //        }
+                    //    }
+                    //}
+                    target.unityObjRef = null;
                     prevProperty = null;
                 }
             }
