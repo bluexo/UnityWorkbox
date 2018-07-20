@@ -18,7 +18,7 @@ namespace Arthas
     {
         public Dictionary<string, ObjectWrapper> fields = new Dictionary<string, ObjectWrapper>();
         [SerializeField] private string json = string.Empty;
-        [SerializeField] private List<UObject> serializedObjects = new List<UObject>();
+        [SerializeField] private List<UnityObjectWrapper> serializedObjects = new List<UnityObjectWrapper>();
 
         private readonly DictionaryConverter dictionaryConverter;
         private readonly ObjectWrapperConverter wrapperConverter;
@@ -44,20 +44,40 @@ namespace Arthas
 
         public virtual void OnBeforeSerialize()
         {
+            if (fields == null) return;
+            var keys = new List<string>(fields.Keys);
+            serializedObjects.Clear();
+            for (var i = 0; i < keys.Count; i++)
+            {
+                var key = keys[i];
+                var field = fields[key];
+                if (!field.IsUnityObject || !field.unityObjRef) continue;
+                var exists = serializedObjects.Exists(s => s.mark == field.mark);
+                if (exists)
+                {
+                    var wrapper = new ObjectWrapper
+                    {
+                        mark = Guid.NewGuid().ToString(),
+                        objRef = field.objRef,
+                        typeName = field.typeName,
+                        unityObjRef = field.unityObjRef,
+                    };
+                    fields[key] = wrapper;
+                }
+                var uwrapper = new UnityObjectWrapper()
+                {
+                    mark = fields[key].mark,
+                    unityObject = field.unityObjRef
+                };
+                serializedObjects.Add(uwrapper);
+            }
             try
             {
-                if (fields == null) return;
                 json = JsonConvert.SerializeObject(fields, dictionaryConverter, wrapperConverter);
             }
             catch (Exception ex)
             {
                 Debug.LogErrorFormat("Json:{0},Error:{1},Detail:{2}", json, ex.Message, ex.StackTrace);
-            }
-            foreach (var field in fields.Values)
-            {
-                if (!field.IsUnityObject || !field.unityObjRef) continue;
-                if (serializedObjects.TrueForAll(o => o.GetInstanceID() != field.unityObjRef.GetInstanceID()))
-                    serializedObjects.Add(field.unityObjRef);
             }
         }
 
@@ -91,9 +111,17 @@ namespace Arthas
     }
 
     [Serializable]
+    public class UnityObjectWrapper
+    {
+        public string mark;
+        public UObject unityObject;
+    }
+
+    [Serializable]
     public struct ObjectWrapper
     {
         public string typeName;
+        public string mark;
         public object objRef;
         public UObject unityObjRef;
 
@@ -101,6 +129,7 @@ namespace Arthas
         {
             objRef = null;
             unityObjRef = null;
+            mark = Guid.NewGuid().ToString();
             typeName = string.Format("{0},{1}", obj.GetType().FullName, obj.GetType().Assembly.FullName);
             if (IsUnityObject) unityObjRef = obj as UObject;
             else objRef = obj;
@@ -131,9 +160,9 @@ namespace Arthas
     public class DictionaryConverter : JsonConverter
     {
         private ObjectWrapperConverter WrapperConverter;
-        private readonly List<UObject> Target;
+        private readonly List<UnityObjectWrapper> Target;
 
-        public DictionaryConverter(List<UObject> items, ObjectWrapperConverter converter)
+        public DictionaryConverter(List<UnityObjectWrapper> items, ObjectWrapperConverter converter)
         {
             WrapperConverter = converter;
             Target = items;
@@ -159,18 +188,18 @@ namespace Arthas
                 {
                     var jObject = JObject.Load(reader);
                     var instanceId = jObject["unityObjRef"]["instanceID"].Value<int>();
-                    var unityObject = Target.Find(u => u.GetInstanceID() == instanceId);
                     if (!serializer.Converters.Contains(WrapperConverter))
                         serializer.Converters.Add(WrapperConverter);
                     var wrapper = jObject.ToObject<ObjectWrapper>(serializer);
-                    if (unityObject == null && !wrapper.IsUnityObject)
+                    var target = Target.Find(t => t.mark == wrapper.mark);
+                    if (target == null)
                     {
                         var propertyType = wrapper.Type;
                         wrapper.objRef = jObject["objRef"].ToObject(propertyType);
                     }
                     else
                     {
-                        wrapper.unityObjRef = unityObject;
+                        wrapper.unityObjRef = target.unityObject;
                     }
                     dict.Add(currentKey, wrapper);
                     currentKey = null;
@@ -189,10 +218,13 @@ namespace Arthas
 
     public class ObjectWrapperConverter : JsonConverter
     {
-        const string TypeName = "typeName", ObjRef = "objRef", UnityObjRef = "unityObjRef", InstanceId = "instanceID";
-        public List<UObject> SerializedObjects { get; private set; }
+        const string TypeName = "typeName",
+            ObjRef = "objRef",
+            UnityObjRef = "unityObjRef",
+            Mark = "mark";
+        public List<UnityObjectWrapper> SerializedObjects { get; private set; }
 
-        public ObjectWrapperConverter(List<UObject> objects) { SerializedObjects = objects; }
+        public ObjectWrapperConverter(List<UnityObjectWrapper> objects) { SerializedObjects = objects; }
 
         public override bool CanConvert(Type objectType) { return objectType == typeof(ObjectWrapper); }
 
@@ -212,40 +244,9 @@ namespace Arthas
                     target.typeName = reader.Value as string;
                     prevProperty = null;
                 }
-                else if (prevProperty == ObjRef)
+                else if (prevProperty == Mark)
                 {
-                    //var propertyType = target.Type;
-                    //var value = reader.Value ?? Activator.CreateInstance(propertyType);
-                    //if (propertyType.IsPrimitive
-                    //    || propertyType == typeof(string)
-                    //    || reader.Value == null)
-                    //{
-                    //    target.objRef = value;
-                    //}
-                    //else 
-                    //{
-                    //    var json = value.ToString();
-                    //    target.objRef = JsonUtility.FromJson(json, propertyType);
-                    //}
-                    target.unityObjRef = null;
-                    prevProperty = null;
-                }
-                else if (prevProperty == InstanceId)
-                {
-                    //if (reader.Value != null)
-                    //{
-                    //    var id = Convert.ToInt32(reader.Value);
-                    //    if (SerializedObjects != null)
-                    //    {
-                    //        var obj = SerializedObjects.Find(i => i != null && i.GetInstanceID() == id);
-                    //        if (obj)
-                    //        {
-                    //            target.objRef = null;
-                    //            target.unityObjRef = obj;
-                    //        }
-                    //    }
-                    //}
-                    target.unityObjRef = null;
+                    target.mark = reader.Value as string;
                     prevProperty = null;
                 }
             }
@@ -260,6 +261,7 @@ namespace Arthas
 
             writer.WritePropertyName("typeName");
             writer.WriteValue(wrapper.typeName);
+
             writer.WritePropertyName("objRef");
             var json = string.Empty;
             try
@@ -271,8 +273,11 @@ namespace Arthas
                 json = JsonUtility.ToJson(wrapper.objRef);
             }
             writer.WriteRawValue(json);
-            writer.WritePropertyName("unityObjRef");
 
+            writer.WritePropertyName("mark");
+            writer.WriteValue(wrapper.mark);
+
+            writer.WritePropertyName("unityObjRef");
             writer.WriteStartObject();
             writer.WritePropertyName("instanceID");
             var id = 0;

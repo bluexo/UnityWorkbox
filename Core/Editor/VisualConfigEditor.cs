@@ -53,6 +53,8 @@ namespace Arthas.Common
         protected virtual void DrawAfterBody(SerializedProperty serializedProperty) { }
         protected virtual void BeforeInsertItem(int index) { }
         protected virtual void BeforeDeleteItem(int index) { }
+        protected virtual void AfterInsertItem(int index) { }
+        protected virtual void AfterDeleteItem(int index) { }
 
         private void WriteToFile(string path)
         {
@@ -117,6 +119,7 @@ namespace Arthas.Common
                         BeforeInsertItem(i);
                         itemsProperty.InsertArrayElementAtIndex(i);
                         ArrayUtility.Insert(ref folds, i, false);
+                        AfterInsertItem(i);
                     }
                     GUI.color = Color.red;
                     if (itemsProperty.arraySize > 1 && GUILayout.Button("-"))
@@ -124,6 +127,7 @@ namespace Arthas.Common
                         BeforeDeleteItem(i);
                         itemsProperty.DeleteArrayElementAtIndex(i);
                         ArrayUtility.RemoveAt(ref folds, i);
+                        AfterDeleteItem(i);
                     }
                     GUI.color = Color.white;
                     EditorGUILayout.EndHorizontal();

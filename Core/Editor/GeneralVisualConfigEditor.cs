@@ -64,8 +64,7 @@ namespace Arthas.Common
 
         private void ApplyChanges()
         {
-            var config = target as GeneralVisualConfig;
-            foreach (var item in config.Items)
+            foreach (var item in Config.Items)
             {
                 if (item.fields == null) item.fields = new Dictionary<string, ObjectWrapper>();
                 var value = item.fields;
@@ -174,6 +173,17 @@ namespace Arthas.Common
             return value;
         }
 
+        protected override void AfterInsertItem(int index)
+        {
+            base.AfterInsertItem(index);
+            var property = itemsProperty.GetArrayElementAtIndex(index);
+        }
+
+        protected override void BeforeDeleteItem(int index)
+        {
+            base.BeforeDeleteItem(index);
+        }
+
         public override void DrawItemProperty(SerializedProperty itemProperty, int index)
         {
             if (index >= Config.Items.Length) return;
@@ -199,13 +209,18 @@ namespace Arthas.Common
             if (!TypeDrawDelegateMap.ContainsKey(type)) return;
             var invoker = TypeDrawDelegateMap[type];
             if (wrapper.objRef != null)
+            {
                 wrapper.objRef = invoker.DynamicInvoke("",
                     Convert.ChangeType(wrapper.objRef, type),
                     new GUILayoutOption[] { });
+            }
             else
+            {
+                wrapper.mark = Guid.NewGuid().ToString();
                 wrapper.unityObjRef = (UnityEngine.Object)invoker.DynamicInvoke(wrapper.unityObjRef = wrapper.unityObjRef ?? new UnityEngine.Object(),
                     wrapper.unityObjRef.GetType(),
                     true);
+            }
         }
 
         public static UnityEngine.Object DrawObjectField(UnityEngine.Object obj, Type type, bool sceneObject = true)
