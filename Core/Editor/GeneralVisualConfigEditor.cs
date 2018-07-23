@@ -28,6 +28,7 @@ namespace Arthas.Common
             {typeof(bool), new Draw<bool>(EditorGUILayout.Toggle)},
             {typeof(string), new Draw<string>(EditorGUILayout.TextField)},
             {typeof(Enum), new Func<string, object, GUILayoutOption[],int>(DrawEnumType)},
+            {typeof(Array), new Action<IList>(DrawArrayType)},
 
             {typeof(Vector2), new Draw<Vector2>(EditorGUILayout.Vector2Field)},
             {typeof(Vector2Int), new Draw<Vector2Int>(EditorGUILayout.Vector2IntField)},
@@ -41,8 +42,10 @@ namespace Arthas.Common
 
             {typeof(Bounds), new Draw<Bounds>(EditorGUILayout.BoundsField)},
             {typeof(BoundsInt), new Draw<BoundsInt>(EditorGUILayout.BoundsIntField)},
-            {typeof(UnityEngine.Object), new Func<UnityEngine.Object,Type,bool,UnityEngine.Object>(DrawObjectField)},
+            {typeof(UnityEngine.Object), new Func<UnityEngine.Object,Type,bool,UnityEngine.Object>(DrawObjectField)}
         };
+
+
         private Dictionary<string, ObjectWrapper> templete = new Dictionary<string, ObjectWrapper>();
         private GeneralVisualConfig Config { get { return target as GeneralVisualConfig; } }
 
@@ -184,7 +187,7 @@ namespace Arthas.Common
             base.BeforeDeleteItem(index);
         }
 
-        public override void DrawItemProperty(SerializedProperty itemProperty, int index)
+        public override void DrawItemProperty(SerializedProperty itemProperty, int index, GUIContent label = null)
         {
             if (index >= Config.Items.Length) return;
             var item = Config.Items[index];
@@ -207,7 +210,11 @@ namespace Arthas.Common
             var type = wrapper.Type;
             if (!TypeDrawDelegateMap.ContainsKey(type)) return;
             var invoker = TypeDrawDelegateMap[type];
-            if (wrapper.objRef != null)
+            if (wrapper.Type.IsArray)
+            {
+                DrawArrayType(wrapper.objRef as IList);
+            }
+            else if (wrapper.objRef != null)
             {
                 wrapper.objRef = invoker.DynamicInvoke("",
                     Convert.ChangeType(wrapper.objRef, type),
@@ -246,6 +253,11 @@ namespace Arthas.Common
         public static void DrawCustomType(SerializedProperty property)
         {
 
+        }
+
+        private static void DrawArrayType(IList list)
+        {
+            
         }
     }
 }

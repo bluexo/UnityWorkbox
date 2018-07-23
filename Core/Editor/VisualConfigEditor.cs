@@ -101,6 +101,7 @@ namespace Arthas.Common
                     ReadFromFile(path);
             }
             EditorGUILayout.EndHorizontal();
+
             EditorGUILayout.BeginVertical();
             if (itemsProperty != null)
             {
@@ -137,6 +138,7 @@ namespace Arthas.Common
                 DrawAfterBody(itemsProperty);
             }
             EditorGUILayout.EndVertical();
+
             GUILayout.Space(12f);
             importOption = EditorGUILayout.Foldout(importOption, "Import And Export");
             if (importOption)
@@ -167,9 +169,9 @@ namespace Arthas.Common
 
         public virtual bool ShowBaseInspactor { get { return true; } }
 
-        public virtual void DrawItemProperty(SerializedProperty property, int index)
+        public virtual void DrawItemProperty(SerializedProperty property, int index, GUIContent label = null)
         {
-            EditorGUILayout.PropertyField(property);
+            EditorGUILayout.PropertyField(property, label ?? new GUIContent(property.displayName));
             if (property.type.Contains(RuntimeObjRefNamePrefix))
             {
                 if (!property.objectReferenceValue) return;
@@ -202,7 +204,7 @@ namespace Arthas.Common
                 {
                     var field = fields[i];
                     if (field.IsNotSerialized) continue;
-                    DrawFieldProperty(property, field.Name, field.FieldType);
+                    else DrawFieldProperty(property, field.Name, field.FieldType);
                 }
             }
         }
@@ -220,9 +222,32 @@ namespace Arthas.Common
                     typeof(Sprite),
                     true);
             }
+            else if (subProperty.isArray)
+            {
+                GUILayout.Space(5f);
+                EditorGUILayout.LabelField(subProperty.displayName);
+                DrawArrayField(subProperty);
+                GUILayout.Space(5f);
+            }
             else
             {
                 EditorGUILayout.PropertyField(subProperty);
+            }
+        }
+
+        protected virtual void DrawArrayField(SerializedProperty subProperty)
+        {
+            if (subProperty.arraySize <= 0) subProperty.arraySize++;
+            for (var i = 0; i < subProperty.arraySize; i++)
+            {
+                EditorGUILayout.BeginHorizontal();
+                var first = subProperty.GetArrayElementAtIndex(i);
+                DrawItemProperty(first, i, new GUIContent(string.Format("[{0}]", i)));
+                if (GUILayout.Button("+", EditorStyles.miniButtonLeft, GUILayout.Width(24)))
+                    subProperty.InsertArrayElementAtIndex(i);
+                if (GUILayout.Button("-", EditorStyles.miniButtonRight, GUILayout.Width(24)))
+                    subProperty.DeleteArrayElementAtIndex(i);
+                EditorGUILayout.EndHorizontal();
             }
         }
     }

@@ -291,5 +291,6 @@ namespace Arthas
             writer.WriteEndObject();
         }
     }
+
 }
 #endif
