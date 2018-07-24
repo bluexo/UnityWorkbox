@@ -13,7 +13,8 @@ namespace Arthas.Common
         {
             EditorGUI.PropertyField(position, property, true);
             var parent = property.serializedObject.FindProperty(property.propertyPath.Split('.')[0]);
-            if (SerializedProperty.EqualContents(parent.GetArrayElementAtIndex(parent.arraySize - 1), property)) {
+            if (SerializedProperty.EqualContents(parent.GetArrayElementAtIndex(parent.arraySize - 1), property))
+            {
                 if (Event.current.type == EventType.DragPerform) return;
                 EditorGUILayout.BeginHorizontal();
                 GUI.color = Color.green;
@@ -23,6 +24,18 @@ namespace Arthas.Common
                 GUI.color = Color.white;
                 EditorGUILayout.EndHorizontal();
             }
+
+            //for (var i = 0; i < property.arraySize; i++)
+            //{
+            //    EditorGUILayout.BeginHorizontal();
+            //    var first = property.GetArrayElementAtIndex(i);
+            //    EditorGUILayout.PropertyField(property, label ?? new GUIContent(property.displayName));
+            //    if (GUILayout.Button("+", EditorStyles.miniButtonLeft, GUILayout.Width(24)))
+            //        property.InsertArrayElementAtIndex(i);
+            //    if (GUILayout.Button("-", EditorStyles.miniButtonRight, GUILayout.Width(24)))
+            //        property.DeleteArrayElementAtIndex(i);
+            //    EditorGUILayout.EndHorizontal();
+            //}
         }
 
         public override float GetPropertyHeight(SerializedProperty property, GUIContent label)

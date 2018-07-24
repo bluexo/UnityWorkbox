@@ -144,12 +144,7 @@ namespace Arthas
             }
         }
 
-        public object GetObject()
-        {
-            if (objRef != null) return objRef;
-            else if (IsUnityObject) return unityObjRef;
-            else return null;
-        }
+        public object GetObject() { return objRef ?? unityObjRef ?? null; }
 
         public Type Type { get { return Type.GetType(typeName); } }
     }
