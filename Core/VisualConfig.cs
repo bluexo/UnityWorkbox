@@ -37,7 +37,6 @@ namespace Arthas.Common
         }
     }
 
-#if UNITY_EDITOR
     public abstract class SingletonVisualConfig<TConfig, TItem> : VisualConfig<TItem>
         where TConfig : VisualConfig<TItem>
         where TItem : new()
@@ -48,6 +47,7 @@ namespace Arthas.Common
 
         public static TConfig LoadOrCreate()
         {
+#if UNITY_EDITOR
             var assets = AssetDatabase.FindAssets(string.Format("t:{0}", typeof(TConfig).Name));
             if (assets == null || assets.Length == 0)
             {
@@ -63,7 +63,9 @@ namespace Arthas.Common
                 var assetPath = AssetDatabase.GUIDToAssetPath(assets[0]);
                 return AssetDatabase.LoadAssetAtPath<TConfig>(assetPath);
             }
+#else
+            return Resources.Load<TConfig>(typeof(TConfig).Name);
+#endif
         }
     }
-#endif
 }

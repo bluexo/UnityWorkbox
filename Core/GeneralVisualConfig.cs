@@ -212,7 +212,7 @@ namespace Arthas
     }
 
     /// <summary>
-    /// 对象包装装唤起
+    /// 对象包装转换器
     /// </summary>
     public class ObjectWrapperConverter : JsonConverter
     {
