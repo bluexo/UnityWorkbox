@@ -55,7 +55,6 @@ namespace Arthas.Common
     {
         public const string RuntimeConfigPath = "Configs/";
 
-
         public static TConfig Instance { get { return instance ?? (instance = LoadOrCreate()); } }
 
         private static TConfig instance;
@@ -67,7 +66,10 @@ namespace Arthas.Common
             if (assets == null || assets.Length == 0)
             {
                 var obj = CreateInstance<TConfig>();
-                var path = EditorUtility.SaveFilePanel("Save singleton config", Application.dataPath + "/Resources/", typeof(TConfig).Name, "asset");
+                var path = EditorUtility.SaveFilePanel("Save singleton config",
+                    Application.dataPath + "/Resources/" + RuntimeConfigPath,
+                    typeof(TConfig).Name,
+                    "asset");
                 if (string.IsNullOrEmpty(path)) return null;
                 AssetDatabase.CreateAsset(obj, PathUtility.ToAssetsPath(path));
                 AssetDatabase.Refresh();
@@ -76,10 +78,10 @@ namespace Arthas.Common
             else
             {
                 var assetPath = AssetDatabase.GUIDToAssetPath(assets[0]);
-                return AssetDatabase.LoadAssetAtPath<TConfig>(assetPath);
+                return instance = AssetDatabase.LoadAssetAtPath<TConfig>(assetPath);
             }
 #else
-            return Resources.Load<TConfig>(RuntimeConfigPath + typeof(TConfig).Name);
+            return instance = Resources.Load<TConfig>(RuntimeConfigPath + typeof(TConfig).Name);
 #endif
         }
     }
