@@ -6,7 +6,10 @@ using UnityEngine;
 
 public static class ILRuntimeExtensions 
 {
+    public static void RegisterILRuntimeGeneralConfig()
+    {
 
+    }
 }
 
 #endif

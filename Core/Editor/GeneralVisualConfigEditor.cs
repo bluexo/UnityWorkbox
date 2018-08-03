@@ -187,7 +187,7 @@ namespace Arthas.Common
             base.BeforeDeleteItem(index);
         }
 
-        public override void DrawItemProperty(SerializedProperty itemProperty, int index, GUIContent label = null)
+        public override void DrawItemProperty(SerializedProperty itemProperty, int index, Type type = null, GUIContent label = null)
         {
             if (index >= Config.Items.Length) return;
             var item = Config.Items[index];
@@ -257,7 +257,7 @@ namespace Arthas.Common
 
         private static void DrawArrayType(IList list)
         {
-            
+
         }
     }
 }
