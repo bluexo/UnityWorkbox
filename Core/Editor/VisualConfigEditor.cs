@@ -108,10 +108,12 @@ namespace Arthas.Common
                 DrawBeforeBody(itemsProperty);
                 for (var i = 0; i < itemsProperty.arraySize; i++)
                 {
+                    EditorGUILayout.BeginVertical();
                     folds[i] = EditorGUILayout.Foldout(folds[i], string.Format("Item [{0}]", i));
                     if (!folds[i]) continue;
                     var item = itemsProperty.GetArrayElementAtIndex(i);
-                    DrawItemProperty(item, i);
+                    var genericType = target.GetType().BaseType.GetGenericArguments().LastOrDefault();
+                    DrawItemProperty(item, i, genericType);
                     EditorGUILayout.Space();
                     EditorGUILayout.BeginHorizontal();
                     GUI.color = Color.green;
@@ -133,6 +135,7 @@ namespace Arthas.Common
                     GUI.color = Color.white;
                     EditorGUILayout.EndHorizontal();
                     EditorGUILayout.Space();
+                    EditorGUILayout.EndVertical();
                 }
                 serializedObject.ApplyModifiedProperties();
                 DrawAfterBody(itemsProperty);
@@ -169,9 +172,8 @@ namespace Arthas.Common
 
         public virtual bool ShowBaseInspactor { get { return true; } }
 
-        public virtual void DrawItemProperty(SerializedProperty property, int index, GUIContent label = null)
+        public virtual void DrawItemProperty(SerializedProperty property, int index, Type type = null, GUIContent label = null)
         {
-            EditorGUILayout.PropertyField(property, label ?? new GUIContent(property.displayName));
             if (property.type.Contains(RuntimeObjRefNamePrefix))
             {
                 if (!property.objectReferenceValue) return;
@@ -190,9 +192,8 @@ namespace Arthas.Common
                 so.ApplyModifiedProperties();
                 return;
             }
-            else
+            else if (property.propertyType == SerializedPropertyType.Generic)
             {
-                var type = target.GetType().BaseType.GetGenericArguments().LastOrDefault();
                 if (type == null)
                 {
                     Debug.LogErrorFormat("Unknow type {0}, cannot draw this property!", property.type);
@@ -206,7 +207,9 @@ namespace Arthas.Common
                     if (field.IsNotSerialized) continue;
                     else DrawFieldProperty(property, field.Name, field.FieldType);
                 }
+                return;
             }
+            EditorGUILayout.PropertyField(property, label ?? new GUIContent(property.displayName));
         }
 
         protected virtual void DrawFieldProperty(SerializedProperty property, string propertyName, Type type)
@@ -222,7 +225,7 @@ namespace Arthas.Common
                     typeof(Sprite),
                     true);
             }
-            else if (subProperty.isArray)
+            else if (subProperty.isArray && subProperty.propertyType != SerializedPropertyType.String)
             {
                 GUILayout.Space(5f);
                 EditorGUILayout.LabelField(subProperty.displayName);
@@ -238,11 +241,22 @@ namespace Arthas.Common
         protected virtual void DrawArrayField(SerializedProperty subProperty)
         {
             if (subProperty.arraySize <= 0) subProperty.arraySize++;
+            Type elementType = null;
+            if (subProperty.propertyType == SerializedPropertyType.Generic)
+            {
+                var rootItemType = target.GetType().BaseType.GetGenericArguments().LastOrDefault();
+                var subType = rootItemType.GetFields().Where(f => f.FieldType.Name.Contains(subProperty.arrayElementType)).FirstOrDefault();
+                if (subType != null) elementType = subType.FieldType.GetElementType();
+            }
             for (var i = 0; i < subProperty.arraySize; i++)
             {
                 EditorGUILayout.BeginHorizontal();
+                EditorGUILayout.Space();
                 var first = subProperty.GetArrayElementAtIndex(i);
-                DrawItemProperty(first, i, new GUIContent(string.Format("[{0}]", i)));
+                EditorGUILayout.BeginVertical();
+                DrawItemProperty(first, i, elementType, new GUIContent(string.Format("[{0}]", i)));
+                EditorGUILayout.Space();
+                EditorGUILayout.EndVertical();
                 if (GUILayout.Button("+", EditorStyles.miniButtonLeft, GUILayout.Width(24)))
                     subProperty.InsertArrayElementAtIndex(i);
                 if (GUILayout.Button("-", EditorStyles.miniButtonRight, GUILayout.Width(24)))
