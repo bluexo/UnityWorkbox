@@ -128,6 +128,12 @@ namespace Arthas.Common
                 {
                     if (!templete.ContainsKey(currentFieldName))
                     {
+                        if (isArrayField && currentObject.GetType() == typeof(UnityEngine.Object))
+                        {
+                            Debug.LogError("GeneralVisualConfig cannot support reference type array!");
+                            isArrayField = false;
+                            return;
+                        }
                         var obj = isArrayField
                             ? new object[] { currentObject }
                             : currentObject;
@@ -204,7 +210,9 @@ namespace Arthas.Common
             var type = wrapper.Type;
             if (wrapper.Type.IsArray)
             {
-                DrawArrayType(wrapper.objRef as IList);
+                var obj = wrapper.objRef as object[];
+                DrawArrayType(ref obj);
+                wrapper.objRef = obj;
                 return;
             }
             if (!TypeDrawDelegateMap.ContainsKey(type)) return;
@@ -242,7 +250,7 @@ namespace Arthas.Common
         public static int DrawEnumType(string label, object value, params GUILayoutOption[] layoutOptions)
         {
             var intValue = Convert.ChangeType(value, typeof(int));
-            return 1;
+            return (int)intValue;
         }
 
         public static void DrawCustomType(SerializedProperty property)
@@ -250,31 +258,33 @@ namespace Arthas.Common
 
         }
 
-        private void DrawArrayType(IList subProperty)
+        private void DrawArrayType(ref object[] list)
         {
-            Type elementType = null;
-            //if (subProperty.propertyType == SerializedPropertyType.Generic)
-            //{
-            //    var rootItemType = target.GetType().BaseType.GetGenericArguments().LastOrDefault();
-            //    var subType = rootItemType.GetFields().Where(f => f.FieldType.Name.Contains(subProperty.arrayElementType)).FirstOrDefault();
-            //    if (subType != null) elementType = subType.FieldType.GetElementType();
-            //}
-            for (var i = 0; i < subProperty.Count; i++)
+            EditorGUILayout.BeginVertical();
+            for (var i = 0; i < list.Length; i++)
             {
                 EditorGUILayout.BeginHorizontal();
                 EditorGUILayout.Space();
-                var first = subProperty[i];
                 EditorGUILayout.BeginVertical();
-                var wrapper = new ObjectWrapper(first);
-                DrawElement(i.ToString(), ref wrapper);
+                var type = list[i].GetType();
+                if (!TypeDrawDelegateMap.ContainsKey(type)) return;
+                var invoker = TypeDrawDelegateMap[type];
+                if (list[i] != null)
+                {
+                    list[i] = invoker.DynamicInvoke("",
+                        Convert.ChangeType(list[i], type),
+                        new GUILayoutOption[] { });
+                }
+                EditorUtility.SetDirty(Config);
                 EditorGUILayout.Space();
                 EditorGUILayout.EndVertical();
                 if (GUILayout.Button("+", EditorStyles.miniButtonLeft, GUILayout.Width(24)))
-                    subProperty.Insert(i, first);
+                    ArrayUtility.Insert(ref list, i, GetDefaultValue(type));
                 if (GUILayout.Button("-", EditorStyles.miniButtonRight, GUILayout.Width(24)))
-                    subProperty.RemoveAt(i);
+                    ArrayUtility.RemoveAt(ref list, i);
                 EditorGUILayout.EndHorizontal();
             }
+            EditorGUILayout.EndVertical();
         }
     }
 }
