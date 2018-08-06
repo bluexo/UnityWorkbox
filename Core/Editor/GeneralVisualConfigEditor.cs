@@ -17,9 +17,10 @@ namespace Arthas.Common
         private int currentFieldIndex = 0;
         private object currentObject = null;
         private UnityEngine.Object currentUnityObject = null;
+        private bool isArrayField = false;
         private string currentFieldName = "fieldName";
         private bool add, remove = false;
-        private readonly Dictionary<Type, Delegate> TypeDrawDelegateMap = new Dictionary<Type, Delegate>()
+        private static readonly Dictionary<Type, Delegate> TypeDrawDelegateMap = new Dictionary<Type, Delegate>()
         {
             {typeof(int), new Draw<int>(EditorGUILayout.IntField)},
             {typeof(long), new Draw<long>(EditorGUILayout.LongField)},
@@ -28,7 +29,6 @@ namespace Arthas.Common
             {typeof(bool), new Draw<bool>(EditorGUILayout.Toggle)},
             {typeof(string), new Draw<string>(EditorGUILayout.TextField)},
             {typeof(Enum), new Func<string, object, GUILayoutOption[],int>(DrawEnumType)},
-            {typeof(Array), new Action<IList>(DrawArrayType)},
 
             {typeof(Vector2), new Draw<Vector2>(EditorGUILayout.Vector2Field)},
             {typeof(Vector2Int), new Draw<Vector2Int>(EditorGUILayout.Vector2IntField)},
@@ -113,6 +113,7 @@ namespace Arthas.Common
                     var array = TypeDrawDelegateMap.Keys.ToArray();
                     currentFieldName = EditorGUILayout.TextField("Name", currentFieldName ?? array[currentFieldIndex].FullName);
                     currentFieldIndex = EditorGUILayout.Popup("Type", currentFieldIndex, Array.ConvertAll(array, t => t.FullName));
+                    isArrayField = EditorGUILayout.Toggle("IsArray", isArrayField);
                     var currentType = array[currentFieldIndex];
                     var invoker = TypeDrawDelegateMap[currentType];
                     var isUnityObject = currentType == typeof(UnityEngine.Object);
@@ -127,7 +128,11 @@ namespace Arthas.Common
                 {
                     if (!templete.ContainsKey(currentFieldName))
                     {
-                        templete.Add(currentFieldName, new ObjectWrapper(currentObject));
+                        var obj = isArrayField
+                            ? new object[] { currentObject }
+                            : currentObject;
+                        var wrapper = new ObjectWrapper(obj);
+                        templete.Add(currentFieldName, wrapper);
                         ApplyChanges();
                     }
                     else
@@ -176,17 +181,6 @@ namespace Arthas.Common
             return value;
         }
 
-        protected override void AfterInsertItem(int index)
-        {
-            base.AfterInsertItem(index);
-            var property = itemsProperty.GetArrayElementAtIndex(index);
-        }
-
-        protected override void BeforeDeleteItem(int index)
-        {
-            base.BeforeDeleteItem(index);
-        }
-
         public override void DrawItemProperty(SerializedProperty itemProperty, int index, Type type = null, GUIContent label = null)
         {
             if (index >= Config.Items.Length) return;
@@ -208,13 +202,14 @@ namespace Arthas.Common
         {
             EditorGUILayout.LabelField(name, GUILayout.Width(100));
             var type = wrapper.Type;
-            if (!TypeDrawDelegateMap.ContainsKey(type)) return;
-            var invoker = TypeDrawDelegateMap[type];
             if (wrapper.Type.IsArray)
             {
                 DrawArrayType(wrapper.objRef as IList);
+                return;
             }
-            else if (wrapper.objRef != null)
+            if (!TypeDrawDelegateMap.ContainsKey(type)) return;
+            var invoker = TypeDrawDelegateMap[type];
+            if (wrapper.objRef != null)
             {
                 wrapper.objRef = invoker.DynamicInvoke("",
                     Convert.ChangeType(wrapper.objRef, type),
@@ -255,9 +250,31 @@ namespace Arthas.Common
 
         }
 
-        private static void DrawArrayType(IList list)
+        private void DrawArrayType(IList subProperty)
         {
-
+            Type elementType = null;
+            //if (subProperty.propertyType == SerializedPropertyType.Generic)
+            //{
+            //    var rootItemType = target.GetType().BaseType.GetGenericArguments().LastOrDefault();
+            //    var subType = rootItemType.GetFields().Where(f => f.FieldType.Name.Contains(subProperty.arrayElementType)).FirstOrDefault();
+            //    if (subType != null) elementType = subType.FieldType.GetElementType();
+            //}
+            for (var i = 0; i < subProperty.Count; i++)
+            {
+                EditorGUILayout.BeginHorizontal();
+                EditorGUILayout.Space();
+                var first = subProperty[i];
+                EditorGUILayout.BeginVertical();
+                var wrapper = new ObjectWrapper(first);
+                DrawElement(i.ToString(), ref wrapper);
+                EditorGUILayout.Space();
+                EditorGUILayout.EndVertical();
+                if (GUILayout.Button("+", EditorStyles.miniButtonLeft, GUILayout.Width(24)))
+                    subProperty.Insert(i, first);
+                if (GUILayout.Button("-", EditorStyles.miniButtonRight, GUILayout.Width(24)))
+                    subProperty.RemoveAt(i);
+                EditorGUILayout.EndHorizontal();
+            }
         }
     }
 }

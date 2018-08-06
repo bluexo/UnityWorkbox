@@ -101,7 +101,7 @@ namespace Arthas
         public string GetJsonString() { return json; }
     }
 
-    [CreateAssetMenu(menuName = "Configs/Create GeneralConfig")]
+    [CreateAssetMenu(menuName = "Configs/Create GeneralConfig", order = -1)]
     public class GeneralVisualConfig : VisualConfig<GeneralItem>
     {
         public T[] GetItems<T>() where T : new()
