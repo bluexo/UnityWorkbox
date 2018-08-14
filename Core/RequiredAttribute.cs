@@ -8,8 +8,8 @@ namespace Arthas
 #if UNITY_EDITOR
     using UnityEditor;
 
-    [CustomPropertyDrawer(typeof(ValidateComponentAttribute))]
-    public class ValidateComponentDrawer : PropertyDrawer
+    [CustomPropertyDrawer(typeof(RequiredAttribute))]
+    public class RequiredPropertyDrawer : PropertyDrawer
     {
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
@@ -19,7 +19,7 @@ namespace Arthas
             var go = property.objectReferenceValue as GameObject;
             if (!go) return;
 
-            var target = attribute as ValidateComponentAttribute;
+            var target = attribute as RequiredAttribute;
             var comp = go.GetComponent(target.Component);
             if (comp == null)
             {
@@ -31,11 +31,11 @@ namespace Arthas
 #endif
 
 
-    public class ValidateComponentAttribute : PropertyAttribute
+    public class RequiredAttribute : PropertyAttribute
     {
         public Type Component;
 
-        public ValidateComponentAttribute(Type type)
+        public RequiredAttribute(Type type)
         {
             Component = type;
         }
