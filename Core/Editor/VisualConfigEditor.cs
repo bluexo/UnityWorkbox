@@ -17,7 +17,6 @@ namespace Arthas.Common
     public class VisualConfigEditor : Editor
     {
         protected SerializedProperty itemsProperty, backupDirProperty, backupTagProperty;
-        protected const string RuntimeObjRefNamePrefix = "PPtr";
         protected bool importOption;
         protected bool[] folds;
 
