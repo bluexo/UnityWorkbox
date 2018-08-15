@@ -245,8 +245,11 @@ namespace Arthas.Common
             if (subProperty.propertyType == SerializedPropertyType.Generic)
             {
                 var rootItemType = target.GetType().BaseType.GetGenericArguments().LastOrDefault();
-                var subType = rootItemType.GetFields().Where(f => f.FieldType.Name.Contains(subProperty.arrayElementType)).FirstOrDefault();
-                if (subType != null) elementType = subType.FieldType.GetElementType();
+                var subType = rootItemType.GetFields()
+                    .Where(f => f.FieldType.Name.Contains(subProperty.arrayElementType))
+                    .FirstOrDefault();
+                if (subType != null)
+                    elementType = subType.FieldType.GetElementType();
             }
             for (var i = 0; i < subProperty.arraySize; i++)
             {
