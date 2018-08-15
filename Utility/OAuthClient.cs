@@ -44,7 +44,8 @@ public class OAuthClient : MonoBehaviour
 
         LoadToken(CurrentToken);
 
-        if (!string.IsNullOrEmpty(CurrentToken.access_token))
+        if (!string.IsNullOrEmpty(CurrentToken.access_token) 
+            && !string.IsNullOrEmpty(CurrentToken.refresh_token))
         {
             if (DateTime.Compare(DateTime.Now, DateTime.Parse(CurrentToken.expires_in)) > 0)
             {

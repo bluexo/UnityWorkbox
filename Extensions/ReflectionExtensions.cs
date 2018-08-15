@@ -19,8 +19,9 @@ namespace Arthas
                 uiTypes.AddRange(dll.GetTypes());
             }
             return uiTypes.ToArray();
-#endif
+#else
             return typeof(ReflectionExtensions).Assembly.GetTypes();
+#endif
         }
     }
 }
