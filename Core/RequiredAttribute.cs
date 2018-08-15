@@ -13,7 +13,7 @@ namespace Arthas
     {
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
-            base.OnGUI(position, property, label);
+            EditorGUI.PropertyField(position, property);
             if (property.propertyType != SerializedPropertyType.ObjectReference) return;
             if (property.objectReferenceValue == null) return;
             var go = property.objectReferenceValue as GameObject;
