@@ -174,25 +174,26 @@ namespace Arthas.Common
 
         public virtual void DrawItemProperty(SerializedProperty property, int index, Type type = null, GUIContent label = null)
         {
-            if (property.type.Contains(RuntimeObjRefNamePrefix))
-            {
-                if (!property.objectReferenceValue) return;
-                var so = new SerializedObject(property.objectReferenceValue);
-                var fields = property
-                    .objectReferenceValue
-                    .GetType()
-                    .GetFields()
-                    .ToArray();
-                for (var i = 0; i < fields.Length; i++)
-                {
-                    var fieldProperty = so.FindProperty(fields[i].Name);
-                    if (fieldProperty == null) continue;
-                    EditorGUILayout.PropertyField(fieldProperty);
-                }
-                so.ApplyModifiedProperties();
-                return;
-            }
-            else if (property.propertyType == SerializedPropertyType.Generic)
+            //if (property.type.Contains(RuntimeObjRefNamePrefix)
+            //    && property.objectReferenceValue != null)
+            //{
+            //    var so = new SerializedObject(property.objectReferenceValue);
+            //    var fields = property
+            //        .objectReferenceValue
+            //        .GetType()
+            //        .GetFields()
+            //        .ToArray();
+            //    for (var i = 0; i < fields.Length; i++)
+            //    {
+            //        var fieldProperty = so.FindProperty(fields[i].Name);
+            //        if (fieldProperty == null) continue;
+            //        EditorGUILayout.PropertyField(fieldProperty);
+            //    }
+            //    so.ApplyModifiedProperties();
+            //    return;
+            //}
+            //else
+            if (property.propertyType == SerializedPropertyType.Generic)
             {
                 if (type == null)
                 {
@@ -245,8 +246,9 @@ namespace Arthas.Common
             if (subProperty.propertyType == SerializedPropertyType.Generic)
             {
                 var rootItemType = target.GetType().BaseType.GetGenericArguments().LastOrDefault();
+                var name = UnityEditorUtility.TrimPointerName(subProperty.arrayElementType);
                 var subType = rootItemType.GetFields()
-                    .Where(f => f.FieldType.Name.Contains(subProperty.arrayElementType))
+                    .Where(f => f.FieldType.IsArray && f.FieldType.GetElementType().FullName.Contains(name))
                     .FirstOrDefault();
                 if (subType != null)
                     elementType = subType.FieldType.GetElementType();
