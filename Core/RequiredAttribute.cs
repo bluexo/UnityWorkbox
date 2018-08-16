@@ -20,11 +20,15 @@ namespace Arthas
             if (!go) return;
 
             var target = attribute as RequiredAttribute;
-            var comp = go.GetComponent(target.Component);
-            if (comp == null)
+            for (var i = 0; i < target.Components.Length; i++)
             {
-                Debug.LogError("This gameobject required component :" + target.Component.FullName);
-                property.objectReferenceValue = null;
+                var comp = go.GetComponent(target.Components[i]);
+                if (comp == null)
+                {
+                    Debug.LogError("This gameobject required component :" + target.Components[i].FullName);
+                    property.objectReferenceValue = null;
+                    break;
+                }
             }
         }
     }
@@ -33,11 +37,11 @@ namespace Arthas
 
     public class RequiredAttribute : PropertyAttribute
     {
-        public Type Component;
+        public Type[] Components;
 
-        public RequiredAttribute(Type type)
+        public RequiredAttribute(params Type[] types)
         {
-            Component = type;
+            Components = types;
         }
     }
 }
