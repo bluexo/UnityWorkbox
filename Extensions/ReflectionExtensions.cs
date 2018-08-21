@@ -14,13 +14,14 @@ namespace Arthas
             var uasms = UnityEditor.Compilation.CompilationPipeline.GetAssemblies();
             foreach (var uasm in uasms)
             {
-                var dllPath = uasm.outputPath.ToSystemPath();
+                var dllPath = uasm.outputPath.ToSystemPath(false);
                 var dll = System.Reflection.Assembly.LoadFile(dllPath);
                 uiTypes.AddRange(dll.GetTypes());
             }
             return uiTypes.ToArray();
-#endif
+#else
             return typeof(ReflectionExtensions).Assembly.GetTypes();
+#endif
         }
     }
 }

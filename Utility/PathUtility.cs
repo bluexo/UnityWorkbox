@@ -8,10 +8,10 @@ namespace Arthas
     {
         readonly static string ProjectPath = Application.dataPath.Replace("Assets", "").TrimEnd('/').TrimEnd('\\');
 
-        public static string ToSystemPath(this string orgin)
+        public static string ToSystemPath(this string orgin, bool isAssetsPath = true)
         {
             var newPath = orgin.ToString();
-            if (!newPath.Contains("Assets/")
+            if (isAssetsPath && !newPath.Contains("Assets/")
                 && !newPath.Contains("/Assets")
                 && !newPath.Contains("\\Assets")
                 && !newPath.Contains("Assets\\"))

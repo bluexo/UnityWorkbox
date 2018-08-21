@@ -220,8 +220,9 @@ namespace Arthas.UI
             }
         }
 
-        private void OnDestroy()
+        protected override void OnDestroy()
         {
+            base.OnDestroy();
             windows.Clear();
             showedWindows.Clear();
             showedFloatingWindows.Clear();
