@@ -5,6 +5,10 @@ using UnityEngine;
 using UnityEngine.Networking;
 using UnityEngine.UI;
 
+/// <summary>
+/// OAuth 2.0 客户端
+/// 包装并请求 OAuth2.0 Api
+/// </summary>
 public class OAuthClient : MonoBehaviour
 {
     public static OAuthClient Instance { get; private set; }
@@ -91,11 +95,14 @@ public class OAuthClient : MonoBehaviour
         //Check if POST request is succesful
         if (!www.isNetworkError)
         {
-            string resultContent = www.downloadHandler.text;
+            var resultContent = www.downloadHandler.text;
+
+            var error = JsonUtility.FromJson<Error>(resultContent);
 
             //check if refresh token is invalid
-            if (IsError(resultContent))
+            if (!string.IsNullOrEmpty(error.error))
             {
+                Debug.LogFormat("Error:{0}, Description:{1} !", error.error, error.error_description);
                 yield return GetAccessToken();
             }
             else
@@ -161,27 +168,6 @@ public class OAuthClient : MonoBehaviour
     {
         PlayerPrefs.SetString("access_token", "");
         PlayerPrefs.SetString("expires_in", "");
-    }
-
-    public static bool IsError(string resultContent)
-    {
-        Error error = JsonUtility.FromJson<Error>(resultContent);
-        if (error.error == "invalid_grant")
-        {
-            Debug.Log("Invalid Grant. Getting new Refresh Token.");
-            return true;
-        }
-        if (error.error == "invalid_token")
-        {
-            Debug.Log("Invalid Token. Getting new Access Token.");
-            return true;
-        }
-        if (error.error == "invalid_client")
-        {
-            Debug.Log(error.error);
-            return true;
-        }
-        return false;
     }
 
     public static IEnumerator GetRequest(string url, Action<string> result)
