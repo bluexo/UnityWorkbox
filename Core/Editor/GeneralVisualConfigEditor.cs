@@ -187,7 +187,7 @@ namespace Arthas.Common
             return value;
         }
 
-        public override void DrawItemProperty(SerializedProperty itemProperty, int index, Type type = null, GUIContent label = null)
+        public override void DrawItemProperty(SerializedProperty itemProperty, int index)
         {
             if (index >= Config.Items.Length) return;
             var item = Config.Items[index];
