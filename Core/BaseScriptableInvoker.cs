@@ -9,7 +9,10 @@ namespace Arthas.Common
     {
         public abstract void Initialize();
 
-        public abstract object[] InvokeScript(string funcName, params object[] parameters);
+        public virtual object InvokeScript(string funcName, params object[] parameters)
+        {
+            throw new System.NotImplementedException();
+        }
 
         public abstract void Dispose();
     }
