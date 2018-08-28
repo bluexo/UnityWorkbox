@@ -18,7 +18,7 @@ using Arthas;
 
 public static class VisualConfigILRuntimeRedirection
 {
-    public unsafe static void Register(ILRAppDomain appDomain)
+    public unsafe static void RegisterVisualConfig(this ILRAppDomain appDomain)
     {
         var methods = typeof(GeneralVisualConfig).GetMethods();
         foreach (var m in methods)
