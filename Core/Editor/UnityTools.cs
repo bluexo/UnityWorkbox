@@ -29,7 +29,11 @@ public static class UnityEditorTools
             for (var i = 0; i < objs.Length; i++)
             {
                 var prefab_root = PrefabUtility.FindPrefabRoot(objs[i]);
+#if UNITY_2018_1_OR_NEWER
                 var prefab_src = PrefabUtility.GetCorrespondingObjectFromSource(prefab_root);
+#else
+                var prefab_src = PrefabUtility.GetPrefabParent(prefab_root);
+#endif
                 if (prefab_src != null)
                 {
                     PrefabUtility.ReplacePrefab(prefab_root, prefab_src, ReplacePrefabOptions.ConnectToPrefab);

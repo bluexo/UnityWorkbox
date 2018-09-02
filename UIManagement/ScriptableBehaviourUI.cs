@@ -124,7 +124,7 @@ namespace Arthas.UI
                 Invoker.InvokeScript("OnPointerEvent", eventData, PointerEventType.Scroll);
         }
 
-        public object[] Invoke(string methodName, params object[] param)
+        public object Invoke(string methodName, params object[] param)
         {
             return Invoker.InvokeScript(methodName, param);
         }
