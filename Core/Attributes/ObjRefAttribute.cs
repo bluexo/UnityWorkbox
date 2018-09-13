@@ -3,9 +3,9 @@ using UnityEngine;
 
 namespace Arthas
 {
-    using UnityEditor;
 
 #if UNITY_EDITOR
+    using UnityEditor;
 
     [CustomPropertyDrawer(typeof(ObjRefAttribute))]
     public class ObjRefAttributePropertyDrawer : PropertyDrawer
