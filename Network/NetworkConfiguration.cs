@@ -54,6 +54,7 @@ public class NetworkConfiguration : ScriptableObject
             return conf.current;
         }
     }
+    public static string NetworkStreamingPath => Application.streamingAssetsPath + "/networkAddress.json";
 
     public static void AddLoader(Func<NetworkConfiguration> configLoader) { loader = configLoader; }
     private static Func<NetworkConfiguration> loader;
@@ -87,6 +88,7 @@ public class NetworkConfiguration : ScriptableObject
         var conf = GetConfiguration();
         conf.current = conf.local;
         EditorUtility.SetDirty(conf);
+        WriteAddressToStreamingAssets(conf.current);
         Debug.LogFormat("<color=cyan>Current Address:[{2}][{0}:{1}]</color>", conf.current.ip, conf.current.port, conf.current.tag);
     }
 
@@ -104,6 +106,7 @@ public class NetworkConfiguration : ScriptableObject
         var conf = GetConfiguration();
         conf.current = conf.intranet;
         EditorUtility.SetDirty(conf);
+        WriteAddressToStreamingAssets(conf.current);
         Debug.LogFormat("<color=cyan>Current Address:[{2}][{0}:{1}]</color>", conf.current.ip, conf.current.port, conf.current.tag);
     }
 
@@ -121,6 +124,7 @@ public class NetworkConfiguration : ScriptableObject
         var conf = GetConfiguration();
         conf.current = conf.internet;
         EditorUtility.SetDirty(conf);
+        WriteAddressToStreamingAssets(conf.current);
         Debug.LogFormat("<color=cyan>Current Address:[{2}][{0}:{1}]</color>", conf.current.ip, conf.current.port, conf.current.tag);
     }
 
@@ -139,6 +143,7 @@ public class NetworkConfiguration : ScriptableObject
         var conf = GetConfiguration();
         conf.current = conf.option1;
         EditorUtility.SetDirty(conf);
+        WriteAddressToStreamingAssets(conf.current);
         Debug.LogFormat("<color=cyan>Current Address:[{2}][{0}:{1}]</color>", conf.current.ip, conf.current.port, conf.current.tag);
     }
 
@@ -156,6 +161,7 @@ public class NetworkConfiguration : ScriptableObject
         var conf = GetConfiguration();
         conf.current = conf.option2;
         EditorUtility.SetDirty(conf);
+        WriteAddressToStreamingAssets(conf.current);
         Debug.LogFormat("<color=cyan>Current Address:[{2}][{0}:{1}]</color>", conf.current.ip, conf.current.port, conf.current.tag);
     }
 
@@ -171,6 +177,15 @@ public class NetworkConfiguration : ScriptableObject
     public static void Configure()
     {
         Selection.activeObject = AssetDatabase.LoadAssetAtPath<NetworkConfiguration>(kPath);
+    }
+
+    private static void WriteAddressToStreamingAssets(NetworkAddress networkAddress)
+    {
+        var addr = JsonUtility.ToJson(networkAddress);
+        if (!Directory.Exists(Application.streamingAssetsPath))
+            Directory.CreateDirectory(Application.streamingAssetsPath);
+        File.WriteAllText(NetworkStreamingPath, addr);
+        AssetDatabase.Refresh();
     }
 
     private static NetworkConfiguration GetConfiguration()
