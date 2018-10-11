@@ -9,9 +9,8 @@ using UnityEngine.UI;
 /// OAuth 2.0 客户端
 /// 包装并请求 OAuth2.0 Api
 /// </summary>
-public class OAuthClient : MonoBehaviour
+public class OAuthClient : SingletonBehaviour<OAuthClient>
 {
-    public static OAuthClient Instance { get; private set; }
 
     public string accessTokenUrl,
      clientId,
@@ -20,11 +19,6 @@ public class OAuthClient : MonoBehaviour
      password;
 
     public static AccessToken CurrentToken { get; private set; }
-
-    private void Awake()
-    {
-        Instance = this;
-    }
 
     [Serializable]
     public class AccessToken
