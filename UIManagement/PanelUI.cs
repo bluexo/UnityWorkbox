@@ -1,5 +1,5 @@
-﻿using UnityEngine;
-using System.Collections;
+﻿using System.Collections;
+using UnityEngine;
 
 namespace Arthas.UI
 {
@@ -10,20 +10,29 @@ namespace Arthas.UI
         {
             get
             {
-                if (!instance) {
-                    var uiName = typeof(T).Name;                                    
+                if (!instance)
+                {
+                    var uiName = typeof(T).Name;
                     var child = UIManager.Instance.transform.Find(uiName);
-                    if (child) {
+                    if (child)
+                    {
                         var ui = child.GetComponent<T>();
                         if (ui) instance = ui;
                         else instance = child.gameObject.AddComponent<T>();
-                    } else Debug.LogErrorFormat("Can not found ui gameobject : {0} in UICanvas!", uiName);
+                    }
+                    else Debug.LogErrorFormat("Can not found ui gameobject : {0} in UICanvas!", uiName);
                 }
                 return instance;
             }
         }
 
-        protected static T instance;
+        private static T instance;
+
+        protected override void Awake()
+        {
+            base.Awake();
+            instance = this as T;
+        }
 
         public override void Show()
         {
@@ -33,7 +42,8 @@ namespace Arthas.UI
 
         public virtual void Back()
         {
-            if (UIManager.PrevWindow.UI) {
+            if (UIManager.PrevWindow.UI)
+            {
                 UIManager.PrevWindow.UI.Show();
             }
         }

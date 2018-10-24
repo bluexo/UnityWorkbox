@@ -6,7 +6,7 @@ namespace Arthas.Network
 {
     public class NetworkManager : SingletonBehaviour<NetworkManager>
     {
-
+        
         // Use this for initialization
         void Start()
         {

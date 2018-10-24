@@ -4,12 +4,12 @@
  * Author : Alvin
  * ******************************************************/
 
-using UnityEngine;
 using System;
+using System.IO;
+using UnityEngine;
 using UnityEngine.Serialization;
 #if UNITY_EDITOR
 using UnityEditor;
-using System.IO;
 #endif
 
 /// <summary>
@@ -46,18 +46,24 @@ public class NetworkConfiguration : ScriptableObject
     {
         get
         {
-            NetworkConfiguration conf;
-            if (loader != null) conf = loader();
-            else conf = Resources.Load<NetworkConfiguration>(kConfigPath + "NetworkConfiguration");
-            if (!conf) throw new NullReferenceException("Cannot found <color=yellow>[NetworkConfiguration]</color>!");
-            if (string.IsNullOrEmpty(conf.current.ip)) conf.current = conf.intranet;
-            return conf.current;
+            NetworkAddress address = null;
+            try
+            {
+                var json = File.ReadAllText(NetworkStreamingPath);
+                address = JsonUtility.FromJson<NetworkAddress>(json);
+                return address;
+            }
+            catch
+            {
+                var conf = Resources.Load<NetworkConfiguration>(kConfigPath + "NetworkConfiguration");
+                if (!conf) throw new NullReferenceException("Cannot found <color=yellow>[NetworkConfiguration]</color>!");
+                if (string.IsNullOrEmpty(conf.current.ip)) conf.current = conf.intranet;
+                return conf.current;
+            }
         }
     }
-    public static string NetworkStreamingPath => Application.streamingAssetsPath + "/networkAddress.json";
 
-    public static void AddLoader(Func<NetworkConfiguration> configLoader) { loader = configLoader; }
-    private static Func<NetworkConfiguration> loader;
+    public static string NetworkStreamingPath => Application.streamingAssetsPath + "/networkAddress.json";
 
     [Space(30)]
     [HideInInspector]
