@@ -35,7 +35,7 @@ namespace Arthas.Common
             get
             {
                 if (current == null)
-                    current = NetworkConfiguration.Instance.Current;
+                    current = NetworkConfiguration.Current;
                 return current;
             }
         }
