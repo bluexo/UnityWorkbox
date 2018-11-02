@@ -12,7 +12,10 @@ namespace Arthas
     {
         private float height = 32f;
 
-        public override float GetPropertyHeight(SerializedProperty property, GUIContent label) => height;
+        public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
+        {
+            return height;
+        }
 
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {

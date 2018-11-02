@@ -63,7 +63,7 @@ public class NetworkConfiguration : ScriptableObject
         }
     }
 
-    public static string NetworkStreamingPath => Application.streamingAssetsPath + "/networkAddress.json";
+    public static string NetworkStreamingPath { get { return Application.streamingAssetsPath + "/networkAddress.json"; } }
 
     [Space(30)]
     [HideInInspector]
