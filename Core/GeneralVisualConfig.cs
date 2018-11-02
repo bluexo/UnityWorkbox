@@ -216,9 +216,10 @@ namespace Arthas
     /// </summary>
     public class ObjectWrapperConverter : JsonConverter
     {
-        const string TypeName = "typeName",
-            ObjRef = "objRef",
+        private const string TypeName = "typeName",
             UnityObjRef = "unityObjRef",
+            InstanceId = "instanceID",
+            ObjRef = "objRef",
             Mark = "mark";
         public List<UnityObjectWrapper> SerializedObjects { get; private set; }
 
@@ -257,10 +258,10 @@ namespace Arthas
 
             writer.WriteStartObject();
 
-            writer.WritePropertyName("typeName");
+            writer.WritePropertyName(TypeName);
             writer.WriteValue(wrapper.typeName);
 
-            writer.WritePropertyName("objRef");
+            writer.WritePropertyName(ObjRef);
             var json = string.Empty;
             try
             {
@@ -272,12 +273,12 @@ namespace Arthas
             }
             writer.WriteRawValue(json);
 
-            writer.WritePropertyName("mark");
+            writer.WritePropertyName(Mark);
             writer.WriteValue(wrapper.mark);
 
-            writer.WritePropertyName("unityObjRef");
+            writer.WritePropertyName(UnityObjRef);
             writer.WriteStartObject();
-            writer.WritePropertyName("instanceID");
+            writer.WritePropertyName(InstanceId);
             var id = 0;
             try { id = wrapper.unityObjRef.GetInstanceID(); } catch { }
             writer.WriteValue(id);

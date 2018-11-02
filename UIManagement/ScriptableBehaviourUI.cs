@@ -50,6 +50,12 @@ namespace Arthas.UI
             }
             else
                 Debug.LogErrorFormat("Cannot found LuaInvoker on UIGameobject {0}!!!", gameObject.name);
+
+            foreach (var child in GetComponentsInChildren<ScriptableBehaviourUI>(true))
+            {
+                if (child.Equals(this)) continue;
+                child.Initialize();
+            }
         }
 
         protected override void Start()

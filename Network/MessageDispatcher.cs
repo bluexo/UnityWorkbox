@@ -30,7 +30,7 @@ namespace Arthas.Network
         }
 
         /// <summary>
-        /// 注册消息
+        /// 注册消息一次性处理消息
         /// </summary>
         /// <param name="cmd"></param>
         /// <param name="invoker"></param>
@@ -90,11 +90,6 @@ namespace Arthas.Network
             messages.Clear();
             foreach (var actions in onceMessages.Values) actions.Clear();
             onceMessages.Clear();
-        }
-
-        internal static void RegisterMessage(object p)
-        {
-            throw new NotImplementedException();
         }
     }
 }

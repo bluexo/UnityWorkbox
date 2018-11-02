@@ -208,5 +208,11 @@ public static class UnityEditorTools
     public static void DeleteAllPlayerPref()
     {
         PlayerPrefs.DeleteAll();
+
+        // 清除持久化目录下的PlayerPrefs数据
+        if (File.Exists(PlayCity.PlayerPrefs.filePath))
+        {
+            File.Delete(PlayCity.PlayerPrefs.filePath);
+        }
     }
 }

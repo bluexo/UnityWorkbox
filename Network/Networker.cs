@@ -1,13 +1,8 @@
 ﻿using System;
-using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
-using System.Net.Sockets;
-using System.Diagnostics;
+using UnityEngine;
 using Debug = UnityEngine.Debug;
-using Arthas.Common;
-using System.Threading;
-using System.Net;
 
 namespace Arthas.Network
 {
@@ -154,10 +149,10 @@ namespace Arthas.Network
             INetworkMessageHandler handler = null)
         {
 #if !UNITY_EDITOR && !UNITY_STANDALONE
-            if (Application.internetReachability == NetworkReachability.NotReachable
-                && error != null)
+            if (Application.internetReachability == NetworkReachability.NotReachable)
             {
-                error.Invoke("Network not reachable , please check you network setting!");
+                if (NetworkStatusEvent != null) NetworkStatusEvent(NetworkStatus.NetworkNotReachbility);
+                if(error != null) error.Invoke("Network not reachable , please check you network setting!");
                 return;
             }
 #endif
@@ -272,7 +267,7 @@ namespace Arthas.Network
 
         protected void OnMessageRespond(byte[] buffer)
         {
-            if (isPaused) return;
+            //if (isPaused) return;
             lock (enterLock)
             {
                 buf.WriteBytes(buffer);

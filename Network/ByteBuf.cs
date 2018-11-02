@@ -1,10 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Text;
+using System.Collections.Generic;
 using UnityEngine;
 
-public class ByteBuf
-{
+public class ByteBuf {
     private byte[] data;
     private int readerIndex;
     private int writerIndex;
@@ -16,7 +15,7 @@ public class ByteBuf
 	**/
     public ByteBuf(int capacity)
     {
-        data = new byte[capacity];
+        this.data = new byte[capacity];
         readerIndex = 0;
         writerIndex = 0;
         markReader = 0;
@@ -25,7 +24,7 @@ public class ByteBuf
 
     public ByteBuf(byte[] content)
     {
-        data = content;
+        this.data = content;
         readerIndex = 0;
         writerIndex = content.Length;
         markReader = 0;
@@ -79,7 +78,7 @@ public class ByteBuf
     public ByteBuf Copy()
     {
         ByteBuf item = new ByteBuf(data.Length);
-        Array.Copy(data, item.data, data.Length);
+        Array.Copy(this.data, item.data, data.Length);
         item.readerIndex = readerIndex;
         item.writerIndex = writerIndex;
         item.markReader = markReader;
@@ -92,14 +91,12 @@ public class ByteBuf
     /// <returns></returns>
     public ByteBuf Duplicate()
     {
-        ByteBuf item = new ByteBuf
-        {
-            readerIndex = readerIndex,
-            writerIndex = writerIndex,
-            markReader = markReader,
-            markWriter = markWriter,
-            data = data
-        };
+        ByteBuf item = new ByteBuf();
+        item.readerIndex = readerIndex;
+        item.writerIndex = writerIndex;
+        item.markReader = markReader;
+        item.markWriter = markWriter;
+        item.data = data;
         return item;
     }
     /**
@@ -111,7 +108,7 @@ public class ByteBuf
         {
             return data[index];
         }
-        return 0;
+        return (byte)0;
     }
     /**
 		* 读取四字节整形F
@@ -120,10 +117,10 @@ public class ByteBuf
     {
         if (index + 3 < data.Length)
         {
-            int ret = data[index] << 24;
-            ret |= data[index + 1] << 16;
-            ret |= data[index + 2] << 8;
-            ret |= data[index + 3];
+            int ret = ((int)data[index]) << 24;
+            ret |= ((int)data[index + 1]) << 16;
+            ret |= ((int)data[index + 2]) << 8;
+            ret |= ((int)data[index + 3]);
             return ret;
         }
         return 0;
@@ -136,7 +133,7 @@ public class ByteBuf
         if (index + 1 < data.Length)
         {
             short r1 = (short)(data[index] << 8);
-            short r2 = data[index + 1];
+            short r2 = (short)(data[index + 1]);
             short ret = (short)(r1 | r2);
             return ret;
         }
@@ -175,7 +172,7 @@ public class ByteBuf
             byte ret = data[readerIndex++];
             return ret;
         }
-        return 0;
+        return (byte)0;
     }
     /**
 		* 读取多个字节
@@ -263,7 +260,7 @@ public class ByteBuf
     {
         if (markReader <= writerIndex)
         {
-            readerIndex = markReader;
+            this.readerIndex = markReader;
         }
         return this;
     }
@@ -364,8 +361,8 @@ public class ByteBuf
 		**/
     public ByteBuf WriteByte(byte value)
     {
-        Capacity(writerIndex + 1);
-        data[writerIndex++] = value;
+        this.Capacity(writerIndex + 1);
+        this.data[writerIndex++] = value;
         return this;
     }
     /**

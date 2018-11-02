@@ -60,6 +60,11 @@ namespace Arthas.Network
         /// <returns></returns>
         IList<INetworkMessage> ParseMessage(byte[] buffer);
 
+        /// <summary>
+        /// 解析消息
+        /// </summary>
+        /// <param name="buffer"></param>
+        /// <returns></returns>
         IList<INetworkMessage> ParseMessage(ByteBuf buffer);
     }
 }
