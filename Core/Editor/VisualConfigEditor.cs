@@ -17,6 +17,7 @@ namespace Arthas.Common
     public class VisualConfigEditor : Editor
     {
         private readonly GUIStyle GUIStyle = new GUIStyle();
+        private readonly Dictionary<int, bool> FoldOuts = new Dictionary<int, bool>();
         protected SerializedProperty itemsProperty, backupDirProperty, backupTagProperty;
         protected bool importOption;
         protected bool[] folds;
@@ -193,9 +194,10 @@ namespace Arthas.Common
             }
             else if (property.isArray && property.propertyType != SerializedPropertyType.String)
             {
+                DrawFieldSparator(fieldInfo);
                 GUILayout.Space(5f);
                 EditorGUILayout.LabelField(property.displayName);
-                DrawArrayField(property);
+                DrawArrayField(property, fieldInfo);
                 GUILayout.Space(5f);
             }
             else if (property.propertyType == SerializedPropertyType.Generic)
@@ -205,12 +207,7 @@ namespace Arthas.Common
                     Debug.LogErrorFormat("Unknow type {0}, cannot draw this property!", property.type);
                     return;
                 }
-                EditorGUILayout.LabelField(GUIContent.none, GUI.skin.horizontalSlider);
-                if (fieldInfo != null)
-                {
-                    var attr = fieldInfo.GetCustomAttribute<HeaderAttribute>();
-                    if (attr != null) GUILayout.Label(attr.header, GUILayout.ExpandWidth(false));
-                }
+                DrawFieldSparator(fieldInfo);
                 var fields = type.GetFields();
                 if (fields.Length == 0) return;
                 for (var i = 0; i < fields.Length; i++)
@@ -229,7 +226,16 @@ namespace Arthas.Common
             }
         }
 
-        protected virtual void DrawArrayField(SerializedProperty subProperty)
+        private void DrawFieldSparator(FieldInfo fieldInfo)
+        {
+            EditorGUILayout.LabelField(GUIContent.none, GUI.skin.horizontalSlider);
+            if (fieldInfo == null) return;
+            var attr = fieldInfo.GetCustomAttribute<HeaderAttribute>();
+            if (attr == null) return;
+            GUILayout.Label(attr.header, GUILayout.ExpandWidth(false));
+        }
+
+        protected virtual void DrawArrayField(SerializedProperty subProperty, FieldInfo fieldInfo = null)
         {
             if (subProperty.arraySize <= 0) subProperty.arraySize++;
             Type elementType = null;
