@@ -16,6 +16,7 @@ namespace Arthas.Common
     [CustomEditor(typeof(VisualConfig<>), true, isFallback = true)]
     public class VisualConfigEditor : Editor
     {
+        private readonly GUIStyle GUIStyle = new GUIStyle();
         protected SerializedProperty itemsProperty, backupDirProperty, backupTagProperty;
         protected bool importOption;
         protected bool[] folds;
@@ -176,7 +177,10 @@ namespace Arthas.Common
             DrawFieldProperty(property, property.displayName, genericType);
         }
 
-        protected virtual void DrawFieldProperty(SerializedProperty property, string propertyName, Type type = null)
+        protected virtual void DrawFieldProperty(SerializedProperty property,
+            string propertyName,
+            Type type = null,
+            FieldInfo fieldInfo = null)
         {
             if (type == typeof(Sprite))
             {
@@ -201,6 +205,12 @@ namespace Arthas.Common
                     Debug.LogErrorFormat("Unknow type {0}, cannot draw this property!", property.type);
                     return;
                 }
+                EditorGUILayout.LabelField(GUIContent.none, GUI.skin.horizontalSlider);
+                if (fieldInfo != null)
+                {
+                    var attr = fieldInfo.GetCustomAttribute<HeaderAttribute>();
+                    if (attr != null) GUILayout.Label(attr.header, GUILayout.ExpandWidth(false));
+                }
                 var fields = type.GetFields();
                 if (fields.Length == 0) return;
                 for (var i = 0; i < fields.Length; i++)
@@ -209,9 +219,9 @@ namespace Arthas.Common
                     if (field.IsNotSerialized) continue;
                     var subProperty = property.FindPropertyRelative(field.Name);
                     if (subProperty == null) continue;
-                    DrawFieldProperty(subProperty, field.Name, field.FieldType);
+                    DrawFieldProperty(subProperty, field.Name, field.FieldType, field);
                 }
-                return;
+                EditorGUILayout.Separator();
             }
             else
             {
