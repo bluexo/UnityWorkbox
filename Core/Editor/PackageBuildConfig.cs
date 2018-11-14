@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 
-namespace YongeGames
+namespace Arthas
 {
     using Arthas.Common;
     using UnityEngine.SceneManagement;

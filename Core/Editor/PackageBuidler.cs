@@ -4,11 +4,11 @@ using UnityEditor;
 using UnityEngine;
 using UDebug = UnityEngine.Debug;
 
-namespace YongeGames
+namespace Arthas
 {
-    using Arthas;
     using System;
     using System.Diagnostics;
+#if UNITY_2018
     using UnityEditor.Build.Reporting;
 
     public class PackageBuidler : EditorWindow
@@ -71,4 +71,5 @@ namespace YongeGames
             return path;
         }
     }
+#endif
 }
