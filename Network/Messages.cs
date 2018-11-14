@@ -45,6 +45,11 @@ namespace Arthas.Network
     public interface INetworkMessageHandler
     {
         /// <summary>
+        /// 全局响应码处理程序
+        /// </summary>
+        IDictionary<short, Action<INetworkMessage>> GlobalResponseCodeHandlers { get; }
+
+        /// <summary>
         /// 包装消息
         /// </summary>
         /// <param name="command">消息命令</param>

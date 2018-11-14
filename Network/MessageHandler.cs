@@ -63,6 +63,13 @@ namespace Arthas.Network
     /// </summary>
     public class DefaultMessageHandler : INetworkMessageHandler
     {
+        public IDictionary<short, Action<INetworkMessage>> GlobalResponseCodeHandlers { get; private set; }
+
+        public DefaultMessageHandler()
+        {
+            GlobalResponseCodeHandlers = new Dictionary<short, Action<INetworkMessage>>();
+        }
+
         public virtual INetworkMessage PackMessage(object command, object obj, params object[] parameters)
         {
             var bodyBuffer = obj as byte[];
