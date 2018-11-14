@@ -23,7 +23,7 @@ namespace Arthas
         public static bool BuildServer()
         {
 #if !UNITY_STANDALONE
-            Debug.LogWarning("Cannot build server with Non standalone platform");
+            UDebug.LogWarning("Cannot build server with Non standalone platform");
             return false;
 #endif
             return BuildInternal(BuildTargetType.Server) != null;
