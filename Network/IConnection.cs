@@ -8,7 +8,7 @@ namespace Arthas.Network
     /// <summary>
     /// 连接器接口
     /// </summary>
-    public interface IConnector
+    public interface IConnection
     {
         bool IsConnected { get; }
 

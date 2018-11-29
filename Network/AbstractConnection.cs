@@ -168,7 +168,7 @@ namespace Arthas.Network
                     if (s.Connected) s.Close();
                 }
             }
-            throw new SocketException((Int32)e.SocketError);
+            throw new SocketException((int)e.SocketError);
         }
 
         public void Dispose()

@@ -16,7 +16,7 @@ public class NetworkerEditor : Editor
     private void OnEnable()
     {
         var allTypes = typeof(Networker).Assembly.GetTypes();
-        var conns = Array.FindAll(allTypes, t => t.GetInterface(typeof(IConnector).Name) != null && t != typeof(IConnector));
+        var conns = Array.FindAll(allTypes, t => t.GetInterface(typeof(IConnection).Name) != null && t != typeof(IConnection));
         conns.Foreach(c => ArrayUtility.Add(ref connectors, c));
 
         var handlerArray = Array.FindAll(allTypes, t => t.GetInterface(typeof(INetworkMessageHandler).Name) != null && t != typeof(INetworkMessageHandler));

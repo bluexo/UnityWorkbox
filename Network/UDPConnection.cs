@@ -10,7 +10,7 @@ using System.Collections.Generic;
 
 namespace Arthas.Network
 {
-    public class UDPConnector : MonoBehaviour, IConnector
+    public class UDPConnection : MonoBehaviour, IConnection
     {
         public readonly int MaxHostCount = 16;
         public bool IsConnected { get; private set; }
