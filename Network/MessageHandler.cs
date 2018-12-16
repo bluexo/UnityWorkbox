@@ -106,7 +106,7 @@ namespace Arthas.Network
             }
         }
 
-        public virtual IList<INetworkMessage> ParseMessage(ByteBuf buffer)
+        public virtual IList<INetworkMessage> ParseMessage(ByteBuffer buffer)
         {
             throw new NotImplementedException();
         }

@@ -80,11 +80,6 @@ namespace Arthas.Network
                 {
                     NoDelay = true,
                     ExclusiveAddressUse = true,
-                    LingerState = new LingerOption(true, 10),
-                    ReceiveTimeout = 3000,
-                    SendTimeout = 3000,
-                    ReceiveBufferSize = 4096,
-                    SendBufferSize = 4096,
                 };
                 Address = string.Format("{0}:{1}", ip, port);
                 client.BeginConnect(ip, port, new AsyncCallback(ConnectCallback), client);

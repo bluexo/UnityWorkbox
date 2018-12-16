@@ -27,8 +27,6 @@ namespace System
 
     public static class CollectionExtensions
     {
-        private readonly static Random random = new Random();
-
         public static T First<T>(this IList<T> arr)
         {
             if (arr.Count > 0) return arr[0];
@@ -43,6 +41,7 @@ namespace System
 
         public static T RandomItem<T>(this IList<T> arr)
         {
+            var random = new Random();
             if (arr.Count > 0)
                 return arr[random.Next(0, arr.Count)];
             else return default(T);
@@ -70,6 +69,7 @@ namespace System
 
         public static T Random<T>(this T[] arr, int startIndex = 0)
         {
+            var random = new Random(Guid.NewGuid().GetHashCode());
             if (arr.Length <= 0) return default(T);
             var rand = random.Next(startIndex, arr.Length);
             return arr[rand];

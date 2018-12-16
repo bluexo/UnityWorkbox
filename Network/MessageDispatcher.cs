@@ -63,25 +63,32 @@ namespace Arthas.Network
         /// <param name="msg"></param>
         private static void Invoke(INetworkMessage msg)
         {
-            if (onceMessages.ContainsKey(msg.Command))
+            try
             {
-                var msgs = onceMessages[msg.Command];
-                for (var i = 0; i < msgs.Count; i++)
+                if (onceMessages.ContainsKey(msg.Command))
                 {
-                    msgs[i].Invoke(msg);
+                    var msgs = onceMessages[msg.Command];
+                    for (var i = 0; i < msgs.Count; i++)
+                    {
+                        msgs[i].Invoke(msg);
+                    }
+                    msgs.Clear();
+                    return;
                 }
-                msgs.Clear();
-                return;
-            }
 
-            if (messages.ContainsKey(msg.Command))
-            {
-                var msgs = messages[msg.Command];
-                for (var i = 0; i < msgs.Count; i++) msgs[i].Invoke(msg);
-            }
+                if (messages.ContainsKey(msg.Command))
+                {
+                    var msgs = messages[msg.Command];
+                    for (var i = 0; i < msgs.Count; i++) msgs[i].Invoke(msg);
+                }
 #if UNITY_EDITOR
-            else Debug.LogFormat("Cannot invoke message,CmdType:{0}", msg.Command);
+                else Debug.LogFormat("Cannot invoke message,CmdType:{0}", msg.Command);
 #endif
+            }
+            catch (Exception exc)
+            {
+                Debug.LogError($"{exc.Message},{exc.StackTrace}");
+            }
         }
 
         public static void Clear()

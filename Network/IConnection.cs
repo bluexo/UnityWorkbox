@@ -6,7 +6,7 @@ using System.Text;
 namespace Arthas.Network
 {
     /// <summary>
-    /// 连接器接口
+    /// 网络连接接口
     /// </summary>
     public interface IConnection
     {

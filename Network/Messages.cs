@@ -70,6 +70,6 @@ namespace Arthas.Network
         /// </summary>
         /// <param name="buffer"></param>
         /// <returns></returns>
-        IList<INetworkMessage> ParseMessage(ByteBuf buffer);
+        IList<INetworkMessage> ParseMessage(ByteBuffer buffer);
     }
 }

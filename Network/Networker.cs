@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using UnityEngine;
 using Debug = UnityEngine.Debug;
@@ -16,6 +17,13 @@ namespace Arthas.Network
         HighLatency = 6            //高延迟
     }
 
+    public class NetworkStatusEventArgs
+    {
+        public NetworkStatus Status { get; set; }
+        public string Description { get; set; }
+        public int StateCode { get; set; }
+    }
+
     /// <summary>
     /// 网络
     /// </summary>
@@ -24,17 +32,9 @@ namespace Arthas.Network
         /// <summary>
         /// 推送和响应事件
         /// </summary>
-        public static event Action<INetworkMessage> ResponseEvent, PushEvent;
+        public static event Action<INetworkMessage> ResponseEvent;
 
-        /// <summary>
-        /// 网络连接事件
-        /// </summary>
-        [Obsolete] public static event Action ConnectedEvent;
-
-        /// <summary>
-        /// 网络断开事件
-        /// </summary>
-        [Obsolete] public static event Action DisconnectedEvent;
+        public static event Action ConnectedEvent, DisconnectedEvent;
 
         /// <summary>
         /// 网络状态事件
@@ -45,7 +45,7 @@ namespace Arthas.Network
         /// <summary>
         /// 网络状态事件
         /// </summary>
-        public static event EventHandler<NetworkStatus> NetworkStatusEventHandler;
+        public static event EventHandler<NetworkStatusEventArgs> NetworkStatusEventHandler;
 
         /// <summary>
         /// 错误回调
@@ -56,23 +56,24 @@ namespace Arthas.Network
         public static int PingTime { get; private set; }
         public static Func<object> HeartbeatCommandGetter { get; set; }
 
-        //public ByteBuf buf;
-        public const short HeartbeatCommand = 0, MaxBuffSize = 4096;
+        public const short DefaultHeartbeatCommand = 0, MaxBuffSize = 4096;
 
         public static bool IsLittleEndian
         {
             get { return Instance.isLittleEndian; }
             set { Instance.isLittleEndian = value; }
         }
-        public static bool IsConnected { get { return connector != null && connector.IsConnected; } }
+
+        public static bool IsConnected { get { return connection != null && connection.IsConnected; } }
         private static object enterLock = new object();
         private static Ping ping;
 
-        private readonly static Queue<INetworkMessage> msgQueue = new Queue<INetworkMessage>();
+        private readonly static ConcurrentQueue<INetworkMessage> msgQueue = new ConcurrentQueue<INetworkMessage>();
         private readonly static Dictionary<object, Queue<Action<INetworkMessage>>> responseActions = new Dictionary<object, Queue<Action<INetworkMessage>>>();
 
         private Coroutine timeoutCor, connectCor, heartbeatCor;
         private WaitForSeconds heartbeatWaitFor, timeoutWaiter, connectPollWaiter = new WaitForSeconds(.5f);
+        private DateTime prevHeartbeatDateTime = DateTime.MinValue;
         private float prevConnectTime, connectCheckDuration = .1f;
         private bool isPaused = false;
         private int retryCount = 0;
@@ -81,19 +82,20 @@ namespace Arthas.Network
         private float connectTimeout = 10f,
             heartbeatInterval = 12f,
             pingInterval = 1f,
+            heartbeatTimeout = 8f,
             delayTimeThreshold = 150;
 
         [SerializeField]
         private bool isLittleEndian = true,
             useSSL = false,
-            enableLogging = true,
-            enableHeartbeat = true;
+            enableLogging = true;
+
         [SerializeField]
         private int maxRetryCount = 3;
 
         [SerializeField, HideInInspector]
         private string connectorTypeName, messageHandlerName;
-        private static IConnection connector;
+        private static IConnection connection;
         private static INetworkMessageHandler messageHandler;
         public NetworkAddress NetworkAddress { get; private set; }
         private static float prevSendTime = 0,
@@ -112,20 +114,20 @@ namespace Arthas.Network
         /// </summary>
         protected void ConnectInternal(string ip, short port, IConnection conn, INetworkMessageHandler handler = null)
         {
-            if (connector != null && connector.IsConnected) connector.Close();
+            if (connection != null && connection.IsConnected) connection.Close();
             if (!string.IsNullOrEmpty(connectorTypeName))
-                connector = (IConnection)Activator.CreateInstance(Type.GetType(connectorTypeName, true, true));
+                connection = (IConnection)Activator.CreateInstance(Type.GetType(connectorTypeName, true, true));
             if (!string.IsNullOrEmpty(messageHandlerName))
                 messageHandler = (INetworkMessageHandler)Activator.CreateInstance(Type.GetType(messageHandlerName, true, true));
             if (messageHandler == null)
                 messageHandler = handler ?? new DefaultMessageHandler();
-            if (connector == null)
-                connector = conn ?? new TCPConnection();
+            if (connection == null)
+                connection = conn ?? new TCPConnection();
             NetworkAddress = new NetworkAddress { ip = ip, port = port };
             ping = new Ping(ip);
             Connect();
 #if UNITY_EDITOR
-            Debug.LogFormat("Connect to server , <color=cyan>Addr:[{0}:{1}] ,connector:{2} ,wrapper:{3}.</color>", ip, port, connector.GetType(), messageHandler.GetType());
+            Debug.LogFormat("Connect to server , <color=cyan>Addr:[{0}:{1}] ,connector:{2} ,wrapper:{3}.</color>", ip, port, connection.GetType(), messageHandler.GetType());
 #endif
         }
 
@@ -169,8 +171,8 @@ namespace Arthas.Network
                 return;
             }
 #endif
-            ConnectErrorEvent = error;
             ConnectedEvent = callback;
+            ConnectErrorEvent = error;
             Instance.ConnectInternal(ip, port, connector, handler);
         }
 
@@ -178,9 +180,8 @@ namespace Arthas.Network
         {
             if (isConnecting || IsConnected) return;
             isConnecting = true;
-            //buf = new ByteBuf(MaxBuffSize);
             prevConnectTime = Time.time;
-            if (connector != null) connector.Connect(NetworkAddress.ip, NetworkAddress.port);
+            if (connection != null) connection.Connect(NetworkAddress.ip, NetworkAddress.port);
             InvokeStatusEvent(NetworkStatus.Connecting);
             timeoutCor = StartCoroutine(TimeoutDetectAsync());
         }
@@ -190,7 +191,7 @@ namespace Arthas.Network
             while (true)
             {
                 yield return timeoutWaiter;
-                if (connector.IsConnected)
+                if (connection.IsConnected)
                 {
                     OnConnected();
                     StopCoroutine(timeoutCor);
@@ -206,13 +207,17 @@ namespace Arthas.Network
             }
         }
 
-        private void InvokeStatusEvent(NetworkStatus status)
+        private void InvokeStatusEvent(NetworkStatus status, string description = null)
         {
             if (NetworkStatus == status) return;
             NetworkStatus = status;
             if (NetworkStatusEvent != null) NetworkStatusEvent(NetworkStatus);
-            if (NetworkStatusEventHandler != null) NetworkStatusEventHandler(this, status);
-            Debug.LogFormat("Network status event={0} invoked!",status);
+            if (NetworkStatusEventHandler != null) NetworkStatusEventHandler(this, new NetworkStatusEventArgs
+            {
+                Status = status,
+                Description = description
+            });
+            Debug.LogFormat("Network status event={0} invoked!", status);
         }
 
         protected IEnumerator HeartbeatDetectAsync()
@@ -220,14 +225,28 @@ namespace Arthas.Network
             while (true)
             {
                 yield return heartbeatWaitFor;
-
-                if (enableHeartbeat && connector.IsConnected)
-                {
-                    if (HeartbeatCommandGetter != null) Send(HeartbeatCommandGetter());
-                    else Send(0);
-                }
-                else yield break;
+                var cmd = (HeartbeatCommandGetter != null)
+                    ? HeartbeatCommandGetter()
+                    : DefaultHeartbeatCommand;
+                SendHeartbeat(cmd);
             }
+        }
+
+        public void SendHeartbeat(object command)
+        {
+            if (!connection.IsConnected) return;
+            if (prevHeartbeatDateTime == DateTime.MinValue)
+                prevHeartbeatDateTime = DateTime.Now;
+            var diff = DateTime.Now - prevHeartbeatDateTime;
+            if (diff.TotalSeconds > heartbeatTimeout
+                && IsConnected)
+            {
+                Debug.LogError($"Heatbeat timeout!");
+                StopCoroutine(heartbeatCor);
+                Close();
+                return;
+            }
+            Send(command, callback: r => prevHeartbeatDateTime = DateTime.Now);
         }
 
         protected IEnumerator ConnectionDetectAsync()
@@ -236,7 +255,7 @@ namespace Arthas.Network
             {
                 yield return connectPollWaiter;
                 if (Application.internetReachability == NetworkReachability.NotReachable
-                    || !connector.IsConnected)
+                    || !connection.IsConnected)
                 {
                     OnDisconnected();
                     StopCoroutine(connectCor);
@@ -252,45 +271,50 @@ namespace Arthas.Network
         {
             retryCount = 0;
             isConnecting = false;
-            if (connector != null)
+            if (connection != null)
             {
-                connector.MessageRespondEvent -= OnMessageRespond;
-                connector.MessageRespondEvent += OnMessageRespond;
+                connection.MessageRespondEvent -= OnMessageRespond;
+                connection.MessageRespondEvent += OnMessageRespond;
             }
-            if (ConnectedEvent != null) ConnectedEvent();
+            ConnectedEvent?.Invoke();
             InvokeStatusEvent(NetworkStatus.Connected);
+            prevHeartbeatDateTime = DateTime.Now;
             connectCor = StartCoroutine(ConnectionDetectAsync());
             heartbeatCor = StartCoroutine(HeartbeatDetectAsync());
         }
 
         protected void OnDisconnected()
         {
-            connector.MessageRespondEvent -= OnMessageRespond;
+            connection.MessageRespondEvent -= OnMessageRespond;
             isConnecting = false;
-            if (connector.IsConnected) return;
-            if (retryCount == maxRetryCount)
-            {
-                InvokeStatusEvent(NetworkStatus.Disconnected);
-                if (DisconnectedEvent != null) DisconnectedEvent();
-                retryCount = 0;
-            }
-            else
-            {
-                retryCount++;
-                this.Invoke(Connect, 1f);
-            }
+            if (connection.IsConnected) return;
+            DisconnectedEvent?.Invoke();
+            InvokeStatusEvent(NetworkStatus.Disconnected);
+
+            //if (retryCount == maxRetryCount)
+            //{
+            //    InvokeStatusEvent(NetworkStatus.Disconnected);
+            //    if (DisconnectedEvent != null) DisconnectedEvent();
+            //    retryCount = 0;
+            //}
+            //else
+            //{
+            //    retryCount++;
+            //    this.Invoke(Connect, 1f);
+            //}
         }
 
         protected void OnMessageRespond(byte[] buffer)
         {
-            lock (enterLock)
+            lock (msgQueue)
             {
-               // buf.WriteBytes(buffer);
+                // buf.WriteBytes(buffer);
                 var msgs = messageHandler.ParseMessage(buffer);
                 for (var i = 0; i < msgs.Count; i++)
                 {
                     msgQueue.Enqueue(msgs[i]);
-                    if (msgQueue.Count > byte.MaxValue) msgQueue.Dequeue();
+                    INetworkMessage message;
+                    if (msgQueue.Count > byte.MaxValue) msgQueue.TryDequeue(out message);
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
                     if (Instance.enableLogging)
                         Debug.LogFormat("<color=blue>[TCPNetwork]</color> [Receive] << CMD:{0},TIME:{1}", msgs[i].Command, DateTime.Now);
@@ -303,29 +327,20 @@ namespace Arthas.Network
         {
             while (msgQueue.Count > 0)
             {
-                var message = msgQueue.Dequeue();
+                INetworkMessage message;
+                if (!msgQueue.TryDequeue(out message)) continue;
                 if (responseActions.Count > 0 && responseActions.ContainsKey(message.Command))
                 {
                     var action = responseActions[message.Command].Dequeue();
                     if (action != null) action.Invoke(message);
                 }
-                else if (PushEvent != null)
-                {
-                    PushEvent(message);
-                }
-                if (ResponseEvent != null)
-                {
-                    ResponseEvent(message);
-                }
+                ResponseEvent?.Invoke(message);
             }
-#if !UNITY_IOS
-            Ping();
-#endif
         }
 
         private void Ping()
         {
-            if (connectCor != null && connector.IsConnected
+            if (connectCor != null && connection.IsConnected
                && Time.time - prevSendPingTime > pingInterval
                && ping != null)
             {
@@ -353,7 +368,7 @@ namespace Arthas.Network
 
         public static void Send(object cmd, object buf = null, Action<INetworkMessage> callback = null, params object[] parameters)
         {
-            if(!connector.IsConnected)
+            if (!IsConnected)
                 return;
 
             try
@@ -363,7 +378,7 @@ namespace Arthas.Network
                 if (!responseActions.ContainsKey(message.Command))
                     responseActions.Add(message.Command, new Queue<Action<INetworkMessage>>());
                 responseActions[message.Command].Enqueue(callback);
-                connector.Send(buffer);
+                connection.Send(buffer);
                 prevSendTime = Time.time;
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
                 if (Instance.enableLogging)
@@ -376,14 +391,9 @@ namespace Arthas.Network
             }
         }
 
-        public static IEnumerator SendAsync(object cmd, object buf, params object[] parameters)
-        {
-            throw new NotImplementedException();
-        }
-
         public static void Close()
         {
-            if (connector != null) connector.Close();
+            if (connection != null) connection.Close();
         }
 
         private void OnApplicationFocus(bool hasFocus)

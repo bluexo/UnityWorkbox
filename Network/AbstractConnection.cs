@@ -34,7 +34,7 @@ namespace Arthas.Network
         protected readonly SocketAsyncEventArgs ConnectArgs = new SocketAsyncEventArgs(),
             ReadWriteArgs = new SocketAsyncEventArgs();
 
-        private readonly ByteBuf buffer = new ByteBuf(short.MaxValue);
+        private readonly ByteBuffer buffer = new ByteBuffer(short.MaxValue);
 
         public Connection() :
             this(new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp))

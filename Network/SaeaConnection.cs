@@ -4,6 +4,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
+using System.Runtime.InteropServices;
 using System.Threading;
 using UnityEngine;
 
@@ -21,23 +22,22 @@ namespace Arthas.Network
             Socket = socket;
         }
 
+        public override string ToString()
+        {
+            return $"{nameof(MessageSize)} = {MessageSize},\n" +
+                    $"{nameof(DataStartOffset)} = {DataStartOffset},\n" +
+                    $"{nameof(NextReceiveOffset)} = {NextReceiveOffset},\n";
+        }
+
         #region IDisposable Members
 
         public void Dispose()
         {
-            try
-            {
-                Socket.Shutdown(SocketShutdown.Send);
-            }
-            catch (Exception)
-            { }
+            try { Socket.Shutdown(SocketShutdown.Send); }
+            catch (Exception) { }
 
-            try
-            {
-                Socket.Close();
-            }
-            catch (Exception)
-            { }
+            try { Socket.Close(); }
+            catch (Exception) { }
         }
 
         #endregion
@@ -45,7 +45,7 @@ namespace Arthas.Network
 
     public class SaeaConnection : IConnection, IDisposable
     {
-        private int bufferSize = 60000;
+        private const int BufferSize = 65536;
         private const int MessageHeaderSize = sizeof(ushort);
 
         private Socket clientSocket;
@@ -53,18 +53,16 @@ namespace Arthas.Network
         private SocketAsyncEventArgs sendEventArgs;
         private SocketAsyncEventArgs receiveEventArgs;
 
-        private readonly AutoResetEvent autoConnectEvent;
-        private readonly AutoResetEvent autoSendEvent;
+        private readonly AutoResetEvent autoConnectEvent, autoSendEvent;
         private readonly BlockingCollection<byte[]> sendingQueue;
         private readonly BlockingCollection<byte[]> receivedMessageQueue;
         private readonly Thread sendMessageWorker;
         private readonly Thread processReceivedMessageWorker;
 
-        private int _receivedMessageCount;
-        private Action<object> connectedCallback;
         public event Action<byte[]> MessageRespondEvent;
 
-        public bool IsConnected { get; private set; }
+        private bool connected = false;
+        public bool IsConnected => connected && clientSocket != null && clientSocket.Connected;
 
         public SaeaConnection()
         {
@@ -76,26 +74,52 @@ namespace Arthas.Network
             processReceivedMessageWorker = new Thread(new ThreadStart(ProcessReceivedMessage));
         }
 
-        public void Connect(string ip, int port, Action<object> callback = null)
+        public void Connect(string hostname, int port, Action<object> callback = null)
         {
-            IPAddress address = null;
-            if (IPAddress.TryParse(ip, out address))
+            IPAddress[] addresses = Dns.GetHostAddresses(hostname);
+            AddressFamily _family = AddressFamily.Unknown;
+
+            try
             {
-                connectedCallback = callback;
-                var endPoint = new IPEndPoint(address, port);
-                Connect(endPoint);
+                foreach (IPAddress address in addresses)
+                {
+                    if (clientSocket == null)
+                    {
+                        Debug.Assert(address.AddressFamily == AddressFamily.InterNetwork || address.AddressFamily == AddressFamily.InterNetworkV6);
+                        if ((address.AddressFamily == AddressFamily.InterNetwork && Socket.OSSupportsIPv4) || Socket.OSSupportsIPv6)
+                        {
+                            Connect(new IPEndPoint(address, port));
+                        }
+
+                        _family = address.AddressFamily;
+                        break;
+                    }
+                    if (address.AddressFamily == _family || _family == AddressFamily.Unknown)
+                    {
+                        Connect(new IPEndPoint(address, port));
+                        break;
+                    }
+                }
             }
-            else
+            catch (Exception ex)
             {
-                Debug.LogError($"Cannot parse ip {ip} !");
+                callback?.Invoke(ex);
+                connected = false;
             }
         }
 
         public void Connect(IPEndPoint hostEndPoint)
         {
             this.hostEndPoint = hostEndPoint;
+            var addressFamily = Socket.OSSupportsIPv6
+                ? AddressFamily.InterNetworkV6
+                : AddressFamily.InterNetwork;
 
-            clientSocket = new Socket(this.hostEndPoint.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
+            clientSocket = new Socket(addressFamily, SocketType.Stream, ProtocolType.Tcp)
+            {
+                NoDelay = true,
+                ExclusiveAddressUse = true,
+            };
 
             sendEventArgs = new SocketAsyncEventArgs
             {
@@ -103,23 +127,22 @@ namespace Arthas.Network
                 RemoteEndPoint = this.hostEndPoint
             };
 
-            sendEventArgs.Completed += new EventHandler<SocketAsyncEventArgs>(OnSend);
+            sendEventArgs.Completed += OnSend;
 
             receiveEventArgs = new SocketAsyncEventArgs
             {
                 UserToken = new AsyncUserToken(clientSocket),
                 RemoteEndPoint = this.hostEndPoint
             };
-            receiveEventArgs.SetBuffer(new byte[bufferSize], 0, bufferSize);
-            receiveEventArgs.Completed += new EventHandler<SocketAsyncEventArgs>(OnReceive);
+            receiveEventArgs.SetBuffer(new byte[BufferSize], 0, BufferSize);
+            receiveEventArgs.Completed += OnReceive;
 
             SocketAsyncEventArgs connectArgs = new SocketAsyncEventArgs
             {
                 UserToken = clientSocket,
                 RemoteEndPoint = hostEndPoint
             };
-            connectArgs.Completed += new EventHandler<SocketAsyncEventArgs>(OnConnect);
-
+            connectArgs.Completed += OnConnect;
             clientSocket.ConnectAsync(connectArgs);
             autoConnectEvent.WaitOne();
 
@@ -134,18 +157,26 @@ namespace Arthas.Network
                 ProcessReceive(receiveEventArgs);
         }
 
-        public void Disconnect() => clientSocket.Disconnect(false);
+        public void Disconnect()
+        {
+            clientSocket.Disconnect(false);
+            connected = false;
+        }
 
         public void Send(byte[] message) => sendingQueue.Add(message);
 
         private void OnConnect(object sender, SocketAsyncEventArgs e)
         {
             autoConnectEvent.Set();
-            IsConnected = (e.SocketError == SocketError.Success);
-            connectedCallback?.Invoke(e);
+            connected = (e.SocketError == SocketError.Success);
         }
 
-        private void OnSend(object sender, SocketAsyncEventArgs e) => autoSendEvent.Set();
+        private void OnSend(object sender, SocketAsyncEventArgs e)
+        {
+            if (e.SocketError != SocketError.Success)
+                ProcessError(e);
+            autoSendEvent.Set();
+        }
 
         private void SendQueueMessage()
         {
@@ -161,7 +192,19 @@ namespace Arthas.Network
             }
         }
 
-        private void OnReceive(object sender, SocketAsyncEventArgs e) => ProcessReceive(e);
+        private void OnReceive(object sender, SocketAsyncEventArgs e)
+        {
+            try
+            {
+                ProcessReceive(e);
+            }
+            catch (Exception ex)
+            {
+                var token = e.UserToken as AsyncUserToken;
+                Debug.LogError($"{ex.Message},{ex.StackTrace},\nBuffer:{e.Buffer.Length}\nToken:{token.ToString()}");
+                Close();
+            }
+        }
 
         private void ProcessReceive(SocketAsyncEventArgs e)
         {
@@ -174,18 +217,17 @@ namespace Arthas.Network
             var token = e.UserToken as AsyncUserToken;
             ProcessReceivedData(token.DataStartOffset, token.NextReceiveOffset - token.DataStartOffset + e.BytesTransferred, 0, token, e);
             token.NextReceiveOffset += e.BytesTransferred;
-            if (token.NextReceiveOffset == e.Buffer.Length)
+            if (token.NextReceiveOffset >= e.Buffer.Length)
             {
                 token.NextReceiveOffset = 0;
                 if (token.DataStartOffset < e.Buffer.Length)
                 {
-                    var notYesProcessDataSize = e.Buffer.Length - token.DataStartOffset;
-                    Buffer.BlockCopy(e.Buffer, token.DataStartOffset, e.Buffer, 0, notYesProcessDataSize);
-                    token.NextReceiveOffset = notYesProcessDataSize;
+                    var notProcessDataSize = e.Buffer.Length - token.DataStartOffset;
+                    Buffer.BlockCopy(e.Buffer, token.DataStartOffset, e.Buffer, 0, notProcessDataSize);
+                    token.NextReceiveOffset = notProcessDataSize;
                 }
                 token.DataStartOffset = 0;
             }
-
             e.SetBuffer(token.NextReceiveOffset, e.Buffer.Length - token.NextReceiveOffset);
             if (!token.Socket.ReceiveAsync(e))
                 ProcessReceive(e);
@@ -200,6 +242,9 @@ namespace Arthas.Network
             if (alreadyProcessedDataSize >= totalReceivedDataSize)
                 return;
 
+            if (dataStartOffset >= e.Buffer.Length - MessageHeaderSize)
+                return;
+
             if (token.MessageSize == null)
             {
                 //如果之前接收到到数据加上当前接收到的数据大于消息头的大小，则可以解析消息头
@@ -209,6 +254,7 @@ namespace Arthas.Network
                     var headerData = new byte[MessageHeaderSize];
                     Buffer.BlockCopy(e.Buffer, dataStartOffset, headerData, 0, MessageHeaderSize);
                     var messageSize = BitConverter.ToInt16(headerData, 0);
+
 
                     token.MessageSize = messageSize;
                     token.DataStartOffset = dataStartOffset + MessageHeaderSize;
@@ -235,6 +281,8 @@ namespace Arthas.Network
                     ProcessReceivedData(token.DataStartOffset, totalReceivedDataSize, alreadyProcessedDataSize + messageSize, token, e);
                 }
             }
+
+
         }
 
         private void ProcessMessage(byte[] messageData) => receivedMessageQueue.Add(messageData);
@@ -251,22 +299,21 @@ namespace Arthas.Network
 
         private void ProcessError(SocketAsyncEventArgs e)
         {
-            Debug.LogError($"Socket error {e.SocketError}");
             var token = e.UserToken as AsyncUserToken;
             var s = token.Socket;
             if (!s.Connected) return;
-            // close the socket associated with the client
             try
             {
+                Disconnect();
                 s.Shutdown(SocketShutdown.Both);
             }
             catch (Exception ex)
             {
-                // throws if client process has already closed
                 Debug.LogError($"{ex.Message},{ex.StackTrace}");
             }
             finally
             {
+                Debug.LogError($"Process SocketError={e.SocketError}");
                 if (s.Connected)
                     s.Close();
             }
@@ -274,6 +321,9 @@ namespace Arthas.Network
 
         public void Dispose()
         {
+            Disconnect();
+            sendMessageWorker.Abort();
+            processReceivedMessageWorker.Abort();
             autoConnectEvent.Close();
             if (!clientSocket.Connected) return;
             clientSocket.Close();
