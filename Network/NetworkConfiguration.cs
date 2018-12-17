@@ -201,9 +201,11 @@ public class NetworkConfiguration : ScriptableObject
         {
             conf = new NetworkConfiguration()
             {
-                local = new NetworkAddress() { ip = "127.0.0.1", port = 10000 },
-                intranet = new NetworkAddress() { ip = "192.168.1.10", port = 10000 },
-                internet = new NetworkAddress() { ip = "0.0.0.0", port = 10000 }
+                local = new NetworkAddress { ip = "127.0.0.1", port = 10000 },
+                intranet = new NetworkAddress { ip = "192.168.1.10", port = 10000 },
+                internet = new NetworkAddress { ip = nameof(internet), port = 10000 },
+                option1 = new NetworkAddress { ip = nameof(option1), port = 10000 },
+                option2 = new NetworkAddress { ip = nameof(option2), port = 10000 }
             };
             var path = Path.Combine(Application.dataPath, "Resources/" + kConfigPath);
             if (!Directory.Exists(path)) Directory.CreateDirectory(path);
