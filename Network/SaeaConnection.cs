@@ -311,13 +311,20 @@ namespace Arthas.Network
 
         public void Dispose()
         {
-            Disconnect();
-            clientSocket.Shutdown(SocketShutdown.Both);
-            sendMessageWorker.Abort();
-            processReceivedMessageWorker.Abort();
-            autoConnectEvent.Close();
-            if (!clientSocket.Connected) return;
-            clientSocket.Close();
+            try
+            {
+                Disconnect();
+                clientSocket.Shutdown(SocketShutdown.Both);
+                sendMessageWorker.Abort();
+                processReceivedMessageWorker.Abort();
+            }
+            catch { }
+            finally
+            {
+                autoConnectEvent.Close();
+                if (clientSocket.Connected)
+                    clientSocket.Close();
+            }
         }
 
         public void Close() => Dispose();
