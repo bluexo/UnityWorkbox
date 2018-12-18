@@ -290,18 +290,6 @@ namespace Arthas.Network
             if (connection.IsConnected) return;
             DisconnectedEvent?.Invoke();
             InvokeStatusEvent(NetworkStatus.Disconnected);
-
-            //if (retryCount == maxRetryCount)
-            //{
-            //    InvokeStatusEvent(NetworkStatus.Disconnected);
-            //    if (DisconnectedEvent != null) DisconnectedEvent();
-            //    retryCount = 0;
-            //}
-            //else
-            //{
-            //    retryCount++;
-            //    this.Invoke(Connect, 1f);
-            //}
         }
 
         protected void OnMessageRespond(byte[] buffer)

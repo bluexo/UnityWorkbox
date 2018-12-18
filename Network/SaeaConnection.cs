@@ -247,10 +247,8 @@ namespace Arthas.Network
 
             if (token.MessageSize == null)
             {
-                //如果之前接收到到数据加上当前接收到的数据大于消息头的大小，则可以解析消息头
                 if (totalReceivedDataSize > MessageHeaderSize)
                 {
-                    //解析消息长度
                     var headerData = new byte[MessageHeaderSize];
                     Buffer.BlockCopy(e.Buffer, dataStartOffset, headerData, 0, MessageHeaderSize);
                     var messageSize = BitConverter.ToInt16(headerData, 0);
@@ -258,31 +256,23 @@ namespace Arthas.Network
 
                     token.MessageSize = messageSize;
                     token.DataStartOffset = dataStartOffset + MessageHeaderSize;
-
-                    //递归处理
                     ProcessReceivedData(token.DataStartOffset, totalReceivedDataSize, alreadyProcessedDataSize + MessageHeaderSize, token, e);
                 }
             }
             else
             {
                 var messageSize = token.MessageSize.Value;
-                //判断当前累计接收到的字节数减去已经处理的字节数是否大于消息的长度，如果大于，则说明可以解析消息了
                 if (totalReceivedDataSize - alreadyProcessedDataSize >= messageSize)
                 {
                     var messageData = new byte[messageSize];
                     Buffer.BlockCopy(e.Buffer, dataStartOffset, messageData, 0, messageSize);
                     ProcessMessage(messageData);
 
-                    //消息处理完后，需要清理token，以便接收下一个消息
                     token.DataStartOffset = dataStartOffset + messageSize;
                     token.MessageSize = null;
-
-                    //递归处理
                     ProcessReceivedData(token.DataStartOffset, totalReceivedDataSize, alreadyProcessedDataSize + messageSize, token, e);
                 }
             }
-
-
         }
 
         private void ProcessMessage(byte[] messageData) => receivedMessageQueue.Add(messageData);
@@ -322,6 +312,7 @@ namespace Arthas.Network
         public void Dispose()
         {
             Disconnect();
+            clientSocket.Shutdown(SocketShutdown.Both);
             sendMessageWorker.Abort();
             processReceivedMessageWorker.Abort();
             autoConnectEvent.Close();
