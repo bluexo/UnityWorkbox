@@ -61,19 +61,19 @@ namespace Arthas.UI
         protected override void Start()
         {
             base.Start();
-            if (Invoker) Invoker.InvokeScript("Start", this);
+            if (Invoker) Invoker.InvokeScript(nameof(Start), this);
         }
 
         protected override void OnEnable()
         {
             base.OnEnable();
-            if (Invoker) Invoker.InvokeScript("OnEnable");
+            if (Invoker) Invoker.InvokeScript(nameof(OnEnable));
         }
 
         protected override void OnDisable()
         {
             base.OnDisable();
-            if (Invoker) Invoker.InvokeScript("OnDisable");
+            if (Invoker) Invoker.InvokeScript(nameof(OnDisable));
         }
 
         public override void Show()
@@ -81,6 +81,12 @@ namespace Arthas.UI
             UIManager.AddUI(this);
             base.Show();
         }
+
+        private void OnApplicationFocus(bool focus) => Invoker.InvokeScript(nameof(OnApplicationFocus), focus);
+
+        private void OnApplicationPause(bool pause) => Invoker?.InvokeScript(nameof(OnApplicationPause), pause);
+
+        private void OnApplicationQuit() => Invoker?.InvokeScript(nameof(OnApplicationQuit));
 
         public void OnPointerDown(PointerEventData eventData)
         {
