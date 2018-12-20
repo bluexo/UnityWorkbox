@@ -211,8 +211,8 @@ namespace Arthas.Network
         {
             if (NetworkStatus == status) return;
             NetworkStatus = status;
-            if (NetworkStatusEvent != null) NetworkStatusEvent(NetworkStatus);
-            if (NetworkStatusEventHandler != null) NetworkStatusEventHandler(this, new NetworkStatusEventArgs
+            NetworkStatusEvent?.Invoke(NetworkStatus);
+            NetworkStatusEventHandler?.Invoke(this, new NetworkStatusEventArgs
             {
                 Status = status,
                 Description = description
