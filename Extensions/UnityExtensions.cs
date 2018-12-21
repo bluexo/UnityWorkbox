@@ -37,18 +37,14 @@ namespace UnityEngine
         {
             yield return new WaitForSeconds(time);
             if (comp)
-            {
-                action.Invoke();
-            }
+                action?.Invoke();
         }
 
         private static IEnumerator InvokeAsync(MonoBehaviour comp, Action action, YieldInstruction yieldInstruction)
         {
             yield return yieldInstruction;
             if (comp)
-            {
-                action.Invoke();
-            }
+                action?.Invoke();
         }
 
         private static IEnumerator InvokeRepatingAsync(MonoBehaviour comp, Action action, float delay, float rate)
@@ -59,9 +55,7 @@ namespace UnityEngine
             {
                 yield return duration;
                 if (comp)
-                {
-                    action.Invoke();
-                }
+                    action?.Invoke();
             }
         }
 

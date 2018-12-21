@@ -34,7 +34,7 @@ namespace Arthas.Network
         /// </summary>
         public static event Action<INetworkMessage> ResponseEvent;
 
-        public static event Action ConnectedEvent, DisconnectedEvent;
+        public static event Action ConnectedEvent;
 
         /// <summary>
         /// 网络状态事件
@@ -200,7 +200,7 @@ namespace Arthas.Network
                 if (Time.time - prevConnectTime > connectTimeout)
                 {
                     prevConnectTime = 0;
-                    OnDisconnected();
+                    InvokeStatusEvent(NetworkStatus.ConnectTimeout);
                     StopCoroutine(timeoutCor);
                     if (ConnectErrorEvent != null) ConnectErrorEvent("Cannot connect to server , please check your network!");
                 }
@@ -257,12 +257,11 @@ namespace Arthas.Network
                 if (Application.internetReachability == NetworkReachability.NotReachable
                     || !connection.IsConnected)
                 {
-                    OnDisconnected();
-                    StopCoroutine(connectCor);
                     var status = Application.internetReachability == NetworkReachability.NotReachable
                         ? NetworkStatus.NetworkNotReachbility
                         : NetworkStatus.Disconnected;
-                    InvokeStatusEvent(status);
+                    OnDisconnected(status);
+                    StopCoroutine(connectCor);
                 }
             }
         }
@@ -283,12 +282,11 @@ namespace Arthas.Network
             heartbeatCor = StartCoroutine(HeartbeatDetectAsync());
         }
 
-        protected void OnDisconnected()
+        protected void OnDisconnected(NetworkStatus status = NetworkStatus.Disconnected)
         {
             connection.MessageRespondEvent -= OnMessageRespond;
             isConnecting = false;
             if (connection.IsConnected) return;
-            DisconnectedEvent?.Invoke();
             InvokeStatusEvent(NetworkStatus.Disconnected);
         }
 
