@@ -178,10 +178,10 @@ namespace Arthas.Network
 
         protected void Connect()
         {
-            if (isConnecting || IsConnected) return;
+            if (IsConnected) return;
             isConnecting = true;
             prevConnectTime = Time.time;
-            if (connection != null) connection.Connect(NetworkAddress.ip, NetworkAddress.port);
+            connection?.Connect(NetworkAddress.ip, NetworkAddress.port);
             InvokeStatusEvent(NetworkStatus.Connecting);
             timeoutCor = StartCoroutine(TimeoutDetectAsync());
         }
@@ -191,7 +191,7 @@ namespace Arthas.Network
             while (true)
             {
                 yield return timeoutWaiter;
-                if (connection.IsConnected)
+                if (IsConnected)
                 {
                     OnConnected();
                     StopCoroutine(timeoutCor);
@@ -254,8 +254,7 @@ namespace Arthas.Network
             while (true)
             {
                 yield return connectPollWaiter;
-                if (Application.internetReachability == NetworkReachability.NotReachable
-                    || !connection.IsConnected)
+                if (!connection.IsConnected)
                 {
                     var status = Application.internetReachability == NetworkReachability.NotReachable
                         ? NetworkStatus.NetworkNotReachbility
@@ -285,7 +284,6 @@ namespace Arthas.Network
         protected void OnDisconnected(NetworkStatus status = NetworkStatus.Disconnected)
         {
             connection.MessageRespondEvent -= OnMessageRespond;
-            isConnecting = false;
             if (connection.IsConnected) return;
             InvokeStatusEvent(NetworkStatus.Disconnected);
         }
@@ -352,10 +350,10 @@ namespace Arthas.Network
             }
         }
 
-        public static void Send(object cmd, object buf = null, Action<INetworkMessage> callback = null, params object[] parameters)
+        public static bool Send(object cmd, object buf = null, Action<INetworkMessage> callback = null, params object[] parameters)
         {
             if (!IsConnected)
-                return;
+                return false;
 
             try
             {
@@ -374,7 +372,10 @@ namespace Arthas.Network
             catch (Exception ex)
             {
                 Debug.LogException(ex);
+                return false;
             }
+
+            return true;
         }
 
         public static void Close()

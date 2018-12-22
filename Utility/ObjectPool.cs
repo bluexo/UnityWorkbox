@@ -27,7 +27,7 @@ namespace Arthas.Common
         [SerializeField, Range(1, 20)] protected int initCount = 10;
         [SerializeField, Range(1, 100)] protected int maxOverload = 16;
         [SerializeField] private float collectInterval = .2f;
-        [SerializeField] private bool isCollected = false;
+        [SerializeField] private bool isCollected = false, enableLogging = false;
 
         protected IEnumerator Start()
         {
@@ -120,6 +120,8 @@ namespace Arthas.Common
             comp.ResetObject();
             if (!objectQueue.ContainsKey(id)) objectQueue.Add(id, new Queue<TComponent>());
             if (disable) comp.gameObject.SetActive(false);
+            if (enableLogging)
+                Debug.LogFormat("<color=green> Put {0} , Id:{1} from ObjectPool! </color>", typeof(TComponent), id);
             objectQueue[id].Enqueue(comp);
         }
 
@@ -130,9 +132,8 @@ namespace Arthas.Common
 
         public TComponent Get(int id, bool active = true)
         {
-#if UNITY_EDITOR
-            Debug.LogFormat("Get {0} , Id:{1} from ObjectPool", typeof(TComponent), id);
-#endif
+            if (enableLogging)
+                Debug.LogFormat("<color=magenta> Get {0} , Id:{1} from ObjectPool! </color>", typeof(TComponent), id);
             if (!objectQueue.ContainsKey(id)) objectQueue.Add(id, new Queue<TComponent>());
             var queue = objectQueue[id];
             if (queue.Count < initCount)

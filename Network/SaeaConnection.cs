@@ -62,7 +62,11 @@ namespace Arthas.Network
         public event Action<byte[]> MessageRespondEvent;
 
         private bool connected = false;
-        public bool IsConnected => connected && clientSocket != null && clientSocket.Connected;
+
+        public bool IsConnected
+        {
+            get { return connected && clientSocket != null && clientSocket.Connected; }
+        }
 
         public SaeaConnection()
         {
