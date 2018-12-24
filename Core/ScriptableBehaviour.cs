@@ -6,6 +6,9 @@ using UnityEngine.EventSystems;
 
 namespace Arthas
 {
+#if USE_XLUA
+    [RequireComponent(typeof(XLuaInvoker))]
+#endif
     /// <summary>
     /// 用于和脚本语言交互的组件
     /// </summary>
@@ -15,7 +18,7 @@ namespace Arthas
 
         [SerializeField]
         private bool enableUpdate = false,
-            enableFixedUpdate = false, 
+            enableFixedUpdate = false,
             enableLateUpdate = false;
 
         protected virtual void Awake()
@@ -51,7 +54,7 @@ namespace Arthas
 
         private void LateUpdate()
         {
-            if (enableLateUpdate) Invoker.InvokeScript(nameof(LateUpdate));   
+            if (enableLateUpdate) Invoker.InvokeScript(nameof(LateUpdate));
         }
 
         private void OnApplicationFocus(bool focus) => Invoker.InvokeScript(nameof(OnApplicationFocus), focus);
@@ -62,6 +65,10 @@ namespace Arthas
 
         public object Invoke(string methodName, params object[] param) => Invoker?.InvokeScript(methodName, param);
 
-        protected virtual void OnDestroy() => Invoker?.Dispose();
+        protected virtual void OnDestroy()
+        {
+            Invoker?.InvokeScript(nameof(OnDestroy));
+            Invoker?.Dispose();
+        }
     }
 }

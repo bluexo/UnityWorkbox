@@ -178,7 +178,11 @@ namespace Arthas.Network
 
         protected void Connect()
         {
-            if (IsConnected) return;
+            if (IsConnected)
+            {
+                OnConnected();
+                return;
+            }
             isConnecting = true;
             prevConnectTime = Time.time;
             connection?.Connect(NetworkAddress.ip, NetworkAddress.port);
@@ -193,6 +197,7 @@ namespace Arthas.Network
                 yield return timeoutWaiter;
                 if (IsConnected)
                 {
+                    yield return new WaitForSeconds(.1f);
                     OnConnected();
                     StopCoroutine(timeoutCor);
                     yield break;
@@ -277,6 +282,7 @@ namespace Arthas.Network
             ConnectedEvent?.Invoke();
             InvokeStatusEvent(NetworkStatus.Connected);
             prevHeartbeatDateTime = DateTime.Now;
+            StopAllCoroutines();
             connectCor = StartCoroutine(ConnectionDetectAsync());
             heartbeatCor = StartCoroutine(HeartbeatDetectAsync());
         }
