@@ -197,7 +197,7 @@ namespace Arthas.Network
                 yield return timeoutWaiter;
                 if (IsConnected)
                 {
-                    yield return new WaitForSeconds(.1f);
+                    yield return new WaitForSeconds(1f);
                     OnConnected();
                     StopCoroutine(timeoutCor);
                     yield break;
