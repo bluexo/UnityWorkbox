@@ -21,6 +21,9 @@ namespace Arthas
             enableFixedUpdate = false,
             enableLateUpdate = false;
 
+        [SerializeField]
+        public GeneralVisualConfig data;
+
         protected virtual void Awake()
         {
             Invoker = GetComponent<BaseScriptableInvoker>();

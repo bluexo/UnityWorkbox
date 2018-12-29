@@ -6,6 +6,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Runtime.InteropServices;
 using System.Threading;
+using System.Threading.Tasks;
 using UnityEngine;
 
 namespace Arthas.Network
@@ -61,12 +62,10 @@ namespace Arthas.Network
 
         public event Action<byte[]> MessageRespondEvent;
 
-        private bool connected = false;
+        private volatile bool connected = false;
+        private volatile bool connecting = false;
 
-        public bool IsConnected
-        {
-            get { return connected && clientSocket != null && clientSocket.Connected; }
-        }
+        public bool IsConnected => connected && clientSocket != null && clientSocket.Connected;
 
         public SaeaConnection()
         {
@@ -80,6 +79,7 @@ namespace Arthas.Network
 
         public void Connect(string hostname, int port, Action<object> callback = null)
         {
+            if (connecting) return;
             IPAddress[] addresses = Dns.GetHostAddresses(hostname);
             AddressFamily _family = AddressFamily.Unknown;
 
@@ -92,7 +92,8 @@ namespace Arthas.Network
                         Debug.Assert(address.AddressFamily == AddressFamily.InterNetwork || address.AddressFamily == AddressFamily.InterNetworkV6);
                         if ((address.AddressFamily == AddressFamily.InterNetwork && Socket.OSSupportsIPv4) || Socket.OSSupportsIPv6)
                         {
-                            Connect(new IPEndPoint(address, port));
+                            ThreadPool.QueueUserWorkItem(obj => Connect(new IPEndPoint(address, port)));
+                            connecting = true;
                         }
 
                         _family = address.AddressFamily;
@@ -100,15 +101,17 @@ namespace Arthas.Network
                     }
                     if (address.AddressFamily == _family || _family == AddressFamily.Unknown)
                     {
-                        Connect(new IPEndPoint(address, port));
+                        ThreadPool.QueueUserWorkItem(obj => Connect(new IPEndPoint(address, port)));
+                        connecting = true;
                         break;
                     }
                 }
             }
             catch (Exception ex)
             {
-                callback?.Invoke(ex);
+                connecting = false;
                 connected = false;
+                callback?.Invoke(ex);
             }
         }
 
@@ -163,14 +166,16 @@ namespace Arthas.Network
 
         public void Disconnect()
         {
-            clientSocket.Disconnect(false);
             connected = false;
+            connecting = false;
+            clientSocket.Disconnect(false);
         }
 
         public void Send(byte[] message) => sendingQueue.Add(message);
 
         private void OnConnect(object sender, SocketAsyncEventArgs e)
         {
+            connecting = false;
             autoConnectEvent.Set();
             connected = (e.SocketError == SocketError.Success);
         }
