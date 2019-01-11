@@ -14,6 +14,11 @@ namespace Arthas.Common
             throw new System.NotImplementedException();
         }
 
+        public virtual void Invoke(string funcName)
+        {
+            throw new System.NotImplementedException();
+        }
+
         public abstract void Dispose();
     }
 }

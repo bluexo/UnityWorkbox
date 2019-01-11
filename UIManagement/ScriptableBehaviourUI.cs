@@ -61,7 +61,7 @@ namespace Arthas.UI
         protected override void Start()
         {
             base.Start();
-            if (Invoker) Invoker.InvokeScript(nameof(Start), this);
+            if (Invoker) Invoker.InvokeScript(nameof(Start));
         }
 
         protected override void OnEnable()

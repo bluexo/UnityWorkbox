@@ -39,7 +39,7 @@ namespace Arthas
                 Debug.LogErrorFormat("Cannot found LuaInvoker on Gameobject {0}!!!", gameObject.name);
         }
 
-        protected virtual void Start() => Invoker?.InvokeScript(nameof(Start), this);
+        protected virtual void Start() => Invoker?.InvokeScript(nameof(Start));
 
         protected virtual void OnEnable() => Invoker?.InvokeScript(nameof(OnEnable));
 
@@ -47,17 +47,17 @@ namespace Arthas
 
         private void Update()
         {
-            if (enableUpdate) Invoker?.InvokeScript(nameof(Update));
+            if (enableUpdate) Invoker?.Invoke(nameof(Update));
         }
 
         private void FixedUpdate()
         {
-            if (enableFixedUpdate) Invoker?.InvokeScript(nameof(FixedUpdate));
+            if (enableFixedUpdate) Invoker?.Invoke(nameof(FixedUpdate));
         }
 
         private void LateUpdate()
         {
-            if (enableLateUpdate) Invoker.InvokeScript(nameof(LateUpdate));
+            if (enableLateUpdate) Invoker.Invoke(nameof(LateUpdate));
         }
 
         private void OnApplicationFocus(bool focus) => Invoker.InvokeScript(nameof(OnApplicationFocus), focus);
