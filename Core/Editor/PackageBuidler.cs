@@ -13,56 +13,40 @@ namespace Arthas
 
     public class PackageBuidler : EditorWindow
     {
-        [MenuItem("Builder/Build/Client")]
-        public static bool BuildClient()
+        [MenuItem("Builder/Build")]
+        public static void Build()
         {
-            return BuildInternal(BuildTargetType.Client) != null;
-        }
-
-        [MenuItem("Builder/Build/Server")]
-        public static bool BuildServer()
-        {
-#if !UNITY_STANDALONE
-            UDebug.LogWarning("Cannot build server with Non standalone platform");
-            return false;
-#endif
-            return BuildInternal(BuildTargetType.Server) != null;
-        }
-
-        [MenuItem("Builder/Build And Run", priority = 1)]
-        public static void BuildAndRunAll()
-        {
-            var client = BuildInternal(BuildTargetType.Client);
-            var server = BuildInternal(BuildTargetType.Server);
-            if (!string.IsNullOrEmpty(client))
-                Process.Start(client);
-            if (!string.IsNullOrEmpty(server))
-                Process.Start(server);
+            var items = PackageBuildConfig.Instance.Items;
+            for (var i = 0; i < items.Length; i++)
+            {
+                var item = items[i];
+                if (!item.Build) continue;
+                BuildInternal(item);
+            }
         }
 
         [MenuItem("Builder/Configuration")]
-        public static void BuildConfiguration()
+        public static void Configuration()
         {
             Selection.activeObject = PackageBuildConfig.Instance;
         }
 
-        private static string BuildInternal(BuildTargetType type)
+        private static string BuildInternal(BuildItem current)
         {
-            var current = Array.Find(PackageBuildConfig.Instance.Items,
-                r => r.BuildTarget == EditorUserBuildSettings.activeBuildTarget && r.BuildTargetType == type);
-
             if (current == null)
             {
                 UDebug.LogErrorFormat("Cannot found build target config : {0} .", EditorUserBuildSettings.activeBuildTarget);
                 return null;
             }
 
-            var path = current.Path
-                + PackageBuildConfig.Instance.PackageName 
+            var path = current.OutputPath
+                + PackageBuildConfig.Instance.PackageName
+                + current.NamePrefix
                 + DateTime.Now.ToString("_yyyyMMdd_HHmmss")
+                + "." 
                 + current.ExtensionName;
 
-            var report = BuildPipeline.BuildPlayer(current.Scenes,
+            var report = BuildPipeline.BuildPlayer(Array.ConvertAll(current.Scenes, s => AssetDatabase.GetAssetOrScenePath(s)),
                 path,
                 current.BuildTarget,
                 current.BuildOptions);

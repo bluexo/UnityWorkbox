@@ -9,23 +9,18 @@ namespace Arthas
     using Arthas.Common;
     using UnityEngine.SceneManagement;
 
-    public enum BuildTargetType
-    {
-        Client,
-        Server
-    }
-
     [System.Serializable]
     public class BuildItem
     {
-        [Path(Type = PathType.Folder, Relative = false)]
-        public string Path;
+        public string NamePrefix;
         public string ExtensionName;
+        [Path(Type = PathType.Folder, Relative = false)]
+        public string OutputPath;
         public BuildTarget BuildTarget;
+        public bool Build;
         [EnumMaskField]
         public BuildOptions BuildOptions;
-        public BuildTargetType BuildTargetType;
-        public string[] Scenes;
+        public Object[] Scenes;
     }
 
     public class PackageBuildConfig : SingletonVisualConfig<PackageBuildConfig, BuildItem>
