@@ -9,12 +9,17 @@ namespace Arthas.Common
     {
         public abstract void Initialize();
 
-        public virtual object InvokeScript(string funcName, params object[] parameters)
+        public virtual void Invoke(string funcName)
         {
             throw new System.NotImplementedException();
         }
 
-        public virtual void Invoke(string funcName)
+        public virtual object Invoke(string funcName, params object[] parameters)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public virtual object InvokeStatic(string funcName, params object[] param)
         {
             throw new System.NotImplementedException();
         }

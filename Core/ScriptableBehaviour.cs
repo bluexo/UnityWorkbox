@@ -30,7 +30,7 @@ namespace Arthas
             if (Invoker)
             {
                 Invoker.Initialize();
-                Invoker.InvokeScript("Initialize", this);
+                Invoker.Invoke("Initialize", this);
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
                 Debug.LogFormat("{0} Initialized!", name);
 #endif
@@ -39,11 +39,11 @@ namespace Arthas
                 Debug.LogErrorFormat("Cannot found LuaInvoker on Gameobject {0}!!!", gameObject.name);
         }
 
-        protected virtual void Start() => Invoker?.InvokeScript(nameof(Start));
+        protected virtual void Start() => Invoker?.Invoke(nameof(Start));
 
-        protected virtual void OnEnable() => Invoker?.InvokeScript(nameof(OnEnable));
+        protected virtual void OnEnable() => Invoker?.Invoke(nameof(OnEnable));
 
-        protected virtual void OnDisable() => Invoker?.InvokeScript(nameof(OnDisable));
+        protected virtual void OnDisable() => Invoker?.Invoke(nameof(OnDisable));
 
         private void Update()
         {
@@ -60,17 +60,17 @@ namespace Arthas
             if (enableLateUpdate) Invoker.Invoke(nameof(LateUpdate));
         }
 
-        private void OnApplicationFocus(bool focus) => Invoker.InvokeScript(nameof(OnApplicationFocus), focus);
+        private void OnApplicationFocus(bool focus) => Invoker.Invoke(nameof(OnApplicationFocus), focus);
 
-        private void OnApplicationPause(bool pause) => Invoker?.InvokeScript(nameof(OnApplicationPause), pause);
+        private void OnApplicationPause(bool pause) => Invoker?.Invoke(nameof(OnApplicationPause), pause);
 
-        private void OnApplicationQuit() => Invoker?.InvokeScript(nameof(OnApplicationQuit));
+        private void OnApplicationQuit() => Invoker?.Invoke(nameof(OnApplicationQuit));
 
-        public object Invoke(string methodName, params object[] param) => Invoker?.InvokeScript(methodName, param);
+        public object Invoke(string methodName, params object[] param) => Invoker?.Invoke(methodName, param);
 
         protected virtual void OnDestroy()
         {
-            Invoker?.InvokeScript(nameof(OnDestroy));
+            Invoker?.Invoke(nameof(OnDestroy));
             Invoker?.Dispose();
         }
     }
