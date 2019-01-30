@@ -1,8 +1,8 @@
-﻿using System;
+﻿using Arthas.Common;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
-using Arthas.Common;
 
 namespace Arthas.UI
 {
@@ -139,6 +139,11 @@ namespace Arthas.UI
         public object Invoke(string methodName, params object[] param)
         {
             return Invoker.Invoke(methodName, param);
+        }
+
+        public object InvokeStatic(string methodName, params object[] param)
+        {
+            return Invoker.InvokeStatic(methodName, param);
         }
 
         protected override void OnDestroy()

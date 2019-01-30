@@ -68,6 +68,8 @@ namespace Arthas
 
         public object Invoke(string methodName, params object[] param) => Invoker?.Invoke(methodName, param);
 
+        public object InvokeStatic(string methodName, params object[] param) => Invoker?.InvokeStatic(methodName, param);
+
         protected virtual void OnDestroy()
         {
             Invoker?.Invoke(nameof(OnDestroy));
