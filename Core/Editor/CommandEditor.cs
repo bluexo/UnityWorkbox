@@ -1,88 +1,171 @@
-﻿using System.Collections;
+﻿using System;
+using System.CodeDom;
+using System.CodeDom.Compiler;
+using System.Collections;
 using System.Collections.Generic;
-using System.Threading;
 using System.IO;
+using System.Text;
+using System.Threading;
 using UnityEditor;
 using UnityEditorInternal;
 using UnityEngine;
-using System;
-using System.Text;
 
 public class CommandEditor : EditorWindow
 {
-    public const string kCommandKey = "Commands", kDefaultCmd = "0:Login", cmdPath = "Assets/Scripts/Commands.cs";
-    public enum CommandType { Int16, String, Enum, Int32 }
-    private CommandType cmdType;
-    private Vector2 scrollViewPosition;
-    private static string cmdTypeName;
+    [Serializable]
+    private class Context
+    {
+        public string nameSpaceName = "Arthas.Network";
+        public string className = "Commands";
+        public CommandType commandType = CommandType.Int16;
+        public List<string> members = new List<string>();
+    }
 
-    [MenuItem("Network/Command/Open", priority = 10)]
+    public enum CommandType
+    {
+        Int16,
+        String,
+        Enum,
+        Int32
+    }
+
+    public enum Lang { CS, Lua }
+
+    public const string kCommandKey = "Commands",
+        kDefaultCmdConfigDirectory = "ProjectSettings/NetworkCommandsConfig.json",
+        cmdPath = "Assets/Scripts/Commands.cs";
+    private static string settingPath;
+    private Vector2 scrollViewPosition;
+    private Context context;
+    private Lang lang = Lang.CS;
+
+
+    private void OnEnable()
+    {
+        settingPath = Path.Combine(new DirectoryInfo(Application.dataPath).Parent.FullName, kDefaultCmdConfigDirectory);
+        if (!File.Exists(settingPath))
+            WriteConfig();
+        ReadConfig();
+    }
+
+    [MenuItem("Network/Command")]
     public static void OpenCommandEditor()
     {
         var window = GetWindow<CommandEditor>();
         window.minSize = new Vector2(240, 480);
-        if (!EditorPrefs.HasKey(kCommandKey)) EditorPrefs.SetString(kCommandKey, kDefaultCmd);
+        window.titleContent = new GUIContent("Command");
     }
 
-    [MenuItem("Network/Command/Clear", priority = 10)]
-    public static void ClearCommands()
-    {
-        EditorPrefs.DeleteKey(kCommandKey);
-    }
-
-    public static void GenerateCommands(CommandType cmdType)
+    public void GenerateCommands(CommandType cmdType)
     {
         var path = Path.Combine(Directory.GetCurrentDirectory(), cmdPath);
+        path = EditorUtility.SaveFilePanel("Save File", path, context.className, lang.ToString());
+        if (string.IsNullOrWhiteSpace(path)) return;
         if (Directory.Exists(path)) Directory.CreateDirectory(path);
         using (var writer = new StreamWriter(path)) writer.Write(GetCmdText(cmdType));
         AssetDatabase.Refresh();
     }
 
-    private static string GetCmdText(CommandType cmdType)
+    public static void GenerateCSharp()
     {
-        var commands = EditorPrefs.GetString(kCommandKey).Split('|');
+        var dec = new CodeTypeDeclaration();
+    }
+
+    private string GetCmdText(CommandType cmdType)
+    {
+        var commands = context.members;
         var stringBuilder = new StringBuilder();
-        stringBuilder.AppendLine("namespace Arthas.Network");
-        stringBuilder.AppendLine("{");
-        stringBuilder.AppendLine(string.Format("      public {0} {1}", cmdType == CommandType.Enum ? "enum" : "class", cmdTypeName));
-        stringBuilder.AppendLine("      {");
-        for (var i = 0; i < commands.Length; i++)
+        if (lang == Lang.CS)
+        {
+            stringBuilder.AppendLine($"namespace {context.nameSpaceName}");
+            stringBuilder.AppendLine("{");
+            stringBuilder.AppendLine(string.Format("\tpublic {0} {1}", cmdType == CommandType.Enum ? "enum" : "class", context.className));
+        }
+        else if (lang == Lang.Lua)
+        {
+            stringBuilder.AppendLine($"{context.className} =");
+            stringBuilder.AppendLine("{");
+        }
+        if (lang == Lang.CS)
+            stringBuilder.AppendLine("\t{");
+        for (var i = 0; i < commands.Count; i++)
         {
             if (string.IsNullOrEmpty(commands[i])) continue;
             var cmds = commands[i].Split(':');
             if (cmds.Length < 2) continue;
-            switch (cmdType)
+            if (lang == Lang.CS)
             {
-                case CommandType.String:
-                    stringBuilder.AppendLine(string.Format("            public const string {0} = \"{1}\";", cmds[1], cmds[1]));
-                    break;
-                case CommandType.Int32:
-                    stringBuilder.AppendLine(string.Format("            public const int {0} = {1};", cmds[1], cmds[0]));
-                    break;
-                case CommandType.Int16:
-                    stringBuilder.AppendLine(string.Format("            public const short {0} = {1};", cmds[1], cmds[0]));
-                    break;
-                case CommandType.Enum:
-                    stringBuilder.AppendLine(string.Format("            {0} = {1},", cmds[1], cmds[0]));
-                    break;
+                switch (cmdType)
+                {
+                    case CommandType.String:
+                        stringBuilder.AppendLine(string.Format("\t\tpublic const string {0} = \"{1}\";", cmds[0], cmds[0]));
+                        break;
+                    case CommandType.Int32:
+                        stringBuilder.AppendLine(string.Format("\t\tpublic const int {0} = {1};", cmds[0], cmds[1]));
+                        break;
+                    case CommandType.Int16:
+                        stringBuilder.AppendLine(string.Format("\t\tpublic const short {0} = {1};", cmds[0], cmds[1]));
+                        break;
+                    case CommandType.Enum:
+                        stringBuilder.AppendLine(string.Format("\t\t{0} = {1},", cmds[0], cmds[1]));
+                        break;
+                }
+            }
+            else if (lang == Lang.Lua)
+            {
+                switch (cmdType)
+                {
+                    case CommandType.Int16:
+                    case CommandType.Int32:
+                    case CommandType.Enum:
+                        stringBuilder.AppendLine(string.Format("\t{0} = {1},", cmds[0], cmds[1]));
+                        break;
+                    case CommandType.String:
+                        stringBuilder.AppendLine(string.Format("\t{0} = \"{1}\",", cmds[0], cmds[0]));
+                        break;
+                }
             }
         }
-        stringBuilder.AppendLine("      }");
+        if (lang == Lang.CS)
+        {
+            stringBuilder.AppendLine("\t}");
+        }
+
         stringBuilder.AppendLine("}");
         return stringBuilder.ToString();
     }
 
+    private void ReadConfig()
+    {
+        var json = File.ReadAllText(settingPath);
+        context = string.IsNullOrWhiteSpace(json)
+            ? new Context()
+            : JsonUtility.FromJson<Context>(json);
+    }
+
+    private void WriteConfig()
+    {
+        var json = JsonUtility.ToJson(context ?? new Context());
+        File.WriteAllText(settingPath, json);
+    }
+
     private void OnGUI()
     {
+        var color = lang == Lang.CS
+            ? new Color(.11f, .93f, .8f)
+            : new Color(.24f, .38f, .92f);
+        GUI.backgroundColor = color;
         var generate = GUILayout.Button("GENERATE", GUILayout.Height(45f));
+        GUI.backgroundColor = Color.white;
         GUILayout.Space(5);
-        cmdTypeName = EditorGUILayout.TextField("CommandTypeName", cmdTypeName);
-        if (string.IsNullOrEmpty(cmdTypeName)) cmdTypeName = "Commands";
-        cmdType = (CommandType)EditorGUILayout.EnumPopup("CommandType", cmdType);
+        lang = (Lang)EditorGUILayout.EnumPopup("Language", lang);
+        context.nameSpaceName = EditorGUILayout.TextField("NameSpaceName", context.nameSpaceName);
+        context.className = EditorGUILayout.TextField("ClassName", context.className);
+        if (string.IsNullOrEmpty(context.className)) context.className = "Commands";
+        context.commandType = (CommandType)EditorGUILayout.EnumPopup("CommandType", context.commandType);
         GUILayout.Space(5);
-        if (generate) GenerateCommands(cmdType);
-        var cmdString = EditorPrefs.GetString(kCommandKey);
-        var commands = new List<string>(cmdString.Split('|'));
+        if (generate) GenerateCommands(context.commandType);
+        var commands = context.members;
         scrollViewPosition = EditorGUILayout.BeginScrollView(scrollViewPosition);
         for (var i = 0; i < commands.Count; i++)
         {
@@ -90,20 +173,22 @@ public class CommandEditor : EditorWindow
             var cmds = commands[i].Split(':');
             if (cmds.Length < 2) continue;
             EditorGUILayout.BeginHorizontal();
-            if (cmdType == CommandType.String) EditorGUILayout.LabelField(string.Format("[{0}]", i), GUILayout.Height(16f), GUILayout.Width(30f));
-            else cmds[0] = EditorGUILayout.TextField(string.Format("{0}", cmds[0]), GUILayout.Height(16f), GUILayout.Width(60f));
-            cmds[1] = EditorGUILayout.TextField(cmds[1], GUILayout.Height(16f));
+            EditorGUILayout.LabelField("Name:", GUILayout.Width(45));
+            cmds[0] = EditorGUILayout.TextField(cmds[0], GUILayout.Height(16f));
+            EditorGUILayout.LabelField("Value:", GUILayout.Width(48));
+            if (context.commandType == CommandType.String)
+                EditorGUILayout.LabelField(string.Format("[{0}]", i), GUILayout.Height(16f));
+            else cmds[1] = EditorGUILayout.TextField(string.Format("{0}", cmds[1]), GUILayout.Height(16f));
             commands[i] = string.Format("{0}:{1}", cmds[0], cmds[1]);
             if (GUILayout.Button("-", GUILayout.Width(20f))) commands.Remove(commands[i]);
             EditorGUILayout.EndHorizontal();
         }
-        if (GUILayout.Button("+")) commands.Add(kDefaultCmd);
+        if (GUILayout.Button("+"))
+            context.members.Add($":");
         GUILayout.Space(10);
         EditorGUILayout.PrefixLabel("Code Preview");
-        GUILayout.TextArea(GetCmdText(cmdType));
+        GUILayout.TextArea(GetCmdText(context.commandType));
+        WriteConfig();
         EditorGUILayout.EndScrollView();
-        cmdString = string.Empty;
-        commands.ForEach(r => { if (!string.IsNullOrEmpty(r)) cmdString += "|" + r; });
-        EditorPrefs.SetString(kCommandKey, cmdString);
     }
 }

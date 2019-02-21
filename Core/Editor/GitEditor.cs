@@ -22,7 +22,7 @@ public class GitEditor : EditorWindow
         set { EditorPrefs.SetString(gitExtensionPathKey, value); }
     }
 
-    [MenuItem("Git/Options", priority = 1)]
+    [MenuItem("Tools/Git/Options", priority = 1)]
     public static void Open()
     {
         var win = GetWindow<GitEditor>();
@@ -88,7 +88,7 @@ public class GitEditor : EditorWindow
     }
 
     #region Menus
-    [MenuItem("Git/Bash", priority = 1)]
+    [MenuItem("Tools/Git/Bash", priority = 1)]
     public static void Git()
     {
         try {
@@ -99,25 +99,25 @@ public class GitEditor : EditorWindow
         }
     }
 
-    [MenuItem("Git/GitExtensions/Browse")]
+    [MenuItem("Tools/Git/GitExtensions/Browse")]
     public static void Add()
     {
         GitCommand(string.Format("browse {0}", Application.dataPath));
     }
 
-    [MenuItem("Git/GitExtensions/Commit")]
+    [MenuItem("Tools/Git/GitExtensions/Commit")]
     public static void Commit()
     {
         GitCommand("commit");
     }
 
-    [MenuItem("Git/GitExtensions/Pull")]
+    [MenuItem("Tools/Git/GitExtensions/Pull")]
     public static void Pull()
     {
         GitCommand("pull");
     }
 
-    [MenuItem("Git/GitExtensions/Push")]
+    [MenuItem("Tools/Git/GitExtensions/Push")]
     public static void Push()
     {
         GitCommand("push");
