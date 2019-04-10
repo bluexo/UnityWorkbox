@@ -124,6 +124,13 @@ namespace System
             }
         }
 
+        /// <summary>
+        ///  将集合转化为字符串并且按照分隔符分开
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="collection"></param>
+        /// <param name="separator"></param>
+        /// <returns></returns>
         public static string ToArrayString<T>(this IEnumerable<T> collection, char separator = ' ')
         {
             var str = string.Empty;
@@ -140,6 +147,11 @@ namespace System
 
         readonly static Regex varNameRegex = new Regex("[^\\w]");
 
+        /// <summary>
+        /// 将字符串转换为标准命名符号
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
         public static string ToCodeSymbol(this string name)
         {
             var varName = varNameRegex.Replace(name, "");
