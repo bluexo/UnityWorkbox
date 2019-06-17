@@ -161,7 +161,7 @@ namespace Arthas.Network
 
         public void Connect(string ip, int port, Action<object> callback = null)
         {
-            StartCoroutine(ConnectAsync(ip, port, callback);
+            StartCoroutine(ConnectAsync(ip, port, callback));
         }
 
         public void Close()
