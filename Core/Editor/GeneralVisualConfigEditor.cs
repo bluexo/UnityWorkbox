@@ -59,7 +59,7 @@ namespace Arthas.Common
         {
             templete.Clear();
             var config = target as GeneralVisualConfig;
-            if (config.Items.Length <= 0) return;
+            if (config.Items.Count <= 0) return;
             var item = config.Items.FirstOrDefault();
             if (item.fields == null) return;
             foreach (var field in item.fields) templete.Add(field.Key, field.Value);
@@ -150,7 +150,7 @@ namespace Arthas.Common
             }
             else if (remove)
             {
-                if (templete.Count != Config.Items.Length) ResetTemplete();
+                if (templete.Count != Config.Items.Count) ResetTemplete();
                 var keys = templete.Keys.ToArray();
                 for (var i = 0; i < keys.Length; i++)
                 {
@@ -189,7 +189,7 @@ namespace Arthas.Common
 
         public override void DrawItemProperty(SerializedProperty itemProperty, int index)
         {
-            if (index >= Config.Items.Length) return;
+            if (index >= Config.Items.Count) return;
             var item = Config.Items[index];
             if (item.fields == null) return;
             var keys = new List<string>(item.fields.Keys);

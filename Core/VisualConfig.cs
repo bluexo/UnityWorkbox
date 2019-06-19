@@ -1,5 +1,6 @@
 ﻿using System;
 using UnityEngine;
+using System.Collections.Generic;
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
@@ -27,8 +28,8 @@ namespace Arthas.Common
 
         [Space(30)]
         [SerializeField, HideInInspector]
-        protected T[] items = { new T() };
-        public virtual T[] Items { get { return items; } }
+        protected List<T> items = new List<T>();
+        public virtual List<T> Items { get { return items; } }
 
         public virtual string ToJson()
         {
@@ -38,7 +39,7 @@ namespace Arthas.Common
         public virtual void FromJson(string json)
         {
             var jArray = new JsonList<T>().Overwrite(json, true);
-            items = jArray.Value.ToArray();
+            items = jArray.Value;
         }
     }
 

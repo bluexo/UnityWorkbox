@@ -37,7 +37,7 @@ namespace Arthas.Common
                 Debug.LogError("Cannot found prefab");
                 yield break;
             }
-            for (var i = 0; i < objectArray.Items.Length; i++)
+            for (var i = 0; i < objectArray.Items.Count; i++)
             {
                 var item = objectArray.Items[i];
                 yield return SpawnAsync(item);

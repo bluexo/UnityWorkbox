@@ -104,9 +104,9 @@ namespace Arthas
     [CreateAssetMenu(menuName = "Configs/Create GeneralConfig", order = -1)]
     public class GeneralVisualConfig : VisualConfig<GeneralItem>
     {
-        public T[] GetItems<T>() where T : new()
+        public List<T> GetItems<T>() where T : new()
         {
-            return Array.ConvertAll(items, c => c.Get<T>());
+            return items.ConvertAll(c => c.Get<T>());
         }
     }
 
