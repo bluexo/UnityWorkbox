@@ -1,0 +1,15 @@
+{
+    "name": "UnityWorkbox.Editor",
+    "references": [
+        "GUID:d7a288a4108a0434c9d2d6e3cfbdf022"
+    ],
+    "optionalUnityReferences": [],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": []
+}

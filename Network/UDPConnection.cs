@@ -5,7 +5,6 @@ using System.Collections;
 
 using UnityEngine;
 using UnityEngine.Networking;
-using UnityEngine.Networking.NetworkSystem;
 using System.Collections.Generic;
 
 namespace Arthas.Network
