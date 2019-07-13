@@ -15,7 +15,7 @@ public class CommandEditor : EditorWindow
     [Serializable]
     private class Context
     {
-        public string nameSpaceName = "Arthas.Network";
+        public string nameSpaceName = "UnityWorkbox.Network";
         public string className = "Commands";
         public CommandType commandType = CommandType.Int16;
         public List<string> members = new List<string>();
