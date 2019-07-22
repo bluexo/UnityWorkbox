@@ -40,14 +40,14 @@ namespace Arthas.Network
 #endif
 
 #if WINDOWS_UWP
-        public TCPConnector() { IsConnected = false; }
+        public TCPConnection() { IsConnected = false; }
 
         /// <summary>
         /// 使用<see cref="StreamSocket"/> 建立连接并且异步接收数据
         /// </summary>
         /// <param name="ip"></param>
         /// <param name="port"></param>
-        public async void Connect(string ip, int port , Action<bool> callback = null)
+        public async void Connect(string ip, int port , Action<object> callback = null)
         {
             try {
                 var serverHost = new HostName(ip);
