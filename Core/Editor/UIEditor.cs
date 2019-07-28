@@ -4,9 +4,9 @@ using UnityEditor;
 using UnityEngine;
 using UnityEngine.UI;
 
-using Arthas.Common;
+using UnityWorkbox.Common;
 
-namespace Arthas.UI
+namespace UnityWorkbox.UI
 {
     [CustomEditor(typeof(BaseUI), true)]
     public class BaseUIEditor : Editor

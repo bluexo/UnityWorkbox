@@ -4,7 +4,7 @@ using UnityEditor;
 using UnityEngine;
 using UDebug = UnityEngine.Debug;
 
-namespace Arthas
+namespace UnityWorkbox
 {
     using System;
     using System.Diagnostics;

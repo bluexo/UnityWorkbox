@@ -6,7 +6,7 @@ using System.Reflection;
 using UnityEditor;
 using UnityEngine;
 
-namespace Arthas.Common
+namespace UnityWorkbox.Common
 {
     /// <summary>
     /// 可配置的列表编辑器

@@ -104,7 +104,7 @@ namespace UnityWorkbox
     [CreateAssetMenu(menuName = "Configs/Create GeneralConfig", order = -1)]
     public class GeneralVisualConfig : VisualConfig<GeneralItem>
     {
-        public T[] GetItems<T>() where T : new() => Array.ConvertAll(items, c => c.Get<T>());
+        public List<T> GetItems<T>() where T : new() => items.ConvertAll(c => c.Get<T>());
     }
 
     [Serializable]

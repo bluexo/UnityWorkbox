@@ -2,7 +2,7 @@
 using UnityEngine;
 using System.Collections;
 
-namespace Arthas.FSM
+namespace UnityWorkbox.FSM
 {
     [CustomEditor(typeof(FSMManager))]
     public class FSMEditor : Editor

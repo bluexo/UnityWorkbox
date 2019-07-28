@@ -1,12 +1,12 @@
-﻿using Arthas;
+﻿using UnityWorkbox;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 
-namespace Arthas
+namespace UnityWorkbox
 {
-    using Arthas.Common;
+    using UnityWorkbox.Common;
     using UnityEngine.SceneManagement;
 
     [System.Serializable]

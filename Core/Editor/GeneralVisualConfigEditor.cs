@@ -7,7 +7,7 @@ using System.Linq;
 
 #if USE_JSON_NET
 
-namespace Arthas.Common
+namespace UnityWorkbox.Common
 {
     public delegate T Draw<T>(string label, T value, params GUILayoutOption[] layoutOptions);
 

@@ -4,7 +4,7 @@ using System.Collections;
 using UnityEngine;
 using UnityEditor;
 
-using Arthas.Network;
+using UnityWorkbox.Network;
 
 [CustomEditor(typeof(Networker))]
 public class NetworkerEditor : Editor

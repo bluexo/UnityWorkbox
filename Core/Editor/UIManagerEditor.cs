@@ -6,7 +6,7 @@ using UnityEditor;
 using UnityEditorInternal;
 using UnityEditor.Callbacks;
 
-namespace Arthas.UI
+namespace UnityWorkbox.UI
 {
     [CustomEditor(typeof(UIManager), true)]
     public class UIManagerEditor : Editor

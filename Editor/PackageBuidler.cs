@@ -16,7 +16,7 @@ namespace UnityWorkbox
         public static void Build()
         {
             var items = PackageBuildConfig.Instance.Items;
-            for (var i = 0; i < items.Length; i++)
+            for (var i = 0; i < items.Count; i++)
             {
                 var item = items[i];
                 if (!item.Build) continue;
