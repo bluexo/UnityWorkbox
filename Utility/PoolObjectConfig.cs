@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace Arthas.Common
+namespace UnityWorkbox.Common
 {
     [System.Serializable]
     public class PoolObjectInfo

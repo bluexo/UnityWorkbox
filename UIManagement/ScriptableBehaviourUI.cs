@@ -1,10 +1,10 @@
-﻿using Arthas.Common;
+﻿using UnityWorkbox.Common;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
-namespace Arthas.UI
+namespace UnityWorkbox.UI
 {
     [Flags]
     public enum PointerEventType

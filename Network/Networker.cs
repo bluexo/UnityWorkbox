@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using Debug = UnityEngine.Debug;
 
-namespace Arthas.Network
+namespace UnityWorkbox.Network
 {
     public enum NetworkStatus
     {

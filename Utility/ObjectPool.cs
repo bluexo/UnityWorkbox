@@ -1,10 +1,10 @@
-﻿using Arthas.Common;
+﻿using UnityWorkbox.Common;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-namespace Arthas.Common
+namespace UnityWorkbox.Common
 {
     public interface IResetable<T> where T : Component
     {
@@ -37,7 +37,7 @@ namespace Arthas.Common
                 Debug.LogError("Cannot found prefab");
                 yield break;
             }
-            for (var i = 0; i < objectArray.Items.Count; i++)
+            for (var i = 0; i < objectArray.Items.Length; i++)
             {
                 var item = objectArray.Items[i];
                 yield return SpawnAsync(item);

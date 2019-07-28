@@ -1,4 +1,4 @@
-﻿using Arthas.Common;
+﻿using UnityWorkbox.Common;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -8,7 +8,7 @@ using UnityEngine.UI;
 using System.Reflection;
 #endif
 
-namespace Arthas.UI
+namespace UnityWorkbox.UI
 {
     public struct WindowInfo : IComparable<WindowInfo>
     {

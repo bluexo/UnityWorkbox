@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Arthas.Network
+namespace UnityWorkbox.Network
 {
     /// <summary>
     /// 消息接口 封装消息的格式和获取方式

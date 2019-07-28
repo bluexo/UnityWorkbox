@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Arthas.Network
+namespace UnityWorkbox.Network
 {
     /// <summary>
     /// 网络连接接口

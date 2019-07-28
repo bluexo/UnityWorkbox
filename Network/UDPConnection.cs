@@ -7,7 +7,7 @@ using UnityEngine;
 using UnityEngine.Networking;
 using System.Collections.Generic;
 
-namespace Arthas.Network
+namespace UnityWorkbox.Network
 {
     public class UDPConnection : MonoBehaviour, IConnection
     {

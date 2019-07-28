@@ -8,9 +8,9 @@ using UObject = UnityEngine.Object;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
-namespace Arthas
+namespace UnityWorkbox
 {
-    using Arthas.Common;
+    using UnityWorkbox.Common;
     using System.Reflection;
 
     [Serializable]
@@ -104,10 +104,7 @@ namespace Arthas
     [CreateAssetMenu(menuName = "Configs/Create GeneralConfig", order = -1)]
     public class GeneralVisualConfig : VisualConfig<GeneralItem>
     {
-        public List<T> GetItems<T>() where T : new()
-        {
-            return items.ConvertAll(c => c.Get<T>());
-        }
+        public T[] GetItems<T>() where T : new() => Array.ConvertAll(items, c => c.Get<T>());
     }
 
     [Serializable]

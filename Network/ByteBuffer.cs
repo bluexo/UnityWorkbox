@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using UnityEngine;
 
-namespace Arthas.Network
+namespace UnityWorkbox.Network
 {
     public class ByteBuffer
     {

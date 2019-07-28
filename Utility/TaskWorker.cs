@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using ThreadPriority = System.Threading.ThreadPriority;
 
-namespace Arthas.Common
+namespace UnityWorkbox.Common
 {
 #if UNITY_EDITOR
     using UnityEditor;

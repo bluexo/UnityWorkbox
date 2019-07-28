@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
-namespace Arthas.Network
+namespace UnityWorkbox.Network
 {
     public static class MessageDispatcher
     {

@@ -1,7 +1,7 @@
 ﻿
 using UnityEngine;
 
-namespace Arthas.Common
+namespace UnityWorkbox.Common
 {
 
 #if UNITY_EDITOR

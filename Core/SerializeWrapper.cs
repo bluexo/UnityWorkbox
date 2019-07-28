@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
 using UnityEngine;
 
-namespace Arthas
+namespace UnityWorkbox
 {
     [Serializable]
     public class SerializeWrapper<T> : ISerializable

@@ -1,10 +1,10 @@
-﻿using Arthas.Common;
+﻿using UnityWorkbox.Common;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
-namespace Arthas
+namespace UnityWorkbox
 {
 #if USE_XLUA
     [RequireComponent(typeof(XLuaInvoker))]
@@ -20,6 +20,9 @@ namespace Arthas
         private bool enableUpdate = false,
             enableFixedUpdate = false,
             enableLateUpdate = false;
+
+        [SerializeField]
+        public UnityEngine.Object data;
 
         protected virtual void Awake()
         {

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace Arthas.Common
+namespace UnityWorkbox.Common
 {
     [DisallowMultipleComponent]
     public abstract class BaseScriptableInvoker : MonoBehaviour

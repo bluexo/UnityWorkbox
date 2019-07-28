@@ -2,7 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 
-namespace Arthas.Common
+namespace UnityWorkbox.Common
 {
     using System;
 #if UNITY_EDITOR

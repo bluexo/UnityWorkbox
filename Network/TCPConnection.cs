@@ -14,7 +14,7 @@ using System.IO;
 using System.Net.Sockets;
 #endif
 
-namespace Arthas.Network
+namespace UnityWorkbox.Network
 {
     public class TCPConnection : IConnection
     {
@@ -40,14 +40,14 @@ namespace Arthas.Network
 #endif
 
 #if WINDOWS_UWP
-        public TCPConnection() { IsConnected = false; }
+        public TCPConnector() { IsConnected = false; }
 
         /// <summary>
         /// 使用<see cref="StreamSocket"/> 建立连接并且异步接收数据
         /// </summary>
         /// <param name="ip"></param>
         /// <param name="port"></param>
-        public async void Connect(string ip, int port , Action<object> callback = null)
+        public async void Connect(string ip, int port , Action<bool> callback = null)
         {
             try {
                 var serverHost = new HostName(ip);

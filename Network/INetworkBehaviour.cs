@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace Arthas.Network
+namespace UnityWorkbox.Network
 {
     /// <summary>
     /// 远程调用

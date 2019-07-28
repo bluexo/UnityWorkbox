@@ -8,7 +8,7 @@ using UnityEngine.Experimental.Networking;
 using UnityEngine.Networking;
 #endif
 
-namespace Arthas.Network
+namespace UnityWorkbox.Network
 {
     public enum ErrorLevel { Error, Fatal }
 

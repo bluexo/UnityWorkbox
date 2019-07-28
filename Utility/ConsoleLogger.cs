@@ -9,9 +9,9 @@ using UnityEngine.Profiling;
 using System.Collections.Generic;
 using System.Collections;
 using System;
-using Arthas.Network;
+using UnityWorkbox.Network;
 
-namespace Arthas.Common
+namespace UnityWorkbox.Common
 {
     public class ConsoleLogger : SingletonBehaviour<ConsoleLogger>
     {

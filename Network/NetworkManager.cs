@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace Arthas.Network
+namespace UnityWorkbox.Network
 {
     public class NetworkManager : SingletonBehaviour<NetworkManager>
     {

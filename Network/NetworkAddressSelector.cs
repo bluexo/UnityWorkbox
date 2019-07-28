@@ -5,7 +5,7 @@ using System.Net.Sockets;
 using UnityEngine;
 using UnityEngine.Networking;
 
-namespace Arthas.Common
+namespace UnityWorkbox.Common
 {
 
     public interface INetworkAddressSelector

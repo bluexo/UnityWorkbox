@@ -9,7 +9,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
 
-namespace Arthas.Network
+namespace UnityWorkbox.Network
 {
     public class AsyncUserToken : IDisposable
     {

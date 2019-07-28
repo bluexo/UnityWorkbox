@@ -1,7 +1,7 @@
 ﻿using System.Collections;
 using UnityEngine;
 
-namespace Arthas.UI
+namespace UnityWorkbox.UI
 {
     [DisallowMultipleComponent]
     public abstract class PanelUI<T> : BaseUI where T : BaseUI

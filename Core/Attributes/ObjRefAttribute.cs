@@ -1,7 +1,7 @@
 ﻿using System;
 using UnityEngine;
 
-namespace Arthas
+namespace UnityWorkbox
 {
 
 #if UNITY_EDITOR

@@ -7,7 +7,7 @@ using System.Text;
 using System.Threading;
 using UnityEngine;
 
-namespace Arthas.Network
+namespace UnityWorkbox.Network
 {
 
     public class SocketConnection : IConnection

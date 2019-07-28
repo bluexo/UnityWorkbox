@@ -2,7 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 
-namespace Arthas.Common
+namespace UnityWorkbox.Common
 {
     /// <summary>
     /// 全局的协程载体 , 用于执行全局异步操作

@@ -10,7 +10,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.Threading;
 
-namespace Arthas.Network
+namespace UnityWorkbox.Network
 {
     /// <summary>
     /// 抽象网络连接

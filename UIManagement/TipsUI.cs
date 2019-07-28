@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace Arthas.UI
+namespace UnityWorkbox.UI
 {
     [UIFloating]
     [UIOrder(SortOrder = 100)]

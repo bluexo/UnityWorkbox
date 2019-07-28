@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-namespace Arthas.FSM
+namespace UnityWorkbox.FSM
 {
     public class FSMManager : MonoBehaviour
     {

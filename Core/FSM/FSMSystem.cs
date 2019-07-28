@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace Arthas.FSM
+namespace UnityWorkbox.FSM
 {
     /// <summary>
     /// 状态机类

@@ -1,4 +1,4 @@
-﻿using Arthas.Common;
+﻿using UnityWorkbox.Common;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -10,7 +10,7 @@ using UnityEngine.EventSystems;
 using System.Reflection;
 #endif
 
-namespace Arthas.UI
+namespace UnityWorkbox.UI
 {
     [RequireComponent(typeof(RectTransform))]
     [RequireComponent(typeof(CanvasRenderer))]

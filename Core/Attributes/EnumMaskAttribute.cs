@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace Arthas.Common
+namespace UnityWorkbox.Common
 {
     using System;
 

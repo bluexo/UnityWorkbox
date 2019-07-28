@@ -79,7 +79,13 @@ public class NetworkConfiguration : ScriptableObject
     [Header("Option2")]
     public NetworkAddress option2;
 
+
 #if UNITY_EDITOR
+    private void OnValidate()
+    {
+        WriteAddressToStreamingAssets(current);
+    }
+
     public const string kPath = "Assets/Resources/" + kConfigPath + "NetworkConfiguration.asset";
     public const string kMenu = "Network/Address",
         kLocal = "/LOCAL",
@@ -142,7 +148,6 @@ public class NetworkConfiguration : ScriptableObject
         return true;
     }
 
-
     [MenuItem(kMenu + kOp1, priority = 1)]
     public static void SetOp1()
     {
@@ -191,7 +196,6 @@ public class NetworkConfiguration : ScriptableObject
         if (!Directory.Exists(Application.streamingAssetsPath))
             Directory.CreateDirectory(Application.streamingAssetsPath);
         File.WriteAllText(NetworkStreamingPath, addr);
-        AssetDatabase.Refresh();
     }
 
     private static NetworkConfiguration GetConfiguration()
