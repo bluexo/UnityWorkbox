@@ -27,19 +27,15 @@ public class DefineManager : EditorWindow
     // http://forum.unity3d.com/threads/93901-global-define/page2
     // Do not modify these paths
     const int COMPILER_COUNT = 4;
-    const string CSHARP_PATH = "Assets/mcs.rsp";
+    const string CSHARP_PATH = "Assets/csc.rsp";
 
     List<string> csDefines = new List<string>();
 
     [MenuItem("Tools/Define Manager")]
     public static void OpenDefManager()
     {
-        EditorWindow.GetWindow<DefineManager>(true, "Global Define Manager", true);
+        GetWindow<DefineManager>(true, "Global Define Manager", true);
         return;
-        //TODO PlayerSetting Define
-        //var defines = EditorUserBuildSettings.activeScriptCompilationDefines;
-        //if (!Array.Exists(defines, d => d.Contains("LUA"))) ArrayUtility.AddRange(ref defines, new string[] { "LUA", "WTF?" });
-        //PlayerSettings.SetScriptingDefineSymbolsForGroup(BuildTargetGroup.Standalone | BuildTargetGroup.Android | BuildTargetGroup.iOS, defines.ToArrayString());
     }
 
     void OnEnable()

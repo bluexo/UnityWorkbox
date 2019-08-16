@@ -109,9 +109,9 @@ namespace UnityWorkbox.Common
                 DrawBeforeBody(itemsProperty);
                 for (var i = 0; i < itemsProperty.arraySize; i++)
                 {
-                    EditorGUILayout.BeginVertical();
                     folds[i] = EditorGUILayout.Foldout(folds[i], string.Format("Item [{0}]", i));
                     if (!folds[i]) continue;
+                    EditorGUILayout.BeginVertical();
                     var item = itemsProperty.GetArrayElementAtIndex(i);
                     DrawItemProperty(item, i);
                     EditorGUILayout.Space();
